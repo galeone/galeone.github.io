@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Hello world
-date: 2016-03-11 9:30:00
+date: 2016-11-03 9:30:00
 summary: First blog post. Nothing more than a greeting
 categories: 
 ---

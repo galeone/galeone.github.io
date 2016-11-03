@@ -4,7 +4,7 @@ email:       nessuno@nerdz.eu
 author:      Paolo Galeone
 description: "Let the machines learn"
 baseurl:     ""
-url:         "https://pgaleone.github.com/"
+url:         "https://pgaleone.github.io/"
 date_format: "%b %-d, %Y"
 
 # Google services

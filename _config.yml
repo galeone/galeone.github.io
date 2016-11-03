@@ -1,10 +1,10 @@
 # Site settings
-title:       Pixyll
-email:       your_email@example.com
-author:      John Otander
-description: "A simple, beautiful theme for Jekyll that emphasizes content rather than aesthetic fluff."
+title:       P. Galeone's blog
+email:       nessuno@nerdz.eu
+author:      Paolo Galeone
+description: "Let the machines learn"
 baseurl:     ""
-url:         "http://pixyll.com"
+url:         "https://pgaleone.github.com/"
 date_format: "%b %-d, %Y"
 
 # Google services
@@ -18,11 +18,11 @@ bing_verification:
 
 # Optional features
 animated:             false
-show_related_posts:   false
+show_related_posts:   true
 show_post_footers:    false
-show_social_icons:    false
+show_social_icons:    true
 ajaxify_contact_form: false
-enable_mathjax: false
+enable_mathjax: true
 extended_fonts: false
 enable_anchorjs: false
 
@@ -33,7 +33,7 @@ fb_page_id:
 
 # Disqus post comments
 # (leave blank to disable Disqus)
-disqus_shortname:
+disqus_shortname: pgaleone
 
 # Facebook Comments plugin
 # (leave blank to disable Facebook Comments, otherwise set it to true)
@@ -42,22 +42,22 @@ facebook_appid:
 facebook_comments_number: 10
 
 # Social icons
-github_username:
+github_username: pgaleone
 bitbucket_username:
-stackoverflow_id:
-twitter_username:
+stackoverflow_id: 2891324
+twitter_username: paolo_galeone
 skype_username:
 steam_nickname:
 google_plus_id:
-linkedin_username:
+linkedin_username: paolo-galeone-6782b311b
 angellist_username:
 medium_id:
 bitcoin_url:
-paypal_url:
+paypal_url: https://paypal.me/PGaleone
 flattr_button:
 
 # Post sharing icons
-show_sharing_icons: false
+show_sharing_icons: true
 # Change to 'true' to enable individual icons
 share_facebook: false
 share_twitter: false
@@ -94,12 +94,12 @@ text:
     email:    'Email Address'
     content:  'What would you like to say?'
     subject:  'New submission!'
-    submit:   'Say Hello'
+    submit:   'Send'
     ajax:
       sending:  'sending..'
       sent:     'Message sent!'
       error:    'Error!'
-  thanks: 'Thanks for contacting us. We will reply as soon as possible.'
+  thanks: 'Thanks for contacting me. I will reply as soon as possible.'
   og_locale: 'en_US'
 
 # Build settings

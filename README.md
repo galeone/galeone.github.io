@@ -1,10 +1,10 @@
 # PGaleone
 
-Repository for https://pgaleone.github.io/, built with [jekyll](https://jekyllrb.com/), [pixyll.com](http://www.pixyll.com) & <3.
+Repository for https://pgaleone.eu/, built with [jekyll](https://jekyllrb.com/), [pixyll.com](http://www.pixyll.com) & <3.
 
 ## Contributing
 
-1. Fork the repo
+1. Fork the repository
 2. Create a new branch
 3. Contribute!
 4. Open a pull request

@@ -2,19 +2,19 @@
 title:       P. Galeone's blog
 email:       nessuno@nerdz.eu
 author:      Paolo Galeone
-description: "Let the machines learn"
-baseurl:     ""
-url:         "https://galeone.github.io/"
-date_format: "%b %-d, %Y"
+description: 'Let the machines learn'
+baseurl:     ''
+url:         'https://galeone.github.io/'
+date_format: '%b %-d, %Y'
 
 # Google services
-google_verification:
+google_verification: 'ZQfgLZBmY7oIkDQWf87ysRgySpoZzeFn0jGqOciv4q4'
 # Use either direct GA implementation or set up GTM account
 # - using both will skew your data (leave blank to not use at all)
-google_analytics:
+google_analytics: 'UA-86940918-1'
 google_tag_manager:
 # Bing services
-bing_verification:
+bing_verification: '1084D9EBDD4D72C5C6A7B5056387DBF3'
 
 # Optional features
 animated:             false
@@ -33,7 +33,7 @@ fb_page_id:
 
 # Disqus post comments
 # (leave blank to disable Disqus)
-disqus_shortname: pgaleone
+disqus_shortname: 'pgaleone'
 
 # Facebook Comments plugin
 # (leave blank to disable Facebook Comments, otherwise set it to true)
@@ -42,18 +42,18 @@ facebook_appid:
 facebook_comments_number: 10
 
 # Social icons
-github_username: galeone
+github_username: 'galeone'
 bitbucket_username:
 stackoverflow_id: 2891324
-twitter_username: paolo_galeone
+twitter_username: 'paolo_galeone'
 skype_username:
 steam_nickname:
 google_plus_id:
-linkedin_username: paolo-galeone-6782b311b
+linkedin_username: 'paolo-galeone-6782b311b'
 angellist_username:
 medium_id:
 bitcoin_url:
-paypal_url: https://paypal.me/PGaleone
+paypal_url: 'https://paypal.me/PGaleone'
 flattr_button:
 
 # Post sharing icons

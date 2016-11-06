@@ -5,4 +5,4 @@ permalink: /about/
 tags: about
 ---
 
-I'm Paolo Galeone, a Compuer Engineer and Deep Learning researcher who work on Computer Vision problems.
+I'm Paolo Galeone, a Compuer Engineer and Deep Learning researcher who works on Computer Vision problems.

@@ -10,17 +10,17 @@ Autoencoders are neural networks models whose aim is to reproduce their input: t
 
 # Simple Autoencoder
 
-The simplest AutoEncoder (AE) have an MLP-like (Multi Layer Perceptron) structure:
+The simplest AutoEncoder (AE) has an MLP-like (Multi Layer Perceptron) structure:
 
 - One input layer
 - One hidden layer
 - One output layer
 
-The main difference between the AE and the MLP is that former's output layer have the same cardinality of its input layer whilst the latter's output layer cardinality is the number of classes the perceptron should be capable of classifying. Moreover, the AE belongs to the **unsupervised learning** algorithms family because it learns to represent unlabeled data; the MLP instead requires labeled data to be trained on.
+The main difference between the AE and the MLP is that former's output layer has the same cardinality of its input layer whilst the latter's output layer cardinality is the number of classes the perceptron should be capable of classifying. Moreover, the AE belongs to the **unsupervised learning** algorithms family because it learns to represent unlabeled data; the MLP instead requires labeled data to be trained on.
 
 The most important part of an AE is its hidden layer. In fact, this layer learns to *encode* the input whilst the output layer learns to *decode* it.
 
-The hidden layer plays a fundamental role because a common application of AEs is **dimensionality reduction**: after the training phase, the output layer it's usually thrown away and the AE is used to build a new dataset of samples with lower dimensions.
+The hidden layer plays a fundamental role because a common application of AEs is **dimensionality reduction**: after the training phase, the output layer is usually thrown away and the AE is used to build a new dataset of samples with lower dimensions.
 
 Formally: 
 
@@ -29,7 +29,7 @@ Formally:
 - $b_i \in \mathbb{R}^{O_{di}}$ bias vector
 - $a(h)$ activation function applied to every neuron of the layer $h$.
 
-The simplest AE can therefore being summarized as:
+The simplest AE can therefore be summarized as:
 
 $$ \begin{align}
 z  &= a(xW_1 + b_1) \\
@@ -46,7 +46,7 @@ $$ \min \mathcal{L} = \min || x - \text{decode}(\text{encode}(x)) ||_p $$
 
 # Constraints are everything
 
-It can be easily noticed that if the number of units in the hidden layer it's greater than or equal to the number of input units, the network will learn the identity function easily.
+It can be easily noticed that if the number of units in the hidden layer is greater than or equal to the number of input units, the network will learn the identity function easily.
 
 Learning the identity function alone is useless because the network will never learn to extract useful features but, instead, it will simply pass forward the input data to the output layer.
 In order to learn useful features, constraints must be added to the network: in this way no neuron can learn the identity function but they'll learn to project inputs in a lower dimensional space.

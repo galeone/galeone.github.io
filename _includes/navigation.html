@@ -3,6 +3,7 @@
         <a href="{{ page.url }}">{{ page.title }}</a>
     {% endif %}
 {% endfor %}
+<a href="//talks.{{ site.domain }}">Talks</a>
 {% for page in site.pages %}
     {% if page.tags contains "contact" %}
         <a href="{{ page.url }}">{{ page.title }}</a>

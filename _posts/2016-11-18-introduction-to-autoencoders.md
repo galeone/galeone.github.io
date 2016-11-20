@@ -24,10 +24,10 @@ The hidden layer plays a fundamental role because a common application of AEs is
 
 Formally: 
 
-- $x \in [0,1]^{d}$ input vector
-- $W_i \in \mathbb{R}^{I_{di} \times O_{di}}$ parameters matrix of layer $i$-th, in charge of projecting a $I_{di}$-D input in a $O_{di}$-D space
-- $b_i \in \mathbb{R}^{O_{di}}$ bias vector
-- $a(h)$ activation function applied to every neuron of the layer $h$.
+- $$x \in [0,1]^{d}$$ input vector
+- $$W_i \in \mathbb{R}^{I_{di} \times O_{di}}$$ parameters matrix of layer $$i$$-th, in charge of projecting a $$I_{di}$$-D input in a $$O_{di}$$-D space
+- $$b_i \in \mathbb{R}^{O_{di}}$$ bias vector
+- $$a(h)$$ activation function applied to every neuron of the layer $$h$$.
 
 The simplest AE can therefore be summarized as:
 
@@ -36,7 +36,7 @@ z  &= a(xW_1 + b_1) \\
 x' &= a(zW_2 + b_2)
 \end{align} $$
 
-The AE is the model that tries to minimize the **reconstruction error** between the input value $x$ and the reconstructed value $x'$: the training process is, therefore, the minimization of a $L_p$ distance (like the $L_2$) or some other chosen metric.
+The AE is the model that tries to minimize the **reconstruction error** between the input value $$x$$ and the reconstructed value $$x'$$: the training process is, therefore, the minimization of a $$L_p$$ distance (like the $$L_2$$) or some other chosen metric.
 
 $$ \min \mathcal{L} = \min E(x, x') \stackrel{e.g.}{=} \min || x - x' ||_p $$
 
@@ -83,13 +83,13 @@ In this way, the identity function can't be learned, but instead, a compress rep
     </cite>
 </footer>
 
-To impose a sparsity constraint means to force some hidden unit to be inactive most of the time. The inactivity of a neuron $i$ depends on the chosen activation function $a_i(h)$.
+To impose a sparsity constraint means to force some hidden unit to be inactive most of the time. The inactivity of a neuron $$i$$ depends on the chosen activation function $$a_i(h)$$.
 
-If the activation function is the $tanh$
+If the activation function is the $$tanh$$
 
 $$ a_i(x) = \text{tanh}(x) $$
 
-being close to $-1$ means to be inactive.
+being close to $$-1$$ means to be inactive.
 
 Sparsity is a desired characteristic for an autoencoder, because it allows to use a greater number of hidden units (even more than the input ones) and therefore gives the network the ability of learning different connections and extract different features (w.r.t. the features extracted with the only constraint on the number of hidden units).
 Moreover, sparsity can be used together with the constraint on the number of hidden units: an optimization process of the combination of these hyper-parameters is required to achieve better performance.
@@ -100,9 +100,9 @@ If the threshold value is low, the neurons will adapt their parameters (and thus
 
 $$ \hat{\rho_{j}} = \frac{1}{|\{TS\}|} \sum_{i=1}^{|\{TS\}|}{a^{(2)}_j(x_i)} $$
 
-the average value for the $j$-th neuron of the hidden (number 2) layer.
+the average value for the $$j$$-th neuron of the hidden (number 2) layer.
 
-Defining the **sparsity parameter** $\rho$ as the desired average activation value for every hidden neuron and initializing it to a value close to zero, we can enforce the sparsity:
+Defining the **sparsity parameter** $$\rho$$ as the desired average activation value for every hidden neuron and initializing it to a value close to zero, we can enforce the sparsity:
 
 $$ \hat{\rho}_{j} \le \rho \quad \forall j $$
 
@@ -110,9 +110,9 @@ To achieve this, various penalization terms to the loss function can be added. T
 
 $$ \sum_{j=1}^{O_{d_2}} \rho \log \frac{\rho}{\hat\rho_j} + (1-\rho) \log \frac{1-\rho}{1-\hat\rho_j}  = \sum_{j=1}^{O_{d_2}} KL(\rho||\hat{\rho_j}) $$
 
-In this case, the KL divergence is measured $O_{d_2}$ times between a Bernoulli random variable with mean $\rho$ and a Bernoulli random variable with mean $\hat{\rho_j}$ used to model a single neuron.
+In this case, the KL divergence is measured $$O_{d_2}$$ times between a Bernoulli random variable with mean $$\rho$$ and a Bernoulli random variable with mean $$\hat{\rho_j}$$ used to model a single neuron.
 
-In short, the $KL$ divergence increase as the difference between $\rho$ and $\hat{\rho_j}$ increase. Therefore this is a good candidate to be added as penalization term to the loss, in that way the learning process via gradient descent will try to minimize the divergence while minimizing the reconstruction error.
+In short, the $$KL$$ divergence increase as the difference between $$\rho$$ and $$\hat{\rho_j}$$ increase. Therefore this is a good candidate to be added as penalization term to the loss, in that way the learning process via gradient descent will try to minimize the divergence while minimizing the reconstruction error.
 
 The final form of the loss thus is:
 
@@ -120,7 +120,7 @@ $$ \min \mathcal{L} = \min \left( E(x, x') +  \sum_{j=1}^{O_{d_2}} KL(\rho||\hat
 
 ## Adding noise: DAE
 
-Instead of forcing the hidden layer to learn to extract features from the input data $x$, we can train the AE to reconstruct the input from a corrupted version of it $\tilde{x}$.
+Instead of forcing the hidden layer to learn to extract features from the input data $$x$$, we can train the AE to reconstruct the input from a corrupted version of it $$\tilde{x}$$.
 
 This allows the AE to discover more robust features w.r.t. the ones that could be learned from the original uncorrupted data.
 
@@ -133,13 +133,13 @@ DAEs have the same architecture of the AEs presented above, with just 2 differen
 
 ### Input corruption
 
-For every element $x$ in the training set, it's required to generate a corrupted version.
+For every element $$x$$ in the training set, it's required to generate a corrupted version.
 
 $$ \tilde{x} = \text{corrupt}(x) $$
 
-$\text{corrupt}$ can be any function to corrupt the input data and it depends on the data type. For example, in the computer vision field can be added Gaussian noise or salt and pepper noise.
+$$\text{corrupt}$$ can be any function to corrupt the input data and it depends on the data type. For example, in the computer vision field can be added Gaussian noise or salt and pepper noise.
 
-Moreover, AEs have been used to introduce the [Dropout](https://www.cs.toronto.edu/~hinton/absps/JMLRdropout.pdf). Dropout is a simple technique to prevent neural networks from overfitting and it's highly related to the input corruption: in fact, it consists of dropping out neurons (setting their output to $0$) casually with a specified probability.
+Moreover, AEs have been used to introduce the [Dropout](https://www.cs.toronto.edu/~hinton/absps/JMLRdropout.pdf). Dropout is a simple technique to prevent neural networks from overfitting and it's highly related to the input corruption: in fact, it consists of dropping out neurons (setting their output to $$0$$) casually with a specified probability.
 
 Dropout is, therefore, an input corruption method and can be applied to improve the quality of the learned features of the hidden layer.
 

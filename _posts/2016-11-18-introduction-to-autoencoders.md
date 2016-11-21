@@ -94,11 +94,11 @@ being close to $$-1$$ means to be inactive.
 Sparsity is a desired characteristic for an autoencoder, because it allows to use a greater number of hidden units (even more than the input ones) and therefore gives the network the ability of learning different connections and extract different features (w.r.t. the features extracted with the only constraint on the number of hidden units).
 Moreover, sparsity can be used together with the constraint on the number of hidden units: an optimization process of the combination of these hyper-parameters is required to achieve better performance.
 
-Sparsity can be forced adding a term to the loss function. Since we want that most of the neurons in the hidden layer are inactive, we can extract the average activation value for every neuron of the hidden layer (averaged over the whole training set) and force it to be under a threshold.
+Sparsity can be forced adding a term to the loss function. Since we want that most of the neurons in the hidden layer are inactive, we can extract the average activation value for every neuron of the hidden layer (averaged over the whole training set $$TS$$) and force it to be under a threshold.
 
 If the threshold value is low, the neurons will adapt their parameters (and thus their outputs) to respect this constraint. To do this, most of them will be inactive. Let:
 
-$$ \hat{\rho_{j}} = \frac{1}{|\{TS\}|} \sum_{i=1}^{|\{TS\}|}{a^{(2)}_j(x_i)} $$
+$$ \hat{\rho_{j}} = \frac{1}{|TS|} \sum_{i=1}^{|TS|}{a^{(2)}_j(x_i)} $$
 
 the average value for the $$j$$-th neuron of the hidden (number 2) layer.
 

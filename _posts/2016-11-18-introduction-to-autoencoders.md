@@ -161,7 +161,7 @@ As previously mentioned, autoencoders are commonly used to reduce the inputs' di
 - Classification: classifiers works better with non-highly dimensional data
 - One-Class Classification (OCC): if the AE has been trained on a single class only, it's possible to find a threshold for the reconstruction error such that elements with a reconstruction error greater than this threshold expose differences from the learned model. It can somehow be seen as an outlier detection procedure.
 
-Moreover, of the decoder has not been thrown away it can be used to perform **Data denoising**: if the AE trained is a DAE it has the ability to remove (some kind of) noise from the input, therefore a DAE can be used to do data preprocessing on a noisy source of data.
+Moreover, if the decoder has not been thrown away it can be used to perform **Data denoising**: if the AE trained is a DAE it has the ability to remove (some kind of) noise from the input, therefore a DAE can be used to do data preprocessing on a noisy source of data.
 
 # Next...
 

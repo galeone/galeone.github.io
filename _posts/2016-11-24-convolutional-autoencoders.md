@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Convolutional Autoencoders
-date: 2016-11-18 15:17:00
+date: 2016-11-24 15:17:00
 summary: 
 categories: neural-networks
 ---

@@ -94,7 +94,7 @@ CAEs are the state-of-art tools for unsupervised learning of convolutional filte
 
 CAEs are a type of **Convolutional Neural Networks (CNNs)**: the main difference between the common interpretation of CNN and CAE is that the former are trained end-to-end to learn filters and combine features with the aim of classifying their input. In fact, CNNs are usually referred as supervised learning algorithms. The latter, instead, are trained only to learn filters able to extract features that can be used to reconstruct the input.
 
-CAEs, due to their convolutional nature, scale well to realistic-sized high-dimensional images because the number of parameters required to produce an activation map it's always the same, no matter what the size of the input is.
+CAEs, due to their convolutional nature, scale well to realistic-sized high-dimensional images because the number of parameters required to produce an activation map is always the same, no matter what the size of the input is.
 Therefore, CAEs are **general purpose feature extractors** differently from AEs that completely ignore the 2D image structure. In fact, in AEs the image must be unrolled into a single vector and the network must be built following the constraint on the number of inputs. In other words, AEs *introduce redundancy in the parameters, forcing each feature to be global (i.e., to span the entire visual field)*[^1], while CAEs do not.
 
 ## Encode

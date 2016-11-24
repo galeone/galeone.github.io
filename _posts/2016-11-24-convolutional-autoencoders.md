@@ -133,7 +133,7 @@ The produced $$n$$ feature maps $$z_{m=1,\cdots,n}$$ (latent representations) wi
 
 The hyper-parameters of the decoding convolution are fixed by the encoding architecture, in fact:
 
-- Filters volume $$F^{(2)}$$ with dimensions $$(2k +1 , 2k+1 , n)$$, because the convolution should spawn across every feature map and produce a volume with the same spatial extent of $$I$$
+- Filters volume $$F^{(2)}$$ with dimensions $$(2k +1 , 2k+1 , n)$$, because the convolution should span across every feature map and produce a volume with the same spatial extent of $$I$$
 - Number of filters to learn: $$D$$, because we'are interested in reconstructing the input image that has depth $$D$$
 
 Therefore, the reconstructed image $$\tilde{I}$$ is the result of the convolution between the volume of feature maps $$Z = \{z_{i=1}\}^{n}$$ and this convolutional filters volume $$F^{(2)}$$.

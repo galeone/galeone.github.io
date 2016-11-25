@@ -50,7 +50,7 @@ This operation (single convolutional step) is done for every location $$(i, j)$$
 ![Convolution with an edge detection filter](/images/convolutions/convolution_kernel.png)
 <footer>
     <cite title="Convolution with an edge detection filter">
-    <b>Figure 2</b>. The convolution of an image with and hand-crafted filter for edge detection allows extracting the edges from the input image.
+    <b>Figure 2</b>. The convolution of an image with and hand-crafted filter (also called kernel) for edge detection allows extracting the edges from the input image.
     </cite>
 </footer>
 
@@ -85,6 +85,11 @@ It's possible to generalize the previous convolution formula, in order to keep i
 $$ O(i, j) = \sum_{d=1}^{D}{\sum_{u=-2k-1}^{2k+1}\sum_{v=-2k -1}^{2k +1}F_d(u, v)I_d(i -u, j -v)}$$
 
 The result of a convolution among volumes is called **activation map**. The activation map is a volume with $$D=1$$.
+
+It may sound strange that a 2D convolution is done among volumes that are 3D objects. In reality, for an input volume with depth $$D$$ exactly $$D$$ 2D discrete convolutions are performed.
+The sum (collapse) of the $$D$$ activation maps produced is a way to treat this set of 2D convolutions as a single 2D convolution. In this way, every single position $$(i,j)$$ of the resulting activation map $$O$$ contains the information extracted from the same input location through its whole depth.
+
+Intuitively, one can think about this operation as a way to keep into account the relations that exist along the RGB channels of a single input pixel.
 
 # Convolutional AutoEncoders
 

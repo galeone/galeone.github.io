@@ -273,7 +273,8 @@ We can visualize the comparison between the original and the reconstructed image
     <small>Hint: open the image in a new tab</small>
     </cite>
 </footer>
-.center}
+
+{:.center}
 ![Input vs Output](/images/autoencoders/tf/cifar10_io_l2.png)
 <footer>
     <cite title="Input vs Outout"><b>Model with L2</b>: on the left there are the original images. On the right their reconstructed counterpart.<br>

@@ -87,7 +87,7 @@ Where obviously $$x$$ is the original input image in the current batch, $$\tilde
 
 Moreover, it has been added the support for the L2 regularization term to the loss. Thus, mathematically, the formula becomes:
 
-$$ \frac{1}{2n} \sum^{n}_{i=i}{(x_i - \tilde{x}_i)^2} + \lambda (W_1 + W_2) $$
+$$ \frac{1}{2n} \sum^{n}_{i=i}{(x_i - \tilde{x}_i)^2} + \lambda( ||W_1||_{2}^{2} + ||W_2||_{2}^{2}) $$
 
 Where $$\lambda$$ is the weight decay (`wd`) parameter, and $$W_{1,2}$$ are the encoding and decoding volumes of convolutional filters respectively.
 

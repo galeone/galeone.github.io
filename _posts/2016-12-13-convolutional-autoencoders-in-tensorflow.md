@@ -66,16 +66,11 @@ It's worth noting that every convolutional layer has the builtin support for the
 
 In fact, DTB adds to the collection `losses` a penalty term for every layer. Obviously, a `wd=0.0` disables the regularization.
 
-Another thing to note is that the decoding convolution has **no regularization** (`wd=0.0`) and **no activation function** (the filters are formed by linear neurons).
+Another thing to note is that the decoding convolution has **no regularization** (`wd=0.0`).
 
 This has been done because the produced activation maps should reproduce the input image.
-But if there's an activation function that squashes the input between values that are not in the range of the values of the input image, the reconstruction error will always be huge.
 
-Just think about a single pixel of a single channel image: $$p$$. This pixel has values in the range $$[0, 255]$$: the decoding layer, thus, should be capable of produce values within this range.
-
-If a non-linearity, like sigmoid $$\sigma(p) = \frac{1}{1 + e^{-p}}$$ is applied, it will produce a value for the reconstructed pixel that will be in the $$[0, 1]$$ range. Thus, there will always be a reconstruction error between $$p$$ and it's reconstructed counterpart $$\tilde{p}$$. Thinking about the case in which the value to reconstruct is $$255$$, the absolute error will span across $$[255-1, 255-0]$$, that's huge.
-
-The same reasoning can be done for what concerns the regularization term.
+The activation function chosen is the Hyperbolic tangent (tanh): this choice is guided by the fact that we want to constraint the output values to live in the same space of the input values. DTB pre-process every input image in order to get every pixel values beteen $$-1$$ and $$1$$. Since this is just the value of the codomain of the $$tanh$$ this is a natural choice.
 
 What is missing to do is to implement the loss function. Following the previous post, we implement the MSE loss. Since we're working with batches of $$n$$ images, the loss formula becomes:
 
@@ -226,11 +221,9 @@ See what regions are active (different from 0) after the application of an activ
     <cite title="MNIST learned filters">Visual representation of the learned filters on the MNIST dataset</cite>
 </footer>
 
-In the image we can see that the learned filters are different, but their combination is almost the same. A thing to note is that both models learned to reproduce the numbers correctly but not the black background: both produces a gray background.
+In the image we can see that the learned filters are different, but their combination is almost the same. A thing to note is that both models learned to reproduce the numbers (almost) correctly and the black background: this is because of the activation function added to the decoding layer. Previous tests with no activation applied showed how the CAE can learn to reproduce the numbers but not the background: it was gray instead of black. When the activation function is present, instead, it constrain the network to produce values that live in the same space of the input ones.
 
 DTB gives us another feedback that's helpful to deeply understand the pros and the cons of these implementations. The visualization of a single image, before and after the application function in the decoding layer.
-
-Since the decoding layer has no activation function applied the images are equal, but we can notice something interesting.
 
 {:.center}
 ![MNIST decode](/images/autoencoders/tf/mnist_decode.png)
@@ -239,7 +232,6 @@ Since the decoding layer has no activation function applied the images are equal
 </footer>
 
 If we look carefully we can see that both models produce artifacts on the borders of the reconstructed images: this is due to the initial padding operation that forces the network to learn a padded, thus not real, representation of the input.
-
 
 ## CIFAR 10
 
@@ -251,7 +243,7 @@ If we look carefully we can see that both models produce artifacts on the border
 
 As we just did for the MNSIT dataset, let's analyze in the same way the results obtained on the Cifar10 dataset.
 
-The graph shows the same 4 loss functions (reconstruction errors). With respect to the MNIST case, these losses are higher: they start from a high value and end at an higher value.
+The graph shows the same 4 loss functions (reconstruction errors). With respect to the MNIST case, these losses are higher: they start from a high value and end at a higher value.
 
 As in the MNIST case, the L2 penalty term affects the loss value making it higher.
 
@@ -300,7 +292,7 @@ Even in this case, the learned filters among the two models are different, but t
     <cite title="Cifar10 decode">A single decode image, for both models</cite>
 </footer>
 
-In this case the artifacts introduced by the padding operation are less marked, almost not present.
+In this case, the artifacts introduced by the padding operation are less marked but still presents.
 
 # Conclusions
 

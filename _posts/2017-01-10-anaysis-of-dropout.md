@@ -193,4 +193,4 @@ The effective learning rate, thus, is higher respect to the learning rate chosen
 7. Dropout helps to prevent overfitting in deep neural networks.
 
 [1]: https://arxiv.org/abs/1207.0580 "Improving neural networks by preventing co-adaptation of feature detectors"
-[^1]: Max Norm impose a constraint to the parameters size. Chosen a value for the hyper-parameter $$c$$ it impose the constraint $$|w| \le c$$.
+[^1]: Max Norm impose a constraint to the parameters size. Chosen a value for the hyper-parameter $$c$$ it impose the constraint $$\vert w\vert \le c$$.

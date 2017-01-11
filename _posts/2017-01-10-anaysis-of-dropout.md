@@ -34,7 +34,7 @@ Quoting the [authors][1]:
 > Dropout prevents co-adaptation by making the presence of other hidden units unreliable.
 > Therefore, a hidden unit cannot rely on other specific units to correct its mistakes.
 
-In short: Dropout works well in practice because it prevents the co-adaption of neurons during the train phase.
+In short: Dropout works well in practice because it prevents the co-adaption of neurons during the training phase.
 
 Now that we got an intuitive idea behind Dropout, let's analyze it in depth.
 
@@ -42,7 +42,7 @@ Now that we got an intuitive idea behind Dropout, let's analyze it in depth.
 
 As said before, Dropout turns off neurons with probability $$p$$ and therefore let the others turned on with probability $$q = 1 - p$$.
 
-**Every single neuron have the same probability of being turned off**. This means that:
+**Every single neuron has the same probability of being turned off**. This means that:
 
 Given
 
@@ -75,9 +75,9 @@ a(\sum_{k=1}^{d_i}{w_k x_k + b}) &\text{if}\quad X_i = 1 \\
 
 where $$P(X_i = 0) = p$$.
 
-Since during train phase a neuron is kept on with probability $$q$$, during the testing phase we have to emulate the behaviour of the ensemble of networks used in the training phase.
+Since during train phase a neuron is kept on with probability $$q$$, during the testing phase we have to emulate the behavior of the ensemble of networks used in the training phase.
 
-To do this, the authors suggest to scale the activation function by a factor of $$q$$ during the test phase in order to use the expected output produced in the train phase as the single output required in the test phase. Thus:
+To do this, the authors suggest scaling the activation function by a factor of $$q$$ during the test phase in order to use the expected output produced in the training phase as the single output required in the test phase. Thus:
 
 **Train phase**:
 $$O_i = X_i a(\sum_{k=1}^{d_i}{w_k x_k + b}) $$
@@ -87,7 +87,7 @@ $$O_i = q a(\sum_{k=1}^{d_i}{w_k x_k + b}) $$
 
 # Inverted Dropout
 
-A sightly different approach is to use **Inverted Dropout**. This approach consists in the scaling of the activations during the train phase, leaving the test phase untouched.
+A slightly different approach is to use **Inverted Dropout**. This approach consists in the scaling of the activations during the training phase, leaving the test phase untouched.
 
 The scale factor is the inverse of the keep probability: $$\frac{1}{1 - p} = \frac{1}{q}$$, thus:
 
@@ -103,7 +103,7 @@ Direct Dropout, instead, force you to modify the network during the test phase b
 
 # Dropout of a set of neurons
 
-It can be easily noticed that a layer $$h$$ with $$n$$ neurons, in a single train step, can be seen as an ensemble of $$n$$ Bernoulli experiments, each one with probability of success equals to $$p$$.
+It can be easily noticed that a layer $$h$$ with $$n$$ neurons, in a single train step, can be seen as an ensemble of $$n$$ Bernoulli experiments, each one with a probability of success equals to $$p$$.
 
 Thus, the output of the layer $$h$$ have a number of dropped neurons equals to:
 
@@ -150,11 +150,11 @@ $$ E[Bi(n, p)] = np $$
 
 Moreover, we can notice that the distribution of values is almost symmetric around $$p = 0.5$$ and the probability of dropping $$np$$ neurons increase as the distance from $$p=0.5$$ increase.
 
-The scaling factor has been added by the authors to compensate the activation values, because they expect that during the train phase only a percentage of $$1 - p$$ neurons have been kept, instead in the training phase the $$100\%$$ of neurons are kept on, thus the value should be scaled down accordingly.
+The scaling factor has been added by the authors to compensate the activation values, because they expect that during the training phase only a percentage of $$1 - p$$ neurons have been kept. During the training phase, instead, the $$100\%$$ of neurons are kept on, thus the value should be scaled down accordingly.
 
 # Dropout & other regularizers
 
-Dropout is often used with L2 normalization and other parameter constraint techniques (such as *Max Norm* [^1]), this is not a case. Normalizations help keeping model parameters value low, in this way a parameter can't grow too much.
+Dropout is often used with L2 normalization and other parameter constraint techniques (such as *Max Norm* [^1]), this is not a case. Normalizations help to keep model parameters value low, in this way a parameter can't grow too much.
 
 In brief, the L2 normalization (for example) is an additional term to the loss, where $$\lambda \in [0, 1]$$ is an hyper-parameter called regularization strength, $$F(W; x)$$ is the model and $$\mathcal{E}$$ is the error function between the real $$y$$ and the predicted $$\hat{y}$$ value.
 
@@ -164,11 +164,11 @@ It's easy to understand that this additional term, when doing back-propagation v
 
 $$ w \leftarrow w - \eta \left( \frac{\partial F(W;x)}{\partial w} + \lambda w \right)$$
 
-Dropout alone, instead, does not have any way to prevent parameter values to become too large during this update phase. Moreover, the inverted implementation lead the update steps to become bigger, as showed below.
+Dropout alone, instead, does not have any way to prevent parameter values from becoming too large during this update phase. Moreover, the inverted implementation leads the update steps to become bigger, as showed below.
 
 ## Inverted Dropout and other regularizers
 
-Since Dropout does not prevent parameters to grow and overwhelm each other, applying L2 regularization (or any other regularization technique that constraint the parameter values) can help.
+Since Dropout does not prevent parameters from growing and overwhelming each other, applying L2 regularization (or any other regularization technique that constraints the parameter values) can help.
 
 Making explicit the scaling factor, the previous equation becomes:
 
@@ -178,15 +178,15 @@ It can be easily seen that when using Inverted Dropout, the learning rate is sca
 
 $$ r(q) = \frac{\eta}{q} \in [\eta = \lim_{q \rightarrow 1} r(q), +\infty =  \lim_{q \rightarrow 0} r(q)] $$
 
-For this reason, from now on we'll call $q$ **boosting factor**, because it boosts the learning rate. Moreover, we'll call $r(q)$ the **effective learning rate**.
+For this reason, from now on we'll call $$q$$ **boosting factor** because it boosts the learning rate. Moreover, we'll call $$r(q)$$ the **effective learning rate**.
 
-The effective learning rate, thus, is higher respect to the learning rate chosen: for this reason normalizations that constraint the parameter values can help to simplify the learning rate selection process.
+The effective learning rate, thus, is higher respect to the learning rate chosen: for this reason normalizations that constrain the parameter values can help to simplify the learning rate selection process.
 
 # Summary
 
 1. Dropout exists in two versions: direct (not commonly implemented) and inverted
 2. Dropout on a single neuron can be modeled using a Bernoulli random variable
-3. Dropout on a set of neruons can be modeled using a Binimial random variable
+3. Dropout on a set of neurons can be modeled using a Binomial random variable
 4. Even if the probability of dropping exactly $$np$$ neurons is low, $$np$$ neurons are dropped on average on a layer of $$n$$ neurons.
 5. Inverted Dropout boost the learning rate
 6. Inverted Dropout should be using together with other normalization techniques that constrain the parameter values in order to simplify the learning rate selection procedure

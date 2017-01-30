@@ -150,7 +150,7 @@ $$ E[Bi(n, p)] = np $$
 
 Moreover, we can notice that the distribution of values is almost symmetric around $$p = 0.5$$ and the probability of dropping $$np$$ neurons increase as the distance from $$p=0.5$$ increase.
 
-The scaling factor has been added by the authors to compensate the activation values, because they expect that during the training phase only a percentage of $$1 - p$$ neurons have been kept. During the training phase, instead, the $$100\%$$ of neurons are kept on, thus the value should be scaled down accordingly.
+The scaling factor has been added by the authors to compensate the activation values, because they expect that during the training phase only a percentage of $$1 - p$$ neurons have been kept. During the testing phase, instead, the $$100\%$$ of neurons are kept on, thus the value should be scaled down accordingly.
 
 # Dropout & other regularizers
 

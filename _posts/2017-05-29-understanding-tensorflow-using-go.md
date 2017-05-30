@@ -190,7 +190,7 @@ In Go, instead, the previous program fails because `A` and `x` are both called `
 #### Question time:
 
 - What do we have learned about the Tensorflow architecture? *Every node in a graph must have a unique name. Every node is identified by its name.*
-- Is the name of the node the same of the operation that defined it? *Yes, or better, it's not its just its last part*
+- Is the name of the node the same of the operation that defined it? *Yes, or better, not completely, it's just its last part*
 
 To clarify the second answer, let's fix the duplicate node name problem.
 

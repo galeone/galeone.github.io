@@ -233,7 +233,7 @@ Let's create the file `attempt2.go` changing the lines
 to
 ```go
 	// define 2 subscopes of the root subscopes, called "input". In this
-	// way we expect the have a input/ and a input_1/ scope under the root scope
+	// way we expect to have a input/ and a input_1/ scope under the root scope
 	A := op.Placeholder(root.SubScope("input"), tf.Int64, op.PlaceholderShape(tf.MakeShape(2, 2)))
 	x := op.Placeholder(root.SubScope("input"), tf.Int64, op.PlaceholderShape(tf.MakeShape(2, 1)))
 	fmt.Println(A.Op.Name(), x.Op.Name())

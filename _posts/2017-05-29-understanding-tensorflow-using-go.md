@@ -63,7 +63,7 @@ The [API documentation](https://godoc.org/github.com/tensorflow/tensorflow/tenso
 
 As we can see, these two packages contains everything we need to define and evaluate a graph.
 
-The former contains the functions to construct the basic "empty" structures like the `Graph` itself, the former is the most important package that contains the bindings automatically generated from the C++ implementation.
+The former contains the functions to construct the basic "empty" structures like the `Graph` itself, the latter is the most important package that contains the bindings automatically generated from the C++ implementation.
 
 However, suppose that we want to compute the matrix multiplication between $$A$$ and $$x$$ where
 

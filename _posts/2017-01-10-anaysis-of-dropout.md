@@ -107,7 +107,7 @@ It can be easily noticed that a layer $$h$$ with $$n$$ neurons, in a single trai
 
 Thus, the output of the layer $$h$$ have a number of dropped neurons equals to:
 
-$$ Y = \sum_{i=1}^{d_h}{X_i} $$
+$$ Y = \sum_{i=1}^{d_h}{(1 - X_i)} $$
 
 Since every neuron is now modeled as a Bernoulli random variable and all these random variables are independent and identically distributed, the total number of dropped neuron is a random variable too, called **Binomial**:
 

@@ -185,7 +185,7 @@ Thus, the `b` placeholder is `Placeholder_1:0` whilst the `a` placeholder is `Pl
 
 In Go, instead, the previous program fails because `A` and `x` are both called `Placeholder`. We can conclude that:
 
-**The Go API does not automatically generate new names every time we invoke a function that defnines an operation**: the operation name is thus fixed and we can't change it.
+**The Go API does not automatically generate new names every time we invoke a function that defines an operation**: the operation name is thus fixed and we can't change it.
 
 #### Question time:
 

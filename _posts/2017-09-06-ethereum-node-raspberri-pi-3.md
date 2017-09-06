@@ -13,12 +13,12 @@ In this post, I'm going to show you how to build a complete ethereum node and wa
 
 First of all, the requirements list (with Amazon's links!):
 
-1. [Raspberry Pi 3](https://www.amazon.it/Raspberry-PI-Model-Scheda-madre/dp/B01CD5VC92/) ~ 38 € / 45 $
-2. [Case, power supply and heatsink kit](https://www.amazon.it/Zacro-Adattatore-Dissipatori-Raffreddamento-Ventilatore/dp/B06VWD8M6X) ~ 14 € / 17 $
-3. [Very cheap UPS](https://www.amazon.it/gp/product/B0089S2XJG/) ~ 28 € / 34 $
-4. [2 x external HDD 1 TB](https://www.amazon.it/gp/product/B00KWHJY7Q/) ~ 2 x (52 € / 62 $) = 104 € / 124 $
-5. [USB switch with external power supply](https://www.amazon.it/gp/product/B01MRJNWLZ/) ~ 16 € / 19 $
-6. [32 GB Micro SD card](https://www.amazon.it/gp/product/B012PL7WKW/) ~ 17 € / 20 $
+1. <a target="_blank" href="https://www.amazon.it/Raspberry-PI-Model-Scheda-madre/dp/B01CD5VC92/?&_encoding=UTF8&tag=pgale-21&linkCode=ur2&linkId=9e5bd1f82ff3c173d4d1846569c96c10&camp=3414&creative=21718">Raspberry Pi 3</a><img src="//ir-it.amazon-adsystem.com/e/ir?t=pgale-21&l=ur2&o=29" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> ~ 38 € / 45 $
+2.  <a target="_blank" href="https://www.amazon.it/Zacro-Adattatore-Dissipatori-Raffreddamento-Ventilatore/dp/B06VWD8M6X?&_encoding=UTF8&tag=pgale-21&linkCode=ur2&linkId=c52ad9b92e28b72d21c933fb292bdf52&camp=3414&creative=21718">Case, power supply and heatsink kit</a><img src="//ir-it.amazon-adsystem.com/e/ir?t=pgale-21&l=ur2&o=29" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> ~ 14 € / 17 $
+3. <a target="_blank" href="https://www.amazon.it/gp/product/B0089S2XJG/?&_encoding=UTF8&tag=pgale-21&linkCode=ur2&linkId=c4a046bf512b93cbd486bbe965a2d464&camp=3414&creative=21718">Very cheap UPS</a><img src="//ir-it.amazon-adsystem.com/e/ir?t=pgale-21&l=ur2&o=29" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> ~ 28 € / 34 $
+4. <a target="_blank" href="https://www.amazon.it/gp/product/B00KWHJY7Q/?&_encoding=UTF8&tag=pgale-21&linkCode=ur2&linkId=6352a4eb356a3fc25a2a60bc5eab286c&camp=3414&creative=21718">2 x external HDD 1 TB</a><img src="//ir-it.amazon-adsystem.com/e/ir?t=pgale-21&l=ur2&o=29" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> ~ 2 x (52 € / 62 $) = 104 € / 124 $
+5. <a target="_blank" href="https://www.amazon.it/gp/product/B01MRJNWLZ/?&_encoding=UTF8&tag=pgale-21&linkCode=ur2&linkId=94ea95a4b3a153fde6e7262b405a9a49&camp=3414&creative=21718">USB switch with external power supply</a><img src="//ir-it.amazon-adsystem.com/e/ir?t=pgale-21&l=ur2&o=29" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> ~ 16 € / 19 $
+6. <a target="_blank" href="https://www.amazon.it/gp/product/B012PL7WKW/?&_encoding=UTF8&tag=pgale-21&linkCode=ur2&linkId=f2b388eecab1435b450079c0b614bd8f&camp=3414&creative=21718">32 GB Micro SD card</a><img src="//ir-it.amazon-adsystem.com/e/ir?t=pgale-21&l=ur2&o=29" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /> ~ 17 € / 20 $
 
 For a total expense of about 217 € / 259 $
 

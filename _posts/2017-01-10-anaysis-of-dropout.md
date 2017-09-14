@@ -101,6 +101,8 @@ Inverted Dropout is how Dropout is implemented in practice in the various deep l
 
 Direct Dropout, instead, force you to modify the network during the test phase because if you don't multiply by $$q$$ the output the neuron will produce values that are higher respect to the one expected by the successive neurons (thus the following neurons can saturate or explode): that's why Inverted Dropout is the more common implementation.
 
+{% include inarticlead.html %}
+
 # Dropout of a set of neurons
 
 It can be easily noticed that a layer $$h$$ with $$n$$ neurons, in a single train step, can be seen as an ensemble of $$n$$ Bernoulli experiments, each one with a probability of success equals to $$p$$.
@@ -151,6 +153,8 @@ $$ E[Bi(n, p)] = np $$
 Moreover, we can notice that the distribution of values is almost symmetric around $$p = 0.5$$ and the probability of dropping $$np$$ neurons increase as the distance from $$p=0.5$$ increase.
 
 The scaling factor has been added by the authors to compensate the activation values, because they expect that during the training phase only a percentage of $$1 - p$$ neurons have been kept. During the testing phase, instead, the $$100\%$$ of neurons are kept on, thus the value should be scaled down accordingly.
+
+{% include inarticlead.html %}
 
 # Dropout & other regularizers
 

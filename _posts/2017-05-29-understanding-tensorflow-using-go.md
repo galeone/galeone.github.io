@@ -167,6 +167,8 @@ Here's what he got:
 wait: what's going on here?
 Apparently, there are 2 operations "Placeholder" with the same name "Placeholder".
 
+{% include inarticlead.html %}
+
 ## Lesson 1: node IDs
 
 **The Python API generates different nodes everytime we invoke a method to define an operation**, no matter if this has been already called before.
@@ -262,6 +264,8 @@ Why the `MatMul` node definition panics? We just want to multiply two `tf.int64`
 What's this list? Why can we multiply 2 matrices of `int32` but not of `int64`?
 
 Let's go solve this understanding what's going on.
+
+{% include inarticlead.html %}
 
 ## Lesson 3: Tensorflow typing system
 

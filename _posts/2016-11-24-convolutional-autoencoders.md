@@ -91,6 +91,8 @@ The sum (collapse) of the $$D$$ activation maps produced is a way to treat this 
 
 Intuitively, one can think about this operation as a way to keep into account the relations that exist along the RGB channels of a single input pixel.
 
+{% include inarticlead.html %}
+
 # Convolutional AutoEncoders
 
 Convolutional AutoEncoders (CAEs) approach the filter definition task from a different perspective: instead of manually engineer convolutional filters we **let the model learn the optimal filters** that minimize the reconstruction error. These filters can then be used in any other computer vision task.

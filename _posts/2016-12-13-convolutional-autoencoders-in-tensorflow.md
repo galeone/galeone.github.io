@@ -6,6 +6,8 @@ summary: How to implement a Convolutional Autoencoder using Tensorflow and DTB.
 categories: neural-networks deep-learning
 ---
 
+**DISCLAIMER**: The code used in this article refers to an old version of DTB (now also renamed DyTB).
+
 To easily build, train & use a CAE there are 3 prerequisites:
 
 - Tensorflow >=0.12
@@ -96,6 +98,8 @@ Instead of implementing from scratch the `inputs/Input.py` interface, we are goi
 We're now going to see how this CAE performs on single and three channels images. Note that defining the SingleLayerCAE filters' depth in function of the input depth (the lines with `input_x.get_shape()[3].value`) we're defining different models in function of the input depth.
 
 In fact, if the input depth is 1 the number of encoding parameters is $$3\cdot 3\cdot 1 \cdot32 = 288$$, whilst if the input depth is 3, then the number of parameters is $$3 \cdot 3 \cdot 3 \cdot 32 = 864$$.
+
+{% include inarticlead.html %}
 
 # Train
 

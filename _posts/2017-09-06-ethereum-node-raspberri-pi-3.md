@@ -9,7 +9,7 @@ categories: raspberry ethereum archlinux
 {:.center}
 ![Raspberry + Ethereum](/images/eth_raspy/eth_rasp.png)
 
-In this post, I'm going to show you how to build a complete ethereum node and wallet using a raspberry pi 3. Why? Because running an ethereum node allows to contribute to the Ethereum network, store our wallets in a private and secure location and also it can be useful when experimenting some kind of crypto-algorithmic trading (you can generate a new address from code being sure that's synced and stored in a private location, do transactions and so on).
+In this post, I'm going to show you how to build a complete ethereum node and wallet using a raspberry pi 3. Why? Because running an ethereum node allows us to: contribute to the Ethereum network; store our wallets in a private and secure location; and it can be useful also when experimenting some kind of crypto-algorithmic trading (you can generate a new address from code, being sure that's synced and stored in a private location, do transactions and so on).
 
 First of all, the requirements list (with Amazon's links!):
 
@@ -24,12 +24,12 @@ For a total expense of about 217 € / 259 $
 
 A brief explanation of why we need that:
 
-1. The Raspberry pi 3 is the most supported ARM device around. It has 1 GB RAM, 4 USB 2.0 ports and 1 ethernet port. It's possible to run on it Linux and there are a lot of distributions available.
-2. Keeping the Raspberry Pi powered on 24/7 produces heat: we have to dissipate it. This guarantees a long life to our device and in the kit we also find a nice plexiglass case that allows protecting the device from external damaging.
-3. Power outage is the second main cause of hardware failure after heating (or better, of filesystem corruption and subsequent data loss). To prevent serious damage a UPS is required. Also, the Raspberry Pi power consumption is not high therefore an UPS can keep it up for a reasonable amount of time (*hey reader, are you a Raspberry Pi hacker and you know how to use the GPIOs to monitor the wall outlet and trigger a safe shutdown procedure when the UPS is UP but the wall power is DOWN? Maybe you also know how to start it when to power comes back and doing all this without any information from the UPS (no USB available)? Contact me!*).
-4. The blockchain size increase in size day by day. I simple SD card is not enough to store the whole blockchain. Also, the SD card is a single point of failure and we should prevent that a failure makes us lost the blockchain and most importantly the wallet!
-5. The Raspberry Pi does not provide enough power to the USB ports, thus since almost every external HDD is not externally powered, wed have to provide enough power using a USB switch.
-6. The raspberry Pi comes with no storage, an SD card is required to install an operating system.
+1. The Raspberry Pi 3 is the most supported ARM device around. It has 1 GB RAM, 4 USB 2.0 ports, and 1 ethernet port. It's possible to run Linux on it; in fact there are a lot of distributions available.
+2. Keeping the Raspberry Pi powered on 24/7 produces heat: we have to dissipate it. This guarantees a long life to our device, plus in the kit we also find a nice plexiglass case that allows us to protect the device from external damaging.
+3. A power outage is the second main cause of hardware failure after heating (or better, of filesystem corruption and subsequent data loss). To prevent serious damage a UPS is required. Also, the Raspberry Pi power consumption is not that high, therefore a UPS can keep it up for a reasonable amount of time (*hey reader, are you a Raspberry Pi hacker and you know how to use the GPIOs to monitor the wall outlet and trigger a safe shutdown procedure when the UPS is UP but the wall power is DOWN? Maybe you also know how to start it when to power comes back, and doing all this without any information from the UPS (no USB available)? Contact me!*).
+4. The blockchain size increases in size day by day. A simple SD card is not enough to store the whole blockchain. Moreover, the SD card is a single point of failure and we should prevent that a failure makes us lose the blockchain and - most importantly - the wallet!
+5. The Raspberry Pi does not provide enough power to the USB ports. Thus, since almost every external HDD is not externally powered, we have to provide enough power using a USB switch.
+6. The Raspberry Pi comes with no storage, an SD card is required to install an operating system.
 
 OK, let's start!
 
@@ -40,7 +40,7 @@ OK, let's start!
 I choose this one instead of the most common Raspbian because I love Archlinux. Also, it's really easy to install and use. More importantly, `geth` (the command line interface for running a full ethereum node) is already packaged and available in the community repository, therefore installing it is as easy as `pacman -Syu geth`.
 
 Installing Archlinux ARM is straightforward. The [installation guide](https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-3) on how to create the SD card is pretty clear.
-I'm going to show 2 ways to create the SD card. The first is how to create it while running Linux, the second is while running Windows.
+I'm going to show 2 ways to create the SD card. The first on Linux, the second on Windows.
 
 ### Prepare the SD card while running Linux
 
@@ -152,7 +152,7 @@ Login remotely as root user (under windows use Putty with user `root` and passwo
 
 ### RAID setup
 
-Our 2 external HDDs are located under `/dev/sda` and `/dev/sdb`. First of all, we're going to create a partition table on thoese devices and a partition for our data.
+Our 2 external HDDs are located under `/dev/sda` and `/dev/sdb`. First of all, we're going to create a partition table on those devices and a partition for our data.
 
 Since we're going to store a lot of data on these hard drives it's recommended to create a GPT partition table. For doing that, we need `gptfdisk`.
 
@@ -191,7 +191,7 @@ The last thing to do is to format the drive:
 mkfs.ext4 /dev/md0
 ```
 
-Done! Our drive is ready to use. (For a more comprehensive guide, refer to the official documentation: https://wiki.archlinux.org/index.php/RAID)
+Done! Our drive is ready to use. (For a more comprehensive guide, please refer to the official documentation: https://wiki.archlinux.org/index.php/RAID)
 
 ### RAID /home and user setup
 
@@ -214,7 +214,7 @@ Now, we need to make the mount of `/dev/md0` on `/home` permanent across reboots
 
 Save the changes and exit.
 
-Now that we have a new user `geth`, set a new password, a RAID device that's mounted on `/home` we're ready to upgrade the whole system.
+Now that we have: a new user `geth`;  set a new password;  a RAID device that's mounted on `/home`;  we're ready to upgrade the whole system.
 
 ```bash
 # First change the root password
@@ -227,16 +227,16 @@ reboot
 
 After the upgrade, we're unable to login via ssh as `root` (that's a good thing). Let's login as `geth`.
 
-We're now going to install `geth`, configure it to start at boot and fix some little problem that using external HDDs can cause to our RAID 1 setup.
+We're now going to install `geth`, configure it to start at boot and fix some little problem that using external HDDs can cause to our RAID-1 setup.
 
 {% include inarticlead.html %}
 
 ### geth & startup services
 
-Before installing `geth`, we have to disable any power saving options in our HDDs. We already connected the external HDDs to an externally powered USB in order to give them enough power to work.
-External hard drives slow down when the disk is not used and/or power them off. This can be a problem for our RAID configuration because once a drive turns off it becomes unavailable as storage and thus our RAID setup becomes useless.
+Before installing `geth`, we have to disable any power saving options in our HDDs. We have already connected the external HDDs to an externally powered USB in order to give them enough power to work.
+External hard drives slow down when the disk is not used and/or power them off. This can be a problem for our RAID configuration because once a drive turns off, it becomes unavailable as storage and so our RAID setup becomes useless.
 
-We have to disable both HDDs power saving settings and we have to do it every time we turn on our Raspberry pi.
+We have to disable both HDDs power saving settings and we have to do it every time we turn on our Raspberry Pi.
 A simple systemd service file is what we need.
 
 ```bash
@@ -262,7 +262,7 @@ ExecStart=/usr/bin/hdparm -S 0 /dev/sdb
 WantedBy=multi-user.target
 ```
 
-This service file will disable Advanced Power Management feature and the spindown of both HDDs. Now we start the service and enable it on every boot.
+This service file will disable Advanced Power Management feature and the spin-down of both HDDs. Now we start the service and enable it on every boot.
 
 ```bash
 systemctl start hdparm.service
@@ -310,18 +310,18 @@ You can monitor the output of `geth` with `systemctl status geth@geth.service` a
 
 **A small note**:
 
-The blockchain synchronization can take a very long time. Also, `geth` uses a lot of RAM when syncing. Therefore is not unusual that the kernel kills the process and then systemd restart it. However, once the whole blockchain has been synchronized and the number of blocks to receive in an hour is low, a Raspberry pi with 1 GB of RAM can handle the synchronization without crashing.
+The blockchain synchronization can take a very long time. Also, `geth` uses a lot of RAM when syncing. Therefore is not unusual that the kernel kills the process and then systemd restart it. However, once the whole blockchain has been synchronized and the number of blocks to receive in an hour is low, a Raspberry Pi with 1 GB of RAM can handle the synchronization without crashing.
 
-Ideally, if you already have a geth node synchronized, it's better to copy the blockchain using `scp` or any other remote copy tools instead of using `geth`.
+Ideally, if you already have a geth node synchronized, it's suggested to copy the blockchain using `scp` or any other remote copy tools instead of using `geth`.
 
 ## Conclusion
 
-In this post, I described how to setup an Ethereum node on a Raspberry Pi 3 using Archlinux ARM. After the initial sync, we can use it to send/receive ETH, handle power failures thanks to the UPS and have redundant data to handle HDDs failures.
+In this post, I described how to set up an Ethereum node on a Raspberry Pi 3 using Archlinux ARM. After the initial sync, we can use it to send/receive ETH, handle power failures thanks to the UPS and have redundant data to handle HDDs failures.
 
-Please note that there are a lot of things to do to increase the security of your node. I just leave here some hint:
+Please note that there are a lot of things to do to increase the security of your node. I just leave here few hints:
 
 1. Do not expose the node outside the LAN
-2. iptables with deny all policy is a good friend
+2. iptables with 'deny all' policy is a good friend
 3. Configure your firewall in the router
 4. Use strong passwords
 5. Do not install `sudo`. If you install it, please add `Defaults rootpw` and use a different password for `geth` and `root`.
@@ -330,4 +330,4 @@ Please note that there are a lot of things to do to increase the security of you
 
 If you found this post helpful let me know it! Just leave a comment in the form below.
 
-If you want to offer me a beer (or anything else) you can just send me ETH to: `0xa1d283e77f8308559f62909526ccb2d9444d96fc`.
+And since we are here to try ETH, if you want to offer me a beer (or anything else) you can just send me ETH to: `0xa1d283e77f8308559f62909526ccb2d9444d96fc`.

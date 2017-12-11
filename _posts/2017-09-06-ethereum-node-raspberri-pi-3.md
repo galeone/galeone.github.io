@@ -286,12 +286,14 @@ Requires=network.target
 [Service]
 Type=simple
 User=%I
-ExecStart=/usr/bin/geth --syncmode fast --cache 64 --maxpeers 12
+ExecStart=/usr/bin/geth --syncmode light --cache 64 --maxpeers 12
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+Please note that we're setting up a **light** node. This means that you won't download the whole blockchain. This is the only mode that requires low hardware resources and that can work on a Raspberry Pi right now.
 
 You can change the `maxpeers` flag with the number of peers you desire. The highest your internet speed is, the highest can this number be (the default value is 25).
 

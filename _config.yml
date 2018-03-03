@@ -111,7 +111,7 @@ permalink:    pretty
 paginate:     4
 sass:
   compressed: true
-gems:
+plugins:
   - jekyll-paginate
   - jekyll-sitemap
   - jekyll-gist

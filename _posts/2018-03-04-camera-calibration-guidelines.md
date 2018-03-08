@@ -47,7 +47,7 @@ while the camera matrix parameters capture the relation between the points in th
 2. $$ \alpha $$ the skew coefficient that defines the angle between the x and y planes (usually, but not always, is 0)
 3. $$ c_x, c_y $$ pixel coordinates of the principal point
 
-The calibration process, of course, allow to estimate all this parameters. The most widely used camera calibration algorithm is the Zhang algorithm [^1] that iteratively finds correspondences between the coordinates of some easily identifiable feature points (usually inner corners) of a known object (a planar pattern) in both the image plane and the scene.
+The calibration process, of course, allows to estimate all this parameters. The most widely used camera calibration algorithm is the Zhang algorithm [^1] that iteratively finds correspondences between the coordinates of some easily identifiable feature points (usually inner corners) of a known object (a planar pattern) in both the image plane and the scene.
 
 The algorithm iteratively builds and refines a system of equations (equations that are the mapping between the points in the image and the scene) with the aim of minimizing the reprojection error.
 
@@ -68,7 +68,7 @@ If your camera has some sort of auto-focus: **disable it**. Auto-focus changes t
 
 ### Camera manual focus
 
-If you're developing some machine vision application, first do the camera setup, then use a software viewer to see the captured images from the camera and manually adjust the focus of your camera until the subjects are perfectly in focus.
+If you're developing some machine vision application, first complete the camera setup, then use a viewer software viewer to see the captured images from the camera and manually adjust the focus of your camera until the subjects are perfectly in focus.
 
 Use the locating skew to lock in the desired position the focus ring. Never touch the skew or the focus ring again.
 

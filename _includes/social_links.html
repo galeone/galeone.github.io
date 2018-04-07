@@ -3,6 +3,9 @@
     {% if site.github_username %}
       <a class="fa fa-github" href="https://github.com/{{ site.github_username }}"></a>
     {% endif %}
+    {% if site.reddit_username %}
+    <a class="fa fa-reddit" href="https://reddit.com/user/{{ site.reddit_username }}"></a>
+    {% endif %}
     {% if site.bitbucket_username %}
       <a class="fa fa-bitbucket" href="https://bitbucket.org/{{ site.bitbucket_username }}"></a>
     {% endif %}
@@ -34,6 +37,14 @@
     {% if site.medium_id %}
       <a class="fa fa-medium" href="https://medium.com/@{{ site.medium_id }}"></a>
     {% endif %}
+    {% if site.telegram_username %}
+      <a class="fa fa-telegram" href="https://t.me/{{ site.telegram_username }}"></a>
+    {% endif %}
+    {% if site.vk_id %}
+      <a class="fa fa-vk" href="https://vk.com/{{ site.vk_id }}"></a>
+    {% endif %}
+  </div>
+  <div class="right">
     {% if site.bitcoin_url %}
       <a class="fa fa-bitcoin" href="{{ site.bitcoin_url }}"></a>
     {% endif %}
@@ -43,5 +54,6 @@
     {% if site.flattr_button %}
       {{ site.flattr_button }}
     {% endif %}
+  </div>
 </div>
 <div class="clearfix"></div>

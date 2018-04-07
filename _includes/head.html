@@ -1,13 +1,4 @@
 <head>
-	<!-- AdSense -->
-    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-	<script>
-	(adsbygoogle = window.adsbygoogle || []).push({
-    	google_ad_client: "ca-pub-9529857974450302",
-	    enable_page_level_ads: true
-  	});
-	</script>
-	<!-- end AdSense -->
     {% if site.google_tag_manager %}
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -35,8 +26,8 @@
 
     <!-- Fonts -->
     {% if site.extended_fonts %}
-    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Lato:900,300&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300&amp;subset=latin-ext,latin' rel='stylesheet' type='text/css'>
     {% else %}
     <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
     <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
@@ -47,7 +38,8 @@
 
     <!-- MathJax -->
     {% if site.enable_mathjax %}
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    <script type="text/javascript" async
+        src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
     {% endif %}
 
@@ -67,15 +59,22 @@
     <meta property="og:description" content="{% if page.description %}{{ page.description | xml_escape }}{% else %}{{ site.description | xml_escape }}{% endif %}">
     <meta property="og:url" content="{{ site.url }}{{ page.url }}">
     <meta property="og:site_name" content="{{ site.title | xml_escape }}">
+    {% if site.post_preview_image %}
+    <meta property="og:image" content="{{ site.url }}/images/me.jpeg">
+    {% endif %}
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
     {% if site.twitter_username %}
         <meta name="twitter:site" content="@{{ site.twitter_username }}" />
+        <meta name="twitter:creator" content="@{{ site.twitter_username }}" />
     {% endif %}
     <meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}" />
     <meta name="twitter:description" content="{% if page.summary %}{{ page.summary }}{% else %}{{ site.description }}{% endif %}" />
     <meta name="twitter:url" content="{{ site.url }}{{ page.url }}" />
+    {% if site.post_preview_image %}
+    <meta name="twitter:image" content="{{ site.url }}/images/me.jpeg" />
+    {% endif %}
 
     <!-- Icons -->
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">

@@ -26,6 +26,8 @@ ajaxify_contact_form: false
 enable_mathjax: true
 extended_fonts: false
 enable_anchorjs: false
+# Preview image for social media aka og:image and twitter:image
+post_preview_image: false
 
 # Facebook Page integration
 # (for instant articles and other stuff)
@@ -44,6 +46,7 @@ facebook_comments_number: 10
 
 # Social icons
 github_username: 'galeone'
+reddit_username: 'pgaleone'
 bitbucket_username:
 stackoverflow_id: 2891324
 twitter_username: 'paolo_galeone'
@@ -56,6 +59,8 @@ medium_id:
 bitcoin_url:
 paypal_url: 'https://paypal.me/PGaleone'
 flattr_button:
+telegram_username:
+vk_id:
 
 # Post sharing icons
 show_sharing_icons: true
@@ -116,4 +121,7 @@ plugins:
   - jekyll-sitemap
   - jekyll-gist
 # https://github.com/jekyll/jekyll/issues/2938
-exclude: [vendor]
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor

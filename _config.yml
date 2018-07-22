@@ -23,11 +23,11 @@ show_related_posts:   true
 show_post_footers:    false
 show_social_icons:    true
 ajaxify_contact_form: false
-enable_mathjax: true
-extended_fonts: false
-enable_anchorjs: false
+enable_mathjax:       true
+extended_fonts:       false
+enable_anchorjs:      true
 # Preview image for social media aka og:image and twitter:image
-post_preview_image: false
+post_preview_image:   true
 
 # Facebook Page integration
 # (for instant articles and other stuff)

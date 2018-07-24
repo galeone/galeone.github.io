@@ -94,8 +94,7 @@ decode = tf.layers.conv2d(
 	name="decode")
 ```
 
-In this short example, we have the definition of an input **placeholder with a partially-known shape** and the definition of 6 **variables with a fully-known shape**.
-
+In this short example, we have the definition of an input **placeholder with a partially-known shape** and, for every `conv2d` layer, the definition of 2 **variables with a fully-known shape**.
 In fact, every time we define a convolutional layer with `tf.layers.conv2d` we're defining both a `bias` vector and a `weights` tensor.
 
 This example, however, hides some cool features of tensorflow's operations I/O shapes. Let's analyze in detail the shape of every layer, this will help us understand a lot about the shaping system.

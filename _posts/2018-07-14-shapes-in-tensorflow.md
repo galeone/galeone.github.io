@@ -32,18 +32,19 @@ Tensorflow, when used in its non-eager version, separate the graph definition fr
 
 Usually, when we define a ML model we define the network architecture parameters completely, hence we are in the case of a fully-known shape definition.
 
-As an example, let's say we want to define a simple encoder-decoder network (that's the base architecture for convolutional autoencoders  / semantic segmentation networks) and let's define this in the more general possible way:
-
-This network will be able to accept as input an image with any spatial extent and with every depth.
+As an example, let's say we want to define a simple encoder-decoder network (that's the base architecture for convolutional autoencoders  / semantic segmentation networks / GANs and so on...) and let's define this in the more general possible way.
 
 ### encoder-decoder network architecture
+
+This network accepts in input an image of any depth (1 or 3 channels) and with any spatial extent (height, width).
+I'm going to use this network architecture to show you the concepts of static and dynamic shapes and how many information about the shapes of the tensors and of the network parameters we can get and use in both, graph definition time and execution time.
 
 ```python
 inputs_ = tf.placeholder(tf.float32, shape=(None, None, None, None))
 inputs = tf.cond(
 	tf.equal(tf.shape(inputs_)[-1], 3), lambda: inputs_,
 	lambda: tf.image.grayscale_to_rgb(inputs_))
-print(inputs)
+
 inputs.set_shape((None, None, None, 3))
 layer1 = tf.layers.conv2d(
 	inputs,
@@ -61,7 +62,7 @@ layer2 = tf.layers.conv2d(
 	name="layer2")
 encode = tf.layers.conv2d(
 	layer2, 10, kernel_size=(6, 6), strides=(1, 1), name="encode")
-print(encode)
+
 d_layer2 = tf.image.resize_nearest_neighbor(encode, tf.shape(layer2)[1:3])
 d_layer2 = tf.layers.conv2d(
 	d_layer2,
@@ -91,7 +92,6 @@ decode = tf.layers.conv2d(
 	activation=tf.nn.tanh,
 	padding="SAME",
 	name="decode")
-
 ```
 
 In this short example, we have the definition of an input **placeholder with a partially-known shape** and the definition of 6 **variables with a fully-known shape**.

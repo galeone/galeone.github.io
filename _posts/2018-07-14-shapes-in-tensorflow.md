@@ -21,18 +21,20 @@ So you might wonder: what's difficult about the shape of a tensor? It just looks
 
 ## Tensor's shape
 
-Well, the difficulties (and the cool stuff) arises when we dive deep into the Tensorflow specifications, and we find out that there's no constraint about the definition of the shape of a tensor. Tensorflow, in fact, allow us to represent the shape of a Tensor in 3 different ways:
+The difficulties (and the cool stuff) arises when we dive deep into the Tensorflow peculiarities, and we find out that there's no constraint about the definition of the shape of a tensor. Tensorflow, in fact, allow us to represent the shape of a Tensor in 3 different ways:
 
 1. **Fully-known shape**: that are exactly the examples described above, in which we know the rank and the size for each dimension.
 2. **Partially-known shape**: in this case, we know the rank, but we have an unknown size for one or more dimension (everyone that has trained a model in batch is aware of this, when we define the input we just specify the feature vector shape, letting the batch dimension set to `None`, e.g.: `(None, 28, 28, 1)`.
-3. **Unknown shape**: this is the most tough case, in which we don't know nothing about the tensor; the rank nor the value of any dimension.
+3. **Unknown shape and known rank**: in this case we know the rank of the tensor, but we don't know any of the dimension value, e.g.: `(None, None, None)`.
+4. **Unknown shape and rank**: this is the most tough case, in which we don't know nothing about the tensor; the rank nor the value of any dimension.
 
+Tensorflow, when used in its non-eager mode, separates the graph definition from the graph execution. This allow us to first define the relationships among nodes and only after executing the graph.
 
-Tensorflow, when used in its non-eager version, separate the graph definition from the graph execution. This allow us to first define the relationships among nodes and only after executing the graph.
+When we define a ML model (but the reasoning holds for a generic computational graph) we define the network parameters completely (e.g. the bias vector shape is fully defined, as is the number of convolutional filter and their shape), hence we are in the case of a fully-known shape definition.
 
-Usually, when we define a ML model we define the network architecture parameters completely, hence we are in the case of a fully-known shape definition.
+But a graph execution time, instead, the relationships among tensors (not among the network parameters, that remain constants) can be extremely dynamic.
 
-As an example, let's say we want to define a simple encoder-decoder network (that's the base architecture for convolutional autoencoders  / semantic segmentation networks / GANs and so on...) and let's define this in the more general possible way.
+To completely understand what happens at graph definition and execution time let's say we want to define a simple encoder-decoder network (that's the base architecture for convolutional autoencoders  / semantic segmentation networks / GANs and so on...) and let's define this in the more general possible way.
 
 ### encoder-decoder network architecture
 

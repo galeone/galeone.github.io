@@ -2,7 +2,7 @@
 layout: post
 title: Introduction to Autoencoders
 date: 2016-11-18 15:17:00
-summary: 
+summary: "Autoencoders are neural networks models whose aim is to reproduce their input: this is trivial if the network has no constraints, but if the network is constrained the learning process becomes more interesting."
 categories: neural-networks
 ---
 

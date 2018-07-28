@@ -3,6 +3,7 @@ layout: post
 title: "Camera calibration guidelines"
 date: 2018-03-04 08:00:00
 categories: computer-vision
+summary: "The process of geometric camera calibration (camera resectioning) is a fundamental step for machine vision and robotics applications. Unfortunately, the result of the calibration process can vary a lot depending on various factors. There are a lot of empirical guidelines that have to be followed in order to achieve good results: this post will drive you through them."
 ---
 
 The process of geometric camera calibration (camera resectioning) is a fundamental step for machine vision and robotics applications. Unfortunately, the result of the calibration process can vary a lot depending on various factors. There are a lot of empirical guidelines that have to be followed in order to achieve good results: this post will drive you through them.

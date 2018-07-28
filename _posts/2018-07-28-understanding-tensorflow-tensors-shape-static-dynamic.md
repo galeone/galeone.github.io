@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Understanding Tensorflow's tensors shape: static and dynamic"
-date: 2018-07-14 8:00:00
+date: 2018-07-28 8:00:00
 categories: tensorflow
 summary: "Describing computational graphs is just a matter connecting nodes correctly. Connecting nodes seems a trivial operation, but it hides some difficulties related to the shape of tensors. This article will guide you through the concept of tensor's shape in both its variants: static and dynamic."
 ---

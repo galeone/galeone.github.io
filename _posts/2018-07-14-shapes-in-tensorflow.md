@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Shapes in tensorflow: dynamic vs static shape"
+title: "Shapes in tensorflow: dynamic vs static"
 date: 2018-07-14 8:00:00
 categories: tensorflow
 summary: 
@@ -36,16 +36,21 @@ But a graph execution time, instead, the relationships among tensors (not among 
 
 To completely understand what happens at graph definition and execution time let's say we want to define a simple encoder-decoder network (that's the base architecture for convolutional autoencoders  / semantic segmentation networks / GANs and so on...) and let's define this in the more general possible way.
 
-### encoder-decoder network architecture
+## encoder-decoder network architecture
 
 This network accepts in input an image of any depth (1 or 3 channels) and with any spatial extent (height, width).
 I'm going to use this network architecture to show you the concepts of static and dynamic shapes and how many information about the shapes of the tensors and of the network parameters we can get and use in both, graph definition time and execution time.
 
 ```python
 inputs_ = tf.placeholder(tf.float32, shape=(None, None, None, None))
-inputs = tf.cond(
-	tf.equal(tf.shape(inputs_)[-1], 3), lambda: inputs_,
-	lambda: tf.image.grayscale_to_rgb(inputs_))
+depth = tf.shape(inputs_)[-1]
+with tf.control_dependencies([
+        tf.Assert(
+            tf.logical_or(tf.equal(depth, 3), tf.equal(depth, 1)), [depth])
+]):
+    inputs = tf.cond(
+        tf.equal(tf.shape(inputs_)[-1], 3), lambda: inputs_,
+        lambda: tf.image.grayscale_to_rgb(inputs_))
 
 inputs.set_shape((None, None, None, 3))
 layer1 = tf.layers.conv2d(
@@ -96,15 +101,106 @@ decode = tf.layers.conv2d(
 	name="decode")
 ```
 
-In this short example, we have the definition of an input **placeholder with a partially-known shape** and, for every `conv2d` layer, the definition of 2 **variables with a fully-known shape**.
-In fact, every time we define a convolutional layer with `tf.layers.conv2d` we're defining both a `bias` vector and a `weights` tensor.
+This example hides some interesting features of tensorflow's ops I/O shapes. Let's analyze in detail the shape of every layer, this will help us understand a lot about the shaping system.
 
-This example, however, hides some cool features of tensorflow's operations I/O shapes. Let's analyze in detail the shape of every layer, this will help us understand a lot about the shaping system.
+## Dynamic input shape handling
 
-### Input placeholder
+A placeholder defined in this way
 
-As said above, the input placeholder shape is partially known, in fact we're explicitly telling to tensorflow that the first dimension (the batch dimension) is unknown, hence at graph execution time this value can be anything >= 1.
+```python
+inputs_ = tf.placeholder(tf.float32, shape=(None, None, None, None))
+```
 
-So, this means that we have 2 different shapes for the input placeholder: a **static shape**, that's known at graph definition time and a **dynamic shape** that will be known only at graph execution time (when we feed a value to that input placeholder).
+has an unknown shape and a known rank (4), at graph definition time.
+
+At graph execution time, when we feed a value to the placeholder, the shape becomes fully defined: tensorflow checks for us if the rank of the value we fed as input matches the specified rank and leave us the task to dynamically check if the passed value is something we're able to use.
+
+So, this means that we have 2 different shapes for the input placeholder: a **static shape**, that's known at graph definition time and a **dynamic shape** that will be known only at graph execution time.
+
+In order to check if the depth of the input image is in the accepted value (1 or 3) we have to use `tf.shape` and **not** `inputs_.shape`.
+
+The difference between the `tf.shape` function and the `.shape` attribute is crucial:
+
+- `tf.shape(inputs_)` returns a 1D integer tensor representing the **dynamic shape** of `inputs_`.
+- `inputs_.shape` returns a python tuple representing the **static shape** of `inputs_`.
+
+Since the static shape known at graph definition time is `None` for every dimension, `tf.shape` is the way to go. Using `tf.shape` forces us to move the logic of the input shape handling inside the graph. In fact, if at graph definition time the shape was known, we could just use python and do something as easy as:
+
+```python
+depth = inputs_.shape[-1]
+assert depth == 3 or depth == 1
+if depth == 1:
+    inputs_ = tf.image.grayscale_to_rgb(inputs_)
+```
+
+but in this particular case this is not possible, hence we have to move the logic inside the graph. The equivalent of the previous code defined directly into the graph is:
+
+```python
+depth = tf.shape(inputs_)[-1]
+with tf.control_dependencies([
+        tf.Assert(
+            tf.logical_or(tf.equal(depth, 3), tf.equal(depth, 1)), [depth])
+]):
+    inputs = tf.cond(
+        tf.equal(tf.shape(inputs_)[-1], 3), lambda: inputs_,
+        lambda: tf.image.grayscale_to_rgb(inputs_))
+```
+
+from now on, we know that the input depth will be `3`, but tensorflow **at graph definition time** is not aware of this (in fact, we described all the input shape control logic into the graph, and thus all of this will be executed only when the graph is created).
+
+Created an input with a "well-known" shape (we do only know that the depth at execution time will be `3`) we want to define the encoding layer, that's just a set of 2 convolutional layers with a `3x3` kernel and a stride of `2`, followed by a convolutional layer with a kernel `6x6` and a stride of `1`.
 
 
+But before doing this, we have to think about the variable definition phase of the convolutional layers: as we know from the [definition of the convolution operation among volumes](neural-networks/2016/11/24/convolutional-autoencoders/#convolution-among-volumes) in order to produce an **activation map** the operation needs to span all the input depth $$D$$.
+
+This means that the *depth of every convolutional filter* depends on the input depth $$D$$, hence the variable definition depends on the expected input depth of the layers.
+
+The shape of the variables **must always be defined** (otherwise the graph can't be built!).
+
+*This means that we have to make tensorflow aware at graph definition time of something that will be known only at graph execution time (the input depth).*
+
+Since we know that after the execution of `tf.cond` the `inputs` tensor will have a depth of `3` we can use this information at graph definition time, **seting the static shape** to `(None,None,None,3)`: that's all we need to know to correctly define all the convolutional layers that will come next.
+
+```python
+inputs.set_shape((None, None, None, 3))
+```
+
+the `.set_shape` method simply assigns to the `.shape` property of the tensor the specified value.
+
+In this way, the definition of all the convolutional layer `layer1`, `layer2` and `encode` can succeed. Let's analyze the shapes of the `layer1` (the same reasoning applies for every convolutional layer in the network):
+
+## Convolutional layer shapes
+
+At graph definition time we know the input depth `3`, this allow the `tf.layers.conv2d` operation to correctly define a set `32` convolutional filters each with shape `3x3x3`, where `3x3` is the spatial extent and the last `3` is the input depth (remember that a convolutional filter must span all the input volume).
+
+Also, the `bias` tensor is added (a tensor with shape `(32)`).
+
+So the input depth is all the convolution operation needs to know to be correctly defined (obviously, together with all the static informations, like the number of filters and their spatial extent).
+
+**What happens at graph execution time?**
+
+The variables are untouched, their shape remain constant. Our convolution operation, however, spans not only the input depth but also all the input spatial extent (width and height) to produce the activation maps.
+
+At graph definition time we know that the input of `layer1` will be a tensor with static shape `(None, None, None, 3)` and it's output will be a tensor with static shape (`None, None, None, 32)`: nothing more.
+
+*suggestion: just add a `print(layer)` after every layer definition to see every useful information about the output of a layer, including the static shape and the name.*
+
+But we know that the output shape of a convolution can be calculated as (for both $$W$$ and $$H$$):
+
+$$ O = \frac{W - 2K +P}{S} + 1 $$
+
+This information can be used to add an additional check on the dynamic input shape, in fact is possible to define a lower bound on the input resolution (a pleasure let to the reader).
+
+## Decode layer shapes
+
+As almost everyone today knows, the "deconvolution" operation produces chessboard artifacts[^1]
+
+## Summary
+
+- Variables must always be fully defined: exploit information from the graph execution time to correctly define meaningful variables shapes.
+- There's a clear distinction between static and dynamic shapes: graph definition time and graph execution time must always be kept in mind when defining a graph.
+- `tf.shape` allows defining extremely dynamic computational graphs, at the only cost to move the logic directly inside the graph and thus out of python.
+- The resize operations accept dynamic shapes: use them in this way.
+
+---
+[^1]: <a href="https://distill.pub/2016/deconv-checkerboard/">Deconvolution and Checkerboard Artifacts</a>

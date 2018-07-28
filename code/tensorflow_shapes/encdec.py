@@ -1,13 +1,19 @@
+import sys
 import tensorflow as tf
 import numpy as np
 
 
 def main():
-
     inputs_ = tf.placeholder(tf.float32, shape=(None, None, None, None))
-    inputs = tf.cond(
-        tf.equal(tf.shape(inputs_)[-1], 3), lambda: inputs_,
-        lambda: tf.image.grayscale_to_rgb(inputs_))
+    depth = tf.shape(inputs_)[-1]
+    with tf.control_dependencies([
+            tf.Assert(
+                tf.logical_or(tf.equal(depth, 3), tf.equal(depth, 1)), [depth])
+    ]):
+        inputs = tf.cond(
+            tf.equal(tf.shape(inputs_)[-1], 3), lambda: inputs_,
+            lambda: tf.image.grayscale_to_rgb(inputs_))
+
     print(inputs)
     inputs.set_shape((None, None, None, 3))
     layer1 = tf.layers.conv2d(

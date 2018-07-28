@@ -235,14 +235,14 @@ After reading this article, what's needed to count the total number of parameter
 
 We know that every variable must be fully defined, we can count the total number of parameter directly in the graph definition phase with a simply python loop, just accessing the `.shape` property of every trainable variable (`tf.trainable_variables()`).
 
-For a complete answer, I let here a link to my StackOverflow answer to this question: https://stackoverflow.com/a/38161314/2891324
+For a complete answer, I let here a link to my StackOverflow answer to this question: [How to count total number of trainable parameters in a Tensorflow model?](https://stackoverflow.com/questions/38160940/how-to-count-total-number-of-trainable-parameters-in-a-tensorflow-model/38161314#38161314)
 
 #### Why did I decided to write this post?
 
 I see an increasing need in the community to understand how to correctly work with Tensorflow and its dynamic/static shape features. In fact, 2 of the most voted answer I wrote on StackOverflow are about this topic:
 
-- https://stackoverflow.com/a/37085824/2891324 *tf.shape() get wrong shape in tensorflow*
-- https://stackoverflow.com/a/38161314/2891324 *How to count total number of trainable parameters in a Tensorflow model?*
+- [tf.shape() get wrong shape in tensorflow](https://stackoverflow.com/questions/37085430/tf-shape-get-wrong-shape-in-tensorflow/37085824#37085824)
+- [How to count total number of trainable parameters in a Tensorflow model?](https://stackoverflow.com/questions/38160940/how-to-count-total-number-of-trainable-parameters-in-a-tensorflow-model/38161314#38161314)
 
 Probably the official documentation is not so clear about this aspect of the framework: I hope this post help to clarify this aspect.
 

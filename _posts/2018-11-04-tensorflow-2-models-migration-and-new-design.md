@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Tensorflow 2.0: models migration and new design"
-date: 2018-11-01 08:00:00
+date: 2018-11-04 08:00:00
 categories: tensorflow gan
 summary: "Tensorflow 2.0 will be a major milestone for the most popular machine learning framework: lots of changes are coming, and all with the aim of making ML accessible to everyone. These changes, however, requires for the old users to completely re-learn how to use the framework: this article describes all the (known) differences between the 1.x and 2.x version, focusing on the change of mindset required and highlighting the pros and cons of the new implementation."
 ---

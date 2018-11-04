@@ -42,7 +42,7 @@ As described in the article [Understanding Tensorflow using Go](/tensorflow/go/2
 
 As an early Tensorflow user, I'm used to designing my computational graphs following this pattern:
 
-1. Which operations connect my variable nodes? Define the graph as multiple sub-graphs connected. Define every sub-graph inside a separate [`tf.variable_scope`](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/variable_scope) in order to define the variables of different graphs, inside different scopes and obtain a clear graph representation in [tensorboard](https://twitter.com/paolo_galeone/status/734047400910802944).
+1. Which operations connect my variable nodes? Define the graph as multiple sub-graphs connected. Define every sub-graph inside a separate [`tf.variable_scope`](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/variable_scope) in order to define the variables of different graphs, inside different scopes and obtain a clear graph representation in [Tensorboard](https://twitter.com/paolo_galeone/status/734047400910802944).
 2. Do I have to use a sub-graph more than once in the same execution step? Be sure to exploit the [`reuse`](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/variable_scope#__init__) parameter of [`tf.variable_scope`](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/variable_scope) in order to avoid the creation of a new graph, prefixed with `_n`.
 3. The graph has been defined? Create the variable initialization op (how many times have you seen the [`tf.global_variables_initializer()`](https://www.tensorflow.org/api_docs/python/tf/initializers/global_variables) call?)
 4. Load the graph into a Session and run it.
@@ -269,7 +269,45 @@ However, another big change in Tensorflow 2.x is to make the *eager mode* the de
 
 ## Eager mode first
 
+As stated in the [Eager execution guide](https://www.tensorflow.org/guide/eager):
 
+TensorFlow's eager execution is an imperative programming environment that evaluates operations immediately, without building graphs: operations return concrete values instead of constructing a computational graph to run later. This makes it easy to get started with TensorFlow and debug models, and it reduces boilerplate as well. To follow along with this guide, run the code samples below in an interactive python interpreter.
+
+Eager execution is a flexible machine learning platform for research and experimentation, providing:
+
+- An intuitive interface—Structure your code naturally and use Python data structures. Quickly iterate on small models and small data.
+- Easier debugging—Call ops directly to inspect running models and test changes. Use standard Python debugging tools for immediate error reporting.
+- Natural control flow—Use Python control flow instead of graph control flow, simplifying the specification of dynamic models.
+
+In short: there's no need to define the graph first and then evaluate it inside a session. Using Tensorflow in eager mode allow to mix the definition and execution, exactly as a standard python program.
+
+There's no a 1:1 match with the static graph version, since things that are *natural* in a graph are not in a imperative environment.
+
+The most important example here is the [`tf.GradientTape`](https://www.tensorflow.org/api_docs/python/tf/GradientTape) context manager that only exists in eager mode.
+
+When we have a graph, we do know how nodes are connected and when we have to compute the gradient of a certain function we can backtrack from the output to the input of the graph, compute the gradient and get the result.
+
+In eager mode we can't. The only way to compute the gradient of a function using automatic differentiation is to *build a graph*. The graph of the operations executed within the `tf.GradientTape` context manager on some *watchable* element (like variables) is built and then we can ask the tape to compute the gradient we need.
+
+On the [`tf.GradientTape`](https://www.tensorflow.org/api_docs/python/tf/GradientTape) documentation page we can find an example that clearly explains how and why tapes are needed:
+
+```python
+x = tf.constant(3.0)
+with tf.GradientTape() as g:
+  g.watch(x)
+  y = x * x
+dy_dx = g.gradient(y, x) # Will compute to 6.0
+```
+
+Also, the control flow operations are just the python control flow operations (like for loops, if statements, ...) differently from the `tf.while_loop`, `tf.map_fn`, `tf.cond` methods that we have to use in the static-graph version.
+
+There's a tool, called [Autograph](https://www.tensorflow.org/guide/autograph) that helps you write complicated graph code using normal Python. Behind the scenes, AutoGraph automatically transforms your code into the equivalent TensorFlow graph code.
+
+However, the python code you need to write is not exactly pure python (for instance, you have to declare that a function return a list of elements with a specified Tensorflow data type, using operations that you won't use in a standard python function) and its capabilities, at least at the time of writing are limited.
+
+This tool has been created because the graph version has the great advantage of being "a single file" once exported, and therefore shipping trained machine learning models in a production environment is way more easier using the static-graph mode. Also, the static-graph mode is faster.
+
+Personally, I don't like eager mode that much. Probably because I'm used to the static graph version and I found the eager mode a coarse imitation of PyTorch. Also, trying to implement a GAN from a PyTorch implementation to a Tensorflow 2.x version, using both static graph and eager mode version, I wasn't able to get the eager one working and I still don't know why (while the static graph implementation works perfectly). I opened a bug report on GitHub (but the error could be mine of course): [Tensorflow eager version fails, while Tensorflow static graph works](https://github.com/tensorflow/tensorflow/issues/23407).
 
 The transition to Tensorflow 2.x carries other changes that I tried to summarize in the next *what if* section.
 
@@ -307,12 +345,13 @@ This article has been created with the specific aim of shed a light on the chang
 
 The GAN implementation in Tensorflow 1.x and its conversion in Tensorflow 2.x should be a clear example of the mindset change required to work with the new version.
 
-Overall I think Tensorflow 2.x will improve the quality of the framework and it will standardize and simplifies how to use it.
+Overall I think Tensorflow 2.x will improve the quality of the framework and it will standardize and simplifies how to use it. New users that never seen a static-graph approach and are used to work with imperative languages could find the eager mode a good entry point to the Tensorflow world.
 
-There are certain parts of the update that I don't like, but are just my personal opinions:
+However, there are certain parts of the update that I don't like (please not that those are just my personal opinions):
 
 - The focus on the eager execution and make it the default: it looks too much a marketing move to me. It looks like Tensorflow wants to chase PyTorch (eager by default)
-- Switching to a Keras based approach is a good move, but it makes the graph visualized in Tensorboard *really* ugly. In fact, the variables and the graphs are defined globally, and the `tf.named_scope` (invoked every time a Keras Model is called, in order to share the variables easily) that creates a new "block" in the tensorflow graph, is separated by the graph it uses internally and it has in the list of the input nodes all the variables of the model - this makes the graph visualization of tensorboard pretty much useless and that's a pity for such a good tool.
+- The missing 1:1 compatibility with static-graph and eager (and the possibility of mixing them) could create a mess in big projects IMHO: it would be hard to maintain this projects
+- Switching to a Keras based approach is a good move, but it makes the graph visualized in Tensorboard *really* ugly. In fact, the variables and the graphs are defined globally, and the `tf.named_scope` (invoked every time a Keras Model is called, in order to share the variables easily) that creates a new "block" in the Tensorflow graph, is separated by the graph it uses internally and it has in the list of the input nodes all the variables of the model - this makes the graph visualization of Tensorboard pretty much useless and that's a pity for such a good tool.
 
 If you liked the article feel free to share it using the buttons below and don't hesitate to comment to let me know if there's something wrong/that can be improved in the article.
 

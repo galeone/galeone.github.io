@@ -66,7 +66,7 @@ def generator(inputs):
     with tf.variable_scope("generator"):
         fc1 = tf.layers.dense(inputs, units=64, activation=tf.nn.elu, name="fc1")
         fc2 = tf.layers.dense(fc1, units=64, activation=tf.nn.elu, name="fc2")
-        G = tf.layers.dense(fc1, units=1, name="G")
+        G = tf.layers.dense(fc2, units=1, name="G")
     return G
 
 def discriminator(inputs, reuse=False):

@@ -3,10 +3,10 @@ layout: post
 title: "Tensorflow 2.0: models migration and new design"
 date: 2018-11-04 08:00:00
 categories: tensorflow gan
-summary: "Tensorflow 2.0 will be a major milestone for the most popular machine learning framework: lots of changes are coming, and all with the aim of making ML accessible to everyone. These changes, however, requires for the old users to completely re-learn how to use the framework: this article describes all the (known) differences between the 1.x and 2.x version, focusing on the change of mindset required and highlighting the pros and cons of the new implementation."
+summary: "Tensorflow 2.0 will be a major milestone for the most popular machine learning framework: lots of changes are coming, and all with the aim of making ML accessible to everyone. These changes, however, require for the old users to completely re-learn how to use the framework: this article describes all the (known) differences between the 1.x and 2.x version, focusing on the change of mindset required and highlighting the pros and cons of the new implementation."
 ---
 
-Tensorflow 2.0 will be a major milestone for the most popular machine learning framework: lots of changes are coming, and all with the aim of making ML accessible to everyone. These changes, however, requires for the old users to completely re-learn how to use the framework: this article describes all the (known) differences between the 1.x and 2.x version, focusing on the change of mindset required and highlighting the pros and cons of the new and implementations.
+Tensorflow 2.0 will be a major milestone for the most popular machine learning framework: lots of changes are coming, and all with the aim of making ML accessible to everyone. These changes, however, require for the old users to completely re-learn how to use the framework: this article describes all the (known) differences between the 1.x and 2.x version, focusing on the change of mindset required and highlighting the pros and cons of the new and implementations.
 
 This article can be a good starting point also for the novice: start thinking in the Tensorflow 2.0 way right now, so you don't have to re-learn a new framework (unless until Tensorflow 3.0 will be released).
 
@@ -83,7 +83,7 @@ def discriminator(inputs, reuse=False):
     return D
 ```
 
-This two functions, when called, define inside the default graph 2 different sub-graphs, each one with its own scope ("generator" or "discriminator"). Please note that this function **return the output tensor** of the defined sub-graph, not the graph itself.
+This two functions, when called, define inside the default graph 2 different sub-graphs, each one with its own scope ("generator" or "discriminator"). Please note that this function **returns the output tensor** of the defined sub-graph, not the graph itself.
 
 In order to share the same $$D$$ graph, we define 2 inputs (real and fake) and define the loss functions required to train $$G$$ and $$D$$.
 

@@ -2,7 +2,7 @@
 layout: post
 title: Convolutional Autoencoders
 date: 2016-11-24 15:17:00
-summary: 
+summary: "The convolution operator allows filtering an input signal in order to extract some part of its content. Autoencoders in their traditional formulation do not take into account the fact that a signal can be seen as a sum of other signals. Convolutional Autoencoders, instead, use the convolution operator to exploit this observation. They learn to encode the input in a set of simple signals and then try to reconstruct the input from them."
 categories: neural-networks
 ---
 

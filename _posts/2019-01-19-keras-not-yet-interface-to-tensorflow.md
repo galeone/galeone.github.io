@@ -9,7 +9,7 @@ summary: "In Tensorflow 2.0 Keras will be the default high-level API for buildin
 In Tensorflow 2.0 Keras will be the default high-level API for building and training machine learning models, hence complete compatibility between a model defined using the old `tf.layers` and the new `tf.Keras.layers` is expected. In version 2 of the popular machine learning framework the eager execution will be enabled by default although the static graph definition + session execution will be still supported (but hidden a little bit).
 
 In this post, you'll see that the compatibility between a model defined using `tf.layers` and `tf.keras.layers` is not always guaranteed when using the graph definition + session execution, but it works as expected if the eager execution is enabled (at least from my tests).
-1
+
 The post is organized as follows: definition of the common data input pipeline, definition of the same model using both `tf.layers` and `tf.keras.layers`, analysis of different behaviors through 6 experiments.
 
 ## Input definition

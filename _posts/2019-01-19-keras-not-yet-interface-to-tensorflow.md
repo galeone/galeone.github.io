@@ -3,7 +3,7 @@ layout: post
 title: "Tensorflow 2.0: Keras is not (yet) a simplified interface to Tensorflow"
 date: 2019-01-19 08:00:00
 categories: tensorflow keras
-summary: "In Tensorflow 2.0 Keras will be the default high-level API for building and training machine learning models, hence complete compatibility between a model defined using the old `tf.layers` and the new `tf.Keras.layers` is expected. In version 2 of the popular machine learning framework the eager execution will be enabled by default although the static graph definition + session execution will be still supported".
+summary: "In Tensorflow 2.0 Keras will be the default high-level API for building and training machine learning models, hence complete compatibility between a model defined using the old tf.layers and the new tf.keras.layers is expected. In version 2 of the popular machine learning framework the eager execution will be enabled by default although the static graph definition + session execution will be still supported. In this post, you'll see that the compatibility between a model defined using tf.layers and tf.keras.layers is not always guaranteed."
 ---
 
 In Tensorflow 2.0 Keras will be the default high-level API for building and training machine learning models, hence complete compatibility between a model defined using the old `tf.layers` and the new `tf.Keras.layers` is expected. In version 2 of the popular machine learning framework the eager execution will be enabled by default although the static graph definition + session execution will be still supported (but hidden a little bit).

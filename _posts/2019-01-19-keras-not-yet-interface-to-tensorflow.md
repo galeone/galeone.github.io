@@ -450,7 +450,14 @@ Thus, using Keras as a simplified interface to Tensorflow is more or less a lie,
 
 Moreover, focusing all the new documentation on the eager execution + Keras (that in this combo just works) there are practically zero examples on how to use the graph definition using the Keras layers + a proper execution inside a Session. Probably this is due to the fact that in Tensorflow 2.0 `tf.Session` will disappear and we have to learn how to use `@tf.function` that will define a graph and a session execution for us; see [RFC: Functions, not Sessions](https://github.com/tensorflow/community/blob/2b712e59cf572ccf4c463519b0e062ad3c48bbe8/rfcs/20180918-functions-not-sessions-20.md).
 
-If you want to download the rough script used to run the experiments: [download it here](/code/keras-input/test.py).
+### Info, code, and reference
+
+- If you want to download the rough script used to run the experiments: [download it here](/code/keras-input/test.py).
+- I have opened an [issue on GitHub](https://github.com/tensorflow/tensorflow/issues/23873) about this some time ago: being unable to correctly migrate my models from `tf.layers` to `tf.keras.layers` I decided to debug and analyze the problem by myself. This blog post is the result of my debugging.
+- [RFC: Functions, not Sessions](https://github.com/tensorflow/community/blob/2b712e59cf572ccf4c463519b0e062ad3c48bbe8/rfcs/20180918-functions-not-sessions-20.md).
+- [Keras as a simplified interface to Tensorflow](https://blog.keras.io/keras-as-a-simplified-interface-to-tensorflow-tutorial.html)
+- [Tensorflow 2.0: models migration and new design](/tensorflow/gan/2018/11/04/tensorflow-2-models-migration-and-new-design/)
+
 
 If you liked the article feel free to share it using the buttons below and don't hesitate to comment to let me know if there's something wrong/that can be improved in the article.
 

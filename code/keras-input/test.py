@@ -121,8 +121,8 @@ def main_keras(case, input_type):
     # Use the update ops of the model itself
     print("model.updates: ", model.updates)
 
-    #with tf.control_dependencies(model.updates):
-    train_op = tf.train.GradientDescentOptimizer(1e-3).minimize(loss)
+    with tf.control_dependencies(model.updates):
+        train_op = tf.train.GradientDescentOptimizer(1e-3).minimize(loss)
 
     mean, variance = get_bn_vars(model.variables)
     init = tf.global_variables_initializer()
@@ -131,6 +131,7 @@ def main_keras(case, input_type):
         while True:
             try:
                 loss_value, _ = sess.run([loss, train_op])
+                #sess.run(model.updates)
                 print("loss: ", loss_value)
             except tf.errors.OutOfRangeError:
                 break

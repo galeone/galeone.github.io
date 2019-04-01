@@ -6,7 +6,6 @@ pre code {
 
 pre,
 code {
-  font-size: 0.75rem;
   font-family: $monospace-font-family;
 }
 
@@ -20,6 +19,11 @@ pre {
   overflow-x: scroll;
   margin-bottom: 0.88em;
   background-color: $pre-background-color;
+}
+
+.highlight .p {
+  font-size: 1.125rem;
+  line-height: 1;
 }
 
 pre {

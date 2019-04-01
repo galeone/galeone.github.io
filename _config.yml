@@ -115,7 +115,7 @@ redcarpet:
 permalink:    pretty
 paginate:     4
 sass:
-  compressed: true
+  style: compressed
 plugins:
   - jekyll-paginate
   - jekyll-sitemap
@@ -124,4 +124,7 @@ plugins:
 exclude:
   - Gemfile
   - Gemfile.lock
+  - Rakefile
+  - README.md
+  - screenshot.png
   - vendor

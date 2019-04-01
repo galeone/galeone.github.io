@@ -215,7 +215,63 @@ This is weird.
 
 Are we sure that `tf.function` is creating a different Graph for every **input value**? Let's check it.
 
-The function `f` returns the input parameter `x` passed as input.
+The function `f` returns the input parameter `x` passed as input, thus we can check if the input type returned matches the one passed. Since we defined first the graph for the integer values 1 and 2, let's see if the call `f(1.0)` and `f(2.0)` return, as we expect, the integer value or not.
+
+```python
+ret = f(1.0)
+if tf.float32 == ret.dtype:
+    print("f(1.0) returns float")
+else:
+    print("f(1.0) return ", ret)
+```
+
+The output is
+
+```
+Graph execution:  1
+f(1.0) return  tf.Tensor(1, shape=(), dtype=int32)
+``
+
+We can conclude that the ID associated to the graph is built using the input parameters **value** when using Python native types (`1.0 == 1`!) and this creates this weird behavior.
+
+**Warning**: this is highly inefficient since every time a `tf.function` decorated function is called with a different input value, both the Python execution + tracing and Graph creation must be executed, making the Graph conversion useless.
+
+### Performance measurement
+
+The following code is a simple benchmark to check if the previous reasoning is correct.
+
+```python
+@tf.function
+def g(x):
+  return x
+
+start = time.time()
+for i in tf.range(1000):
+  g(i)
+end = time.time()
+
+print("tf.Tensor time elapsed: ", (end-start))
+
+start = time.time()
+for i in range(1000):
+  g(i)
+end = time.time()
+
+print("Native type time elapsed: ", (end-start))
+```
+
+The `g` function, decorated with `tf.function`, is executed the first time in a loop of `tf.Tensor` objects, all created with the same dtype `tf.int32` by the `tf.range` call, while the second time it is executed in a loop of Python integers.
+
+The benchmark confirms the hypothesis:
+
+```
+tf.Tensor time elapsed:  0.41594886779785156
+Native type time elapsed:  5.189513444900513
+```
+
+Conclusion: **use tf.Tensor everywhere**.
+
+AutoGraph is highly optimized and works well when the input is a `tf.Tensor` object, while **it creates a new graph for every different input parameter type** with a **huge drop in performance**.
 
 ## Conclusions
 

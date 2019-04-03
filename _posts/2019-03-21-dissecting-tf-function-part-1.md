@@ -16,7 +16,7 @@ The reader familiar with Tensorflow 1.x already knows that the standard workflow
 
 1. Create the `tf.Graph` object and set it as the default graph for the current scope.
 2. Describe the computation using the Tensorflow API (e.g. `y = tf.matmul(a,x) + b`).
-3. Think in advice about variable sharing and define the variables scope accordingly.
+3. Think in advance about variable sharing and define the variables scope accordingly.
 4. Create and configure the `tf.Session`.
 5. Build the concrete graph and load it into the `tf.Session`.
 6. Initialize all the variables.

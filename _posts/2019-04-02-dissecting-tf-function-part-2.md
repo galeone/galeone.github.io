@@ -1,18 +1,38 @@
 ---
 layout: post
 title: "Analyzing tf.function to discover AutoGraph strengths and subtleties - part 2"
-date: 2019-03-21 08:00:00
+date: 2019-04-03 08:00:00
 categories: tensorflow tf.function
-summary: ""
+summary: "In part 1 we learned how to convert a 1.x code to its eager version, the eager version to its graph representation and faced the problems that arise when working with functions that create a state. In this second part, we’ll analyze what happens when instead of a tf.Variable we pass a tf.Tensor or a Python native type as input to a tf.function decorated function. Are we sure everything is going to be converted to the Graph representation we expect?"
 ---
 
 In [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we learned how to convert a 1.x code to its eager version, the eager version to its graph representation and faced the problems that arise when working with functions that create a state.
 
-In this second part, we’ll study what happens when instead of a `tf.Variable` we pass a `tf.Tensor` or a Python native type as input to a `tf.function` decorated function, together with the analysis of the AutoGraph behavior when the Python code is executed in the first function call: are we sure everything is going to be converted to the Graph representation we expect?
+In this second part, we’ll analyze what happens when instead of a `tf.Variable` we pass a `tf.Tensor` or a Python native type as input to a `tf.function` decorated function. Are we sure everything is going to be converted to the Graph representation we expect?
+
+## tf.function uses AutoGraph
+
+For sake of clarity, below is reported the complete signature of the `tf.function` function:
+
+```python
+def function(func=None,
+             input_signature=None,
+             autograph=True,
+             experimental_autograph_options=None)
+```
+
+The default value of the `autograph` parameter is `True`, hence this means that `tf.function` uses AutoGraph. The documentation describes what happens when `autograph` is `True` or `False`.
+
+Quoting the [documentation](https://www.tensorflow.org/versions/r2.0/api_docs/python/tf/function):
+
+- When `autograph` is `True`, all Python code that depends on Tensor values is staged into a TensorFlow graph.
+- When `autograph` is `False`, the function is traced and control flow is not allowed to depend on data.
+
+Thus, by default `tf.function` uses AutoGraph and we are going to analyze how it behaves by changing the input types and the function structure.
 
 ## Changing tf.Tensor input type
 
-Let's start by defining a Python function. The function parameters type is of fundamental importance since is used to create a graph, that is a statically typed object, and to assigning it an ID (for a complete and informal explanation of what's going on when calling the function for the first time, see [tf.function: layman explanation](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/#tffunction-layman-explanation)).
+Let's start by defining our test Python function. The function parameters type is of fundamental importance since is used to create a graph, that is a statically typed object, and to assign it an ID (for a complete and informal explanation of what's going on when calling the function for the first time, see [tf.function: layman explanation](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/#tffunction-layman-explanation)).
 
 ```python
 @tf.function
@@ -22,11 +42,11 @@ def f(x):
     return x
 ```
 
-Brief function description:
+Here's the brief function description:
 
 - **Line 1**: the function accepts a Python variable `x` that can be literally everything.
-- **Line 2**: the first `print` statement is executed once, only during the function creation.
-- **Line 3**: the second `tf.print` statement is executed every time the graph is evaluated.
+- **Line 2**: the `print` function is executed once, only during the function creation.
+- **Line 3**: the `tf.print` function is executed every time the graph is evaluated.
 - **Line 4**: `x` is returned.
 
 Let's see if everything goes as we expect by running some test.
@@ -91,7 +111,7 @@ def tf__f(x):
     ag__.rewrite_graph_construction_error(ag_source_map__)
 ```
 
-The code is machine generated and therefore hard to read. However we can notice something interesting: in the Graph code we can still find some reference to the Python code that's executed only on the first-call.
+The code is machine generated and therefore hard to read. However, we can notice something interesting: in the Graph code, we can still find some reference to the Python code that's executed only on the first-call.
 
 (rewritten and formatted for clarity)
 ```python
@@ -106,7 +126,7 @@ with ag__.utils.control_dependency_on_returns(
         ):
 ```
 
-We can see that `ag__.utils.control_dependency_on_returns` creates a `tf.control_dependency` context manager when the function created by `converted_call` returns. This allow preserving the execution order in graph mode, forcing the execution of the nodes to be sequential.
+We can see that `ag__.utils.control_dependency_on_returns` creates a `tf.control_dependency` context manager when the function created by `converted_call` returns. This allows preserving the execution order in graph mode, forcing the execution of the nodes to be sequential.
 
 The [`converted_call`](https://github.com/tensorflow/tensorflow/blob/56c8527fa73f694b76963dbb28a9d011d233086f/tensorflow/python/autograph/impl/api.py#L206) function compiles a function call. This function has all the information required to convert and execute a function call (`print` in this case) as we can see analyzing its signature. That is `(f, owner, options, args, kwargs)` where:
 
@@ -120,13 +140,15 @@ The [`converted_call`](https://github.com/tensorflow/tensorflow/blob/56c8527fa73
 
 Begin a graph, why is there a reference to the Python code that is should be executed only on the first call when tracing the function execution?
 
-**Guess**:
+**Hypothesis**:
 
 My guess is that while tracing the function execution on the first-call there is no easy way to understand if a Python function produces some side effect that will change the graph behavior and for this reason (and to be sure to preserve the execution order) every python function invoked on the first-call is traced and added to the graph.
 
 If during the execution of the function (in this case a print, but it could be any arbitrary complex function) a side effect is detected (a call to a `tf.` method) then the graph code is updated; otherwise, as in this case, the operation is converted to a `tf.no_op` by the `converted_call`.
 
 This is my guess since we don't see any output or side effect generated by the `print` converted call, while we do see them when using the `tf.print` function (now, node).
+
+Since this behavior is not clear, and I'm only guessing what's going on, [I asked on the Tensorflow Developers Group](https://groups.google.com/a/tensorflow.org/forum/#!topic/developers/SD_ijT4MuPw) an explanation; if you are curious about this behavior please subscribe to the mailing list and monitor that thread!
 
 ## Using a Python native type
 
@@ -206,8 +228,8 @@ We expect a Graph for type, but instead, if we look carefully **we have a differ
 
 1. The first call `f(1)` executes the Python code, traces its execution, creates a Graph and executes it.
 2. The second call `f(2)` executes the Python code **again**, traces its execution, creates a Graph and executes it.
-3. The first call `f(1.0) **does not executes the python code**, therfore is using an already existing Graph.
-4. The second call `f(2.0)` **does not executes the python code**, therefore behaves like 3.
+3. The first call `f(1.0) **does not execute the python code**, therefore is using an already existing Graph.
+4. The second call `f(2.0)` **does not execute the python code**, therefore behaves like 3.
 5. The first call `f(1 + 2j)` behaves like 1.
 6. The first call `f(2 + 1j)` behaves like 2.
 
@@ -232,7 +254,7 @@ Graph execution:  1
 f(1.0) return  tf.Tensor(1, shape=(), dtype=int32)
 ```
 
-We can conclude that the ID associated to the graph is built using the input parameters **value** when using Python native types (`1.0 == 1`) causing this weird behavior.
+We can conclude that the ID associated with the graph is built using the input parameters **value** when using Python native types (`1.0 == 1`) causing this weird behavior.
 
 **Warning**: this is highly inefficient since every time a `tf.function` decorated function is called with a different input value, both the Python execution + tracing and Graph creation must be executed, making the Graph conversion useless.
 
@@ -269,10 +291,66 @@ tf.Tensor time elapsed:  0.41594886779785156
 Native type time elapsed:  5.189513444900513
 ```
 
-Conclusion: **use tf.Tensor everywhere**.
+Conclusion: **do use `tf.Tensor` everywhere**.
 
 AutoGraph is highly optimized and works well when the input is a `tf.Tensor` object, while it creates a **new graph** for every different input parameter value with a **huge drop in performance**.
 
+## Is tf.function really using AutoGraph?
+
+The signature of `tf.function` clearly states that `autograph=True`, therefore we expect that the function is converted by using tracing + autograph; let's check if it is true.
+
+Experimenting I found out that there are functions (like functions without a return value) that `tf.autograph.to_code` can't convert, but that work correctly if decorated with `tf.function` and called.
+
+Let's just update the function `f` removing the `return` statement.
+
+```python
+@tf.function
+def f(x):
+    print("Python execution: ", x)
+    tf.print("Graph execution: ", x)
+```
+
+If called twice it works correctly (`f(1)` followed by `f(1)`): it executes the `print` function only on the first call.
+On every non-first call, it prints only the `tf.print` output.
+
+This is the behavior we expect when a function is traced first, then graph converted, then an ID is assigned to the graph and the graph is being re-used.
+
+Something weird happens if we try to look at the code, as we did it before, generated by the autograph `to_code` method; in fact
+
+```python
+tf.autograph.to_code(f.python_function)
+```
+
+raises the following exception:
+
+```
+ValueError during conversion: Unable to insert statement into the computation flow: it is not followed by any computation which the statement could gate.
+```
+
+**Question time**
+
+So the question is: shouln't `tf.function` use `tf.autograph.to_code`/`tf.autograph.to_graph` under the hood? How is the graph being built if `to_code` fails?
+
+
+**Hypothesis**:
+
+It seems that `tf.function` builds and stores a graph correctly since on every non-first call we got only the `tf.print` output.
+However, `tf.autograph.to_code` fails raising a `ValueError`; if `tf.function` uses `tf.autograph` internally, probably this exception is caught inside the `tf.function` body and handled somehow in order to simulate the graph execution.
+
+This is just a guess and in the previously linked [thread](https://groups.google.com/a/tensorflow.org/forum/#!topic/developers/SD_ijT4MuPw), I've asked for an additional explanation of this behavior; as for the previous question, if you are curious about this behavior please subscribe to the mailing list and monitor that thread!
+
+
 ## Conclusions
+
+In this article we analyzed the behavior of `tf.function` when AutoGraph is used and discovered that a `@tf.function` decorated function:
+
+- behaves as we expect if we use a `tf.Tensor` as input type (please use `tf.Tensor` everywhere!),
+- creates a new graph (or it behaves like is creating it) if the input is a Python native type; in this case, the graph seems created by looking at the parameters' value (please use `tf.Tensor` everywhere!)²,
+- reuses the first graph created for a Python native type comparing the parameters input values (not the type, thus `1.0 == 1`),
+- contains still a reference to the Python code executed only once in the graph-converted code.
+
+In addition, we found out that certain functions work with `tf.function` but the autograph module can't convert them; how is this possible?
+
+This second part was thought to be the last one, but due to the overwhelming list of peculiarities to know and analyze, the behavior of `tf.function` and AutoGraph when the function body is more complex than a `print` function invocation haven't been analyzed yet; so stay tuned for the part 3!
 
 If you find this article useful, feel free to share it using the buttons below!

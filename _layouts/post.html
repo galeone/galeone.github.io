@@ -28,6 +28,10 @@ layout: default
 
 {% include advertisement.html %}
 
+{% if site.show_mailchimp %}
+  {% include mailchimp.html %}
+{% endif %}
+
 {% if site.show_sharing_icons %}
   {% include share_buttons.html %}
 {% endif %}
@@ -38,7 +42,7 @@ layout: default
 
 {% if site.disqus_shortname %}
   <div id="disqus_thread"></div>
-  <script type="text/javascript">
+  <script>
     var disqus_shortname  = '{{ site.disqus_shortname }}';
     var disqus_identifier = '{{ page.id }}';
     var disqus_title      = {{ page.title | jsonify }};

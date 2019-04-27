@@ -1,27 +1,31 @@
 # Site settings
-title:       P. Galeone's blog
-email:       nessuno@nerdz.eu
-author:      Paolo Galeone
-description: 'Let the machines learn'
-baseurl:     ''
-domain:      'pgaleone.eu'
-url:         'https://pgaleone.eu'
-date_format: '%b %-d, %Y'
+title:       "P. Galeone's blog"
+email:       "nessuno@nerdz.eu"
+author:      "Paolo Galeone"
+description: "Let the machines learn"
+baseurl:     ""
+domain:      "pgaleone.eu"
+url:         "https://pgaleone.eu"
+date_format: "%b %-d, %Y"
 
 # Google services
-google_verification: 'ZQfgLZBmY7oIkDQWf87ysRgySpoZzeFn0jGqOciv4q4'
+google_verification: "ZQfgLZBmY7oIkDQWf87ysRgySpoZzeFn0jGqOciv4q4"
 # Use either direct GA implementation or set up GTM account
 # - using both will skew your data (leave blank to not use at all)
-google_analytics: 'UA-86940918-1'
+google_analytics: "UA-86940918-1"
 google_tag_manager:
 # Bing services
-bing_verification: '1084D9EBDD4D72C5C6A7B5056387DBF3'
+bing_verification: "1084D9EBDD4D72C5C6A7B5056387DBF3"
+
+# Mailchimp
+mailchimp-list: "https://nerdz.us20.list-manage.com/subscribe/post?u=fb89d477dbac0540417f20fb7&amp;id=d41207f25e"
 
 # Optional features
 animated:             false
 show_related_posts:   true
 show_post_footers:    false
 show_social_icons:    true
+show_mailchimp:       true
 ajaxify_contact_form: false
 enable_mathjax:       true
 extended_fonts:       false
@@ -36,7 +40,7 @@ fb_page_id:
 
 # Disqus post comments
 # (leave blank to disable Disqus)
-disqus_shortname: 'pgaleone'
+disqus_shortname: "pgaleone"
 
 # Facebook Comments plugin
 # (leave blank to disable Facebook Comments, otherwise set it to true)
@@ -45,19 +49,19 @@ facebook_appid:
 facebook_comments_number: 10
 
 # Social icons
-github_username: 'galeone'
-reddit_username: 'pgaleone'
+github_username: "galeone"
+reddit_username: "pgaleone"
 bitbucket_username:
 stackoverflow_id: 2891324
-twitter_username: 'paolo_galeone'
+twitter_username: "paolo_galeone"
 skype_username:
 steam_nickname:
 google_plus_id:
-linkedin_username: 'paolo-galeone-6782b311b'
+linkedin_username: "paolo-galeone-6782b311b"
 angellist_username:
 medium_id:
 bitcoin_url:
-paypal_url: 'https://paypal.me/PGaleone'
+paypal_url: "https://paypal.me/PGaleone"
 flattr_button:
 telegram_username:
 vk_id:
@@ -77,41 +81,43 @@ share_hackernews: true
 
 text:
   pagination:
-    newer: 'Newer'
-    older: 'Older'
+    newer: "Newer"
+    older: "Older"
+  mailchimp:
+      text: "Don't you want to miss the next article? Subscribe to the mailing list!"
   share_buttons:
-    text:         'Share this post!'
-    facebook:     'Share on Facebook'
-    twitter:      'Share on Twitter'
-    googleplus:   'Share on Google+'
-    linkedin:     'Share on LinkedIn'
-    digg:         'Share on Digg'
-    tumblr:       'Share on Tumblr'
-    reddit:       'Share on Reddit'
-    stumbleupon:  'Share on StumbleUpon'
-    hackernews:   'Share on Hacker News'
+    text:         "If you liked the article: share it!"
+    facebook:     "Share on Facebook"
+    twitter:      "Share on Twitter"
+    googleplus:   "Share on Google+"
+    linkedin:     "Share on LinkedIn"
+    digg:         "Share on Digg"
+    tumblr:       "Share on Tumblr"
+    reddit:       "Share on Reddit"
+    stumbleupon:  "Share on StumbleUpon"
+    hackernews:   "Share on Hacker News"
   post:
-    updated:        'Updated'
-    minute_read:    'minute read'
-    related_posts:  'Related Posts'
+    updated:        "Updated"
+    minute_read:    "minute read"
+    related_posts:  "Related Posts"
   index:
-    coming_soon: 'Coming soon...'
+    coming_soon: "Coming soon..."
   contact:
-    email:    'Email Address'
-    content:  'What would you like to say?'
-    subject:  'New submission!'
-    submit:   'Send'
+    email:    "Email Address"
+    content:  "What would you like to say?"
+    subject:  "New submission!"
+    submit:   "Send"
     ajax:
-      sending:  'sending..'
-      sent:     'Message sent!'
-      error:    'Error!'
-  thanks: 'Thanks for contacting me. I will reply as soon as possible.'
-  og_locale: 'en_US'
+      sending:  "sending..."
+      sent:     "Message sent!"
+      error:    "Error!"
+  thanks: "Thanks for contacting me. I will reply as soon as possible."
+  og_locale: "en_US"
 
 # Build settings
 markdown:     kramdown
 redcarpet:
-  extensions: ['smart', 'tables', 'with_toc_data']
+  extensions: ["smart", "tables", "with_toc_data"]
 permalink:    pretty
 paginate:     4
 sass:

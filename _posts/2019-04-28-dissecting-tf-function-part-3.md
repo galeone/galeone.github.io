@@ -150,7 +150,6 @@ The conversion seems correct: two `tf.cond` nested. The inner `tf.cond` is defin
 
 The inner `tf.cond` has the equality condition `cond = a == b` to verify; if it holds, it prints 'a == b`, otherwise it prints `a < b`.
 
-
 **Step 2: execution**
 
 ```python
@@ -160,32 +159,151 @@ if_elif(x, x)
 
 Executing it we expect to see `a == b, 1, 1`  since this is the truth. However, the output is `a < b 1 1`. **WHAT!?**
 
-Ok then, let's debug.
+OK then, let's debug.
 
 **Step 3: debugging**
 
-The AutoGraph representation looks correct, moreover, we can try by removing the `tf.function` annotation to see if everything goes as expected in eager mode.
+The AutoGraph representation looks correct, moreover, we can try by using the non-converted function to see if everything goes as expected in eager mode.
 
 ```python
-def if_elif_eager(a, b):
+x = tf.constant(1)
+if_elif.python_function(x, x)
+```
+
+In eager mode the output is correct: `a == b 1 1`. So we do expect to see the same output when we feed the function with two `tf.Tensor` object that hold the same value
+
+```python
+x, y = tf.constant(1), tf.constant(1)
+if_elif.python_function(x, y)
+```
+
+Surprise! The output is `a < b 1 1`. *What's going on?*
+
+### Lesson 1: not all operators are created equal
+
+This lesson is not about AutoGraph or `tf.function`, but is about `tf.Tensor`. In fact, this "weird" behavior that happens also when eager mode is enable, is due to the different way the `__eq__` operator for the `tf.Tensor` objects has been overridden.
+
+There is a [question on StackOverflow](https://stackoverflow.com/questions/46785041/why-does-tensorflow-not-override-eq) and a related [Github issue](https://github.com/tensorflow/tensorflow/issues/9359) about this. In short: the `__eq__` operator has been overridden, but the operator **does not** use `tf.equal` to check for the Tensor equality, it just checks for the **Python variable identity** (if some of you is familiar with the Java programming language, this is exactly like the `==` operator used on `string` objects).
+The reason is that the `tf.Tensor` object needs to be hashable since it is used everywhere in the Tensorflow codebase as key for `dict` objects.
+
+OK then, to solve it is required to do not rely upon the `__eq__` operator but to manually use `tf.equal` to check if the equality holds.
+
+However, something should still sound strange: why when invoking the graph-converted function, passing the same `tf.Tensor` `x`, the execution produces `a < b 1 1' instead of `a == b 1 1` as it happens in eager execution?
+
+### Lesson 2: how AutoGraph (don't) converts the operators
+
+So far we supposed that AutoGraph is able to translate not only the `if`, `elif`, and `else` statements to the graph equivalent, but also the Python built-in operators like `__eq__`, `__gt__`, and `__lt__`. In practice this conversion (still?) does not happens at all.
+
+In the previously converted graph-code, the two condititions are expressed as `a > b` and `a == b` and not as function calls to AutoGraph converted functions (`ag__.converted_call(...)`).
+
+In practice, what happens is that the `cond` is always `False`. We can verify this assertion by adding an additional `elsif` to the previously function and calling it again.
+
+```python
+@tf.function
+def if_elif(a, b):
   if a > b:
     tf.print("a > b", a, b)
   elif a == b:
     tf.print("a == b", a, b)
-  else:
+  elif a < b:
     tf.print("a < b", a, b)
+  else:
+    tf.print("wat")
 x = tf.constant(1)
-if_elif_eager(x, x)
+if_elif(x,x)
 ```
 
-The output is correct `a == b 1 1`, that's exactly what this simple snippet should do!
+Output: **wat**.
 
-However, let's see if some weird behavior happens even when using the standard eager execution.
+Hurray?
 
+### Lesson 3: how to write a function
+
+In order to have the very same behavior in both eager and graph execution we have to know that:
+
+1. The semantic of the operations matters.
+2. There are operators that have been overridden following a different semantic (respect to the most natural one, common in Python).
+3. AutoGraph converts Python statements naturally (`if`, `elif`, ...) but it requires some extra care when designing a function that is going to be `tf.function` decorated.
+
+In practice, and this is the most important lesson, **use the Tensorflow operators explicitly everywhere** (in the end, the Graph is still present and we are building it!).
+
+Thus, we can write the correctly eager and graph-convertible function by using the correct `tf.` methods.
+
+```python
+@tf.function
+def if_elif(a, b):
+  if tf.math.greater(a, b):
+    tf.print("a > b", a, b)
+  elif tf.math.equal(a, b):
+    tf.print("a == b", a, b)
+  elif tf.math.less(a, b):
+    tf.print("a < b", a, b)
+  else:
+    tf.print("wat")
+```
+
+The generated graph code now looks like (removed long parts for clarity):
+```python
+def tf__if_elif(a, b):
+    cond_2 = ag__.converted_call("greater", ...)  # a > b
+
+    def if_true_2():
+        ag__.converted_call("print", ...)  # tf.print a > b
+        return ag__.match_staging_level(1, cond_2)
+
+    def if_false_2():
+        cond_1 = ag__.converted_call("equal", ...)  # tf.math.equal
+
+        def if_true_1():
+            ag__.converted_call("print", ...)  # tf.print a == b
+            return ag__.match_staging_level(1, cond_1)
+
+        def if_false_1():
+            cond = ag__.converted_call("less", ...)  # a < b
+
+            def if_true():
+                ag__.converted_call("print", ...)  # tf.print a < b
+                return ag__.match_staging_level(1, cond)
+
+            def if_false():
+                ag__.converted_call("print", ...)  # tf.print wat
+                return ag__.match_staging_level(1, cond)
+
+            ag__.if_stmt(cond, if_true, if_false, get_state, set_state)
+            return ag__.match_staging_level(1, cond_1)
+
+        ag__.if_stmt(cond_1, if_true_1, if_false_1, get_state_1, set_state_1)
+        return ag__.match_staging_level(1, cond_2)
+
+    ag__.if_stmt(cond_2, if_true_2, if_false_2, get_state_2, set_state_2)
+```
+
+Now that every single part of the function has been converted (note the `ag__converted_call` everywhere) the function works as we want also when it is converted to its graph representation.
 
 ## for ... in range
 
-## while
+Following the previous 3 lessons, writing a function that uses a `for` loop is trivial. In order to be completely sure that the code will be correctly graph-converted, we can design the function by using the tensorflow `tf.` methods to help the conversion. So, for a simple function that sums the number from from `1` to `X-1` to correct way of desining it is to use:
+
+1. An external `tf.Variable` since the function creates a state and from [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we know how to deal with it.
+2. Use `tf.range` instead of `range` since `tf.range` exists and therefore it is just better to use it.
+
+```python
+x = tf.Variable(1)
+@tf.function
+def test_for(upto):
+  for i in range(upto):
+    x.assign_add(i)
+
+x.assign(tf.constant(0))
+test_for(tf.constant(5))
+print("x value: ", x.numpy())
+```
+
+The value of the `x` variable is 10, as expected.
+
+The reader is invited to convert the function to its graph representation and check if every statement has been correctly converted.
+
+**Question** (please feel free to answer in the comment section!): what happens if the line `x.assign_add(1)` is replaced by `x = x + i`?
 
 ## Interacting Graphs
 

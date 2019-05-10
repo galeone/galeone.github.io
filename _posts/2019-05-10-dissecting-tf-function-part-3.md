@@ -1,14 +1,14 @@
 ---
 layout: post
 title: "Analyzing tf.function to discover AutoGraph strengths and subtleties - part 3"
-date: 2019-04-28 08:00:00
+date: 2019-05-10 12:00:00
 categories: tensorflow tf.function
 summary: "In this third and last part, we analyze what happens when tf.function is used to convert a function that contains complex Python constructs in its body. Should we design functions thinking about how they are going to be converted?"
 ---
 
-In [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we learned how to convert a 1.x code to its eager version, the eager version to its graph representation and faced the problems that arise when working with functions that create a state.
+In [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we learned how to convert a Tensorflow 1.x code to its eager version, the eager version to its graph representation, and faced the problems that arise when working with functions that create a state.
 
-In [part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/) we learned that `tf.function` creates a new graph for every different input value if the input type is not a `tf.Tensor` object and that this could slow down (or speed up if correctly used) the execution. Moreover, the differences between the `tf.autograph` generated source code and what happens, instead, when using AutoGraph trough `tf.function` have been highlighted.
+In [part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/) we learned that `tf.function` creates a new graph for every different input value if the input is not a `tf.Tensor` object but a Python native type and how this could slow down (or speed up if correctly used) the execution. Moreover, the differences between the `tf.autograph` generated source code and what happens, instead, when using AutoGraph trough `tf.function` have been highlighted.
 
 In this third and last part, we analyze what happens when `tf.function` is used to convert a function that contains "complex" Python constructs in its body. Should we design functions thinking about how they are going to be converted?
 
@@ -16,9 +16,9 @@ In this third and last part, we analyze what happens when `tf.function` is used 
 
 In the Tensorflow repository, in the `python/autograph` folder, we can find [a document](https://github.com/tensorflow/tensorflow/blob/560e2575ecad30bedff5b192f33f6d06b19ccaeb/tensorflow/python/autograph/LIMITATIONS.md) that explains which are the capabilities and the limitations of the AutoGraph module together with a list of the Python constructs it is able to convert.
 
-The [table](https://github.com/tensorflow/tensorflow/blob/560e2575ecad30bedff5b192f33f6d06b19ccaeb/tensorflow/python/autograph/LIMITATIONS.md#python-language-support-status) in the section "Python Language Support Status" contains a list of all the Python constructs that AutoGraph explicitly supports, plan to support, or won't support. Among them, we can find the widely used `while`, `for`, `if`  statements, the Python built-in `print`, `len`, `range`, and the iterator construct.
+The [table](https://github.com/tensorflow/tensorflow/blob/560e2575ecad30bedff5b192f33f6d06b19ccaeb/tensorflow/python/autograph/LIMITATIONS.md#python-language-support-status) in the section "Python Language Support Status" contains all the Python constructs that AutoGraph explicitly supports, plan to support, or won't support. Among them, we can find the widely used `while`, `for`, `if`  statements, the Python built-in `print`, `len`, `range`, and the iterator construct.
 
-In the next sections, various Python functions that use these Python constructs are analyzed, to understand if the function body gets converted as we expect or it is required to design the functions thinking about the graph conversion.
+In the next sections, various Python functions that use these Python constructs are analyzed, to understand if the function body gets converted as we expect or if it is required to design the functions thinking about the graph conversion.
 
 ## if ... else
 
@@ -119,7 +119,7 @@ def if_elif(a, b):
 
 **Step 1: graph conversion**
 
-The generated function, with the removed `tf.print` conversion and `(get|set)\_state` function definitions,is
+The generated function, with the removed `tf.print` conversion and `(get|set)\_state` function definitions, is
 
 ```python
 def tf__if_elif(a, b):
@@ -284,7 +284,7 @@ Now that every single part of the function has been converted (note the `ag__con
 
 ## for ... in range
 
-Following the previous 3 lessons, writing a function that uses a `for` loop is trivial. Tobe entirely sure that the code is correctly graph-converted, we can design the function by using the tensorflow `tf.` methods to help the conversion. So, for a simple function that sums the number from `1` to `X-1` the correct way of designing it is to use:
+Following the previous 3 lessons, writing a function that uses a `for` loop is trivial. To be entirely sure that the code is correctly graph-converted, we can design the function by using the tensorflow `tf.` methods to help the conversion. So, for a simple function that sums the number from `1` to `X-1` the correct way of designing it is to use:
 
 1. An external `tf.Variable` since the function creates a state and from [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we know how to deal with it.
 2. Use `tf.range` instead of `range` since `tf.range` exists and therefore it is just better to use it.
@@ -313,21 +313,17 @@ Writing functions that work correctly in both eager mode and their graph-convert
 
 - Functions that create a state need a dedicated design since in eager mode they just work while when converted the stateful objects can create problems. ([part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/))
 - AutoGraph **does not** perform the boxing of the Python native type, and this can slow down the execution **a lot** ([part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/)); use `tf.Tensor` whenever possible!
-- `tf.print` and `print` are different objects; there is a clear distinction between the first call (+ function execution tracing) and any other call of the graph-converted function (part 2).
+- `tf.print` and `print` are different objects; there is a clear distinction between the first call (AutoGraph + function execution + tracing) and any other call of the graph-converted function ([part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/)).
 - The operator overloading of `tf.Tensor` has its own peculiarities. In order to be 100% confident of your function design, and making it also work when it is graph-converted, I highly recommend to use the Tensorflow operators explicitly (call `tf.equal(a,b)` instead of `a == b` and so on).
-
-If you liked the article feel free to share it using the buttons at the end of the article and don't hesitate to comment to let me know if there's something wrong/that can be improved!
 
 ## Announcement
 
-I hope to say something pleasing by announcing that I'm authoring my first book about Tensorflow 2.0 and Neural Networks!
+The article is finished, but I hope to say something pleasing by announcing that I'm authoring my first book about Tensorflow 2.0 and Neural Networks!
 
 > **Hands-On Neural Networks with Tensorflow 2.0**
 >
 > *Understanding the Tensorflow architecture, from static graph to eager execution, designing Deep Neural Networks.*
 
-The book is made of two parts.
+The book is divided into two parts: the first part is more theoretical and is about machine learning and neural networks, with a focus on the intuitive idea behind the presented concepts. The second part, that's the main topic of the book, is about the Tensorflow architecture (from 1.x to 2.0) followed by the implementation of several neural-networks-based solutions to challenging machine learning problems, all using Tensorflow 2.0.
 
-The first part is more theoretical and is about machine learning and neural networks, with a focus on the intuitive idea about the presented concepts. The second part, that's the main topic book, is about the Tensorflow architecture (1.x and 2.0) followed by the implementation of several neural-networks-based solutions to challenging machine learning problems.
-
-If you want to receive an email when the book is published and also stay up-to-date with the latest published article on the blog, just leave your email in the form below!
+If you want to receive an email when the book is out and also stay up-to-date with the latest articles, leave your email in the form below!

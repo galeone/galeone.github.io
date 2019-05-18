@@ -8,4 +8,7 @@
     {% if page.tags contains "contact" %}
         <a href="{{ page.url }}">{{ page.title }}</a>
     {% endif %}
+    {% if page.tags contains "subscribe" %}
+        <a href="{{ page.url }}">{{ page.title }}</a>
+    {% endif %}
 {% endfor %}

@@ -61,7 +61,7 @@ linkedin_username: "paolo-galeone-6782b311b"
 angellist_username:
 medium_id:
 bitcoin_url:
-paypal_url: "https://paypal.me/PGaleone"
+paypal_url:
 flattr_button:
 telegram_username:
 vk_id:
@@ -84,7 +84,7 @@ text:
     newer: "Newer"
     older: "Older"
   mailchimp:
-      text: "Don't you want to miss the next article? Subscribe to the mailing list!"
+      text: "Don't you want to miss the next article? Do you want to be kept updated?<br>Subscribe to the mailing list!"
   share_buttons:
     text:         "If you liked the article: share it!"
     facebook:     "Share on Facebook"

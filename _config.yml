@@ -84,7 +84,7 @@ text:
     newer: "Newer"
     older: "Older"
   mailchimp:
-      text: "Don't you want to miss the next article? Do you want to be kept updated?<br>Subscribe to the mailing list!"
+      text: "Don't you want to miss the next article? Do you want to be kept updated?<br>Subscribe to the newsletter!"
   share_buttons:
     text:         "If you liked the article: share it!"
     facebook:     "Share on Facebook"

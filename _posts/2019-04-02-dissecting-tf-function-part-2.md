@@ -138,7 +138,7 @@ The [`converted_call`](https://github.com/tensorflow/tensorflow/blob/56c8527fa73
 
 **Question Time**:
 
-Begin a graph, why is there a reference to the Python code that is should be executed only on the first call when tracing the function execution?
+Begin a graph, why is there a reference to the Python code that it should be executed only on the first call when tracing the function execution?
 
 **Hypothesis**:
 

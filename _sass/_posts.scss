@@ -43,6 +43,11 @@
   font-style: italic;
 }
 
+.meta > a, .post-meta > a {
+    text-decoration: none;
+    background-image: none;
+}
+
 .related-post-title {
   border-bottom: thin solid #f3f3f3;
 }

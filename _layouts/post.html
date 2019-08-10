@@ -6,6 +6,7 @@ layout: default
 {% if minutes == 0 %}
 {% assign minutes = 1 %}
 {% endif %}
+{% assign author_counter = page.authors | size %}
 
 <div class="post-header mb2">
   <h1>{{ page.title }}</h1>
@@ -18,6 +19,25 @@ layout: default
     {{ page.minutes }} {{ site.text.post.minute_read | default: "minute read" }}
   {% else %}
     {{ minutes }} {{ site.text.post.minute_read | default: "minute read" }}
+  {% endif %}
+  </span>
+  <span class="post-meta small" style="float: right">
+  {% if author_counter == 0 %}
+    <!-- nothing -->
+  {% elsif author_counter == 1 %}
+    {% assign author=page.authors[0] %}
+    Author: <a href="{{ site.data.authors[author].uri }}">{{ site.data.authors[author].name }}</a>
+  {% else %}
+    Authors:
+      {% for author in page.authors %}
+          {% if forloop.first %}
+              <a href="{{ site.data.authors[author].uri }}">{{ site.data.authors[author].name }}</a>
+          {% elsif forloop.last %}
+              and <a href="{{ site.data.authors[author].uri }}">{{ site.data.authors[author].name }}</a>
+          {% else %}
+              , <a href="{{ site.data.authors[author].uri }}">{{ site.data.authors[author].name }}</a>
+          {% endif %}
+      {% endfor %}
   {% endif %}
   </span>
 </div>

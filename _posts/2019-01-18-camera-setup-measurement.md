@@ -4,6 +4,8 @@ title: "Fixed camera setup for object localization and measurement"
 date: 2019-01-18 08:00:00
 categories: computer-vision
 summary: "A common task in Computer Vision is to use a camera for localize and measure certain objects in the scene. In the industry is common to use images of objects on a high contrast background and use Computer Vision algorithms to extract useful information. There's a lot of literature about the computer vision algorithm that we can use to extract the information, but something that's usually neglected is how to correctly setup the camera in order to correctly address the problem. This post aim is to shed light on this subject."
+authors:
+    - pgaleone
 ---
 
 A common task in Computer Vision is to use a camera for localize and measure certain objects in the scene. In the industry is common to use images of objects on a high contrast background and use Computer Vision algorithms to extract useful information.

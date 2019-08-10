@@ -4,6 +4,8 @@ title: "Analyzing tf.function to discover AutoGraph strengths and subtleties - p
 date: 2019-04-03 08:00:00
 categories: tensorflow tf.function
 summary: "In part 1 we learned how to convert a 1.x code to its eager version, the eager version to its graph representation and faced the problems that arise when working with functions that create a state. In this second part, we’ll analyze what happens when instead of a tf.Variable we pass a tf.Tensor or a Python native type as input to a tf.function decorated function. Are we sure everything is going to be converted to the Graph representation we expect?"
+authors:
+    - pgaleone
 ---
 
 In [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we learned how to convert a 1.x code to its eager version, the eager version to its graph representation and faced the problems that arise when working with functions that create a state.

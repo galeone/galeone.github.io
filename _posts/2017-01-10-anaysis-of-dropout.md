@@ -4,6 +4,8 @@ title: Analysis of Dropout
 date: 2017-01-10 14:00:00
 categories: deep-learning regularization
 summary: "Overfitting is a problem in Deep Neural Networks (DNN): the model learns to classify only the training set, adapting itself to the training examples instead of learning decision boundaries capable of classifying generic instances. Many solutions to the overfitting problem have been presented during these years; one of them have overwhelmed the others due to its simplicity and its empirical good results: Dropout."
+authors:
+    - pgaleone
 ---
 
 Overfitting is a problem in Deep Neural Networks (DNN): the model learns to classify **only** the training set, adapting itself to the training examples instead of learning decision boundaries capable of classifying generic instances.

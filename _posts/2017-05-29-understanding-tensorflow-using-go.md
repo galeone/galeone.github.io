@@ -5,6 +5,8 @@ date: 2017-05-29 18:00:00
 categories: tensorflow go
 summary: "Tensorflow is not a Machine Learning specific library, instead, is a general purpose computation library that represents computations with graphs.
 Its core is implemented in C++ and there are also bindings for different languages. The bindings for the Go programming language, differently from the Python ones, are a useful tool not only for using Tensorflow in Go but also for understanding how Tensorflow is implemented under the hood."
+authors:
+    - pgaleone
 ---
 
 Tensorflow is not a Machine Learning specific library, instead, is a general purpose computation library that represents computations with graphs.

@@ -4,6 +4,8 @@ title: "Ethereum on Raspberry Pi: secure wallet and complete node with redundant
 date: 2017-09-06 13:00:00
 summary: Ethereum is a relatively new player in the crypto-currencies ecosystem. If you are a researcher, an algorithmic trader or an investor, you could want to run an ethereum node to study, develop and store your ETH while contributing to the network good.
 categories: raspberry ethereum archlinux
+authors:
+    - pgaleone
 ---
 
 {:.center}

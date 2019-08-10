@@ -4,6 +4,8 @@ title: Convolutional Autoencoders in Tensorflow
 date: 2016-12-13 11:00:00
 summary: How to implement a Convolutional Autoencoder using Tensorflow and DTB.
 categories: neural-networks deep-learning
+authors:
+    - pgaleone
 ---
 
 **DISCLAIMER**: The code used in this article refers to an old version of DTB (now also renamed DyTB).

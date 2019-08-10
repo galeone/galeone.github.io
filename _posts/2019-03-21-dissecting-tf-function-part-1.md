@@ -4,6 +4,8 @@ title: "Analyzing tf.function to discover AutoGraph strengths and subtleties - p
 date: 2019-03-21 08:00:00
 categories: tensorflow tf.function
 summary: "AutoGraph is one of the most exciting new features of Tensorflow 2.0: it allows transforming a subset of Python syntax into its portable, high-performance and language agnostic graph representation bridging the gap between Tensorflow 1.x and the 2.0 release based on eager execution. As often happens all that glitters is not gold: although powerful, AutoGraph hides some subtlety that is worth knowing; this article will guide you through them using an error-driven approach."
+authors:
+    - pgaleone
 ---
 
 AutoGraph is one of the most exciting new features of Tensorflow 2.0: it allows transforming a subset of Python syntax into its portable, high-performance and language agnostic graph representation bridging the gap between Tensorflow 1.x and the 2.0 release based on eager execution.

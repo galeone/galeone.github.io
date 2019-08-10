@@ -4,6 +4,8 @@ title: "Analyzing tf.function to discover AutoGraph strengths and subtleties - p
 date: 2019-05-10 12:00:00
 categories: tensorflow tf.function
 summary: "In this third and last part, we analyze what happens when tf.function is used to convert a function that contains complex Python constructs in its body. Should we design functions thinking about how they are going to be converted?"
+authors:
+    - pgaleone
 ---
 
 In [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we learned how to convert a Tensorflow 1.x code to its eager version, the eager version to its graph representation, and faced the problems that arise when working with functions that create a state.

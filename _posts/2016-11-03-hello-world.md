@@ -4,6 +4,8 @@ title: Hello world
 date: 2016-11-03 9:30:00
 summary: First blog post. Nothing more than a greeting
 categories: 
+authors:
+    - pgaleone
 ---
 
 Like every other software developer, I wrote Hello Worlds hundreds of times. This time, however, is the first time I write an Hello World to inaugurate a blog.

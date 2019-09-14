@@ -163,6 +163,15 @@ Executing it, we expect to see `a == b, 1, 1`  since this is the truth. However,
 
 OK then, debug time.
 
+<hr />
+
+*Update (14 Sept 2109): as [Raphael Meudec](https://twitter.com/raphaelmeudec) pointed out in the tweet below, this behavior has been changed in TensorFlow 2.0-rc0 and it works as expected.
+However, the lessons presented later in the article are still valid: following them helps you writing idiomatic TensorFlow 2.0 code.*
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Hey <a href="https://twitter.com/paolo_galeone?ref_src=twsrc%5Etfw">@paolo_galeone</a>, great blog post series on tf.function! I&#39;ve tried the if_elif_else case (from part 3: <a href="https://t.co/HukmaUY4dL">https://t.co/HukmaUY4dL</a>) this afternoon, and it looks like it has been fixed in 2.0.0rc0. Thought you might want to know</p>&mdash; Raphael Meudec (@raphaelmeudec) <a href="https://twitter.com/raphaelmeudec/status/1172510929659019264?ref_src=twsrc%5Etfw">September 13, 2019</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<hr />
+
 **Step 3: debugging**
 
 The AutoGraph representation looks correct. Moreover, we can try by using the non-converted function to see if everything goes as expected in eager mode.

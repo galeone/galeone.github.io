@@ -8,7 +8,7 @@ authors:
     - pgaleone
 ---
 
-In [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we learned how to convert a Tensorflow 1.x code to its eager version, the eager version to its graph representation, and faced the problems that arise when working with functions that create a state.
+In [part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/) we learned how to convert a TensorFlow 1.x code to its eager version, the eager version to its graph representation, and faced the problems that arise when working with functions that create a state.
 
 In [part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/) we learned that `tf.function` creates a new graph for every different input value if the input is not a `tf.Tensor` object but a Python native type and how this could slow down (or speed up if correctly used) the execution. Moreover, the differences between the `tf.autograph` generated source code and what happens, instead, when using AutoGraph trough `tf.function` have been highlighted.
 
@@ -16,7 +16,7 @@ In this third and last part, we analyze what happens when `tf.function` is used 
 
 ## AutoGraph capabilities and limitations
 
-In the Tensorflow repository, in the `python/autograph` folder, we can find [a document](https://github.com/tensorflow/tensorflow/blob/560e2575ecad30bedff5b192f33f6d06b19ccaeb/tensorflow/python/autograph/LIMITATIONS.md) that explains which are the capabilities and the limitations of the AutoGraph module together with a list of the Python constructs it is able to convert.
+In the TensorFlow repository, in the `python/autograph` folder, we can find [a document](https://github.com/tensorflow/tensorflow/blob/560e2575ecad30bedff5b192f33f6d06b19ccaeb/tensorflow/python/autograph/LIMITATIONS.md) that explains which are the capabilities and the limitations of the AutoGraph module together with a list of the Python constructs it is able to convert.
 
 The [table](https://github.com/tensorflow/tensorflow/blob/560e2575ecad30bedff5b192f33f6d06b19ccaeb/tensorflow/python/autograph/LIMITATIONS.md#python-language-support-status) in the section "Python Language Support Status" contains all the Python constructs that AutoGraph explicitly supports, plan to support, or won't support. Among them, we can find the widely used `while`, `for`, `if`  statements, the Python built-in `print`, `len`, `range`, and the iterator construct.
 
@@ -197,7 +197,7 @@ This lesson is not about AutoGraph or `tf.function` but is about `tf.Tensor`.
 This "weird" behavior that also happens when the eager mode is enabled is due to the different way the `__eq__` operator for the `tf.Tensor` objects have been overridden.
 
 There is a [question on StackOverflow](https://stackoverflow.com/questions/46785041/why-does-tensorflow-not-override-eq) and a related [Github issue](https://github.com/tensorflow/tensorflow/issues/9359) about this. In short: the `__eq__` operator has been overridden, but the operator **does not** use `tf.equal` to check for the Tensor equality, it just checks for the **Python variable identity** (if you are familiar with the Java programming language, this is precisely like the `==` operator used on `string` objects).
-The reason is that the `tf.Tensor` object needs to be hashable since it is used everywhere in the Tensorflow codebase as key for `dict` objects.
+The reason is that the `tf.Tensor` object needs to be hashable since it is used everywhere in the TensorFlow codebase as key for `dict` objects.
 
 OK then, to solve it is required to do not rely upon the `__eq__` operator but use `tf.equal` to check if the equality holds.
 
@@ -238,7 +238,7 @@ To have the very same behavior in both eager and graph execution we have to know
 2. There are operators that have been overridden following a different semantic (respect to the most natural one, common in Python).
 3. AutoGraph converts Python statements naturally (`if`, `elif`, ...) but it requires some extra care when designing a function that is going to be `tf.function` decorated.
 
-In practice, and this is the most important lesson, **use the Tensorflow operators explicitly everywhere** (in the end, the Graph is still present, and we are building it!).
+In practice, and this is the most important lesson, **use the TensorFlow operators explicitly everywhere** (in the end, the Graph is still present, and we are building it!).
 
 Thus, we can write the correctly eager and graph-convertible function by using the correct `tf.` methods.
 
@@ -325,16 +325,16 @@ Writing functions that work correctly in both eager mode and their graph-convert
 - Functions that create a state need a dedicated design since in eager mode they just work while when converted the stateful objects can create problems. ([part 1](/tensorflow/tf.function/2019/03/21/dissecting-tf-function-part-1/))
 - AutoGraph **does not** perform the boxing of the Python native type, and this can slow down the execution **a lot** ([part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/)); use `tf.Tensor` whenever possible!
 - `tf.print` and `print` are different objects; there is a clear distinction between the first call (AutoGraph + function execution + tracing) and any other call of the graph-converted function ([part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/)).
-- The operator overloading of `tf.Tensor` has its own peculiarities. In order to be 100% confident of your function design, and making it also work when it is graph-converted, I highly recommend to use the Tensorflow operators explicitly (call `tf.equal(a,b)` instead of `a == b` and so on).
+- The operator overloading of `tf.Tensor` has its own peculiarities. In order to be 100% confident of your function design, and making it also work when it is graph-converted, I highly recommend to use the TensorFlow operators explicitly (call `tf.equal(a,b)` instead of `a == b` and so on).
 
 ## Announcement
 
-The article is finished, but I hope to say something pleasing by announcing that I'm authoring my first book about Tensorflow 2.0 and Neural Networks!
+The article is finished, but I hope to say something pleasing by announcing that I'm authoring my first book about TensorFlow 2.0 and Neural Networks!
 
-> **Hands-On Neural Networks with Tensorflow 2.0**
+> **Hands-On Neural Networks with TensorFlow 2.0**
 >
-> *Understanding the Tensorflow architecture, from static graph to eager execution, designing Deep Neural Networks.*
+> *Understand TensorFlow, from static graph to eager execution, and design neural networks*
 
-The book is divided into two parts: the first part is more theoretical and is about machine learning and neural networks, with a focus on the intuitive idea behind the presented concepts. The second part, that's the main topic of the book, is about the Tensorflow architecture (from 1.x to 2.0) followed by the implementation of several neural-networks-based solutions to challenging machine learning problems, all using Tensorflow 2.0.
+The book is divided into two parts: the first part is more theoretical and is about machine learning and neural networks, with a focus on the intuitive idea behind the presented concepts. The second part, that's the main topic of the book, is about the TensorFlow architecture (from 1.x to 2.0) followed by the implementation of several neural-networks-based solutions to challenging machine learning problems, all using TensorFlow 2.0.
 
 If you want to receive an email when the book is out and also stay up-to-date with the latest articles, leave your email in the form below!

@@ -21,8 +21,8 @@ The book is divided into 3 parts:
 
 The book is available on Amazon on three different stores and is available both in paperback and Kindle version!
 
-- 🇮🇹 [https://amzn.to/2LGRqWc](Amazon Italy)
-- 🇬🇧 [https://amzn.to/2AzOG6D](Amazon UK)
-- 🇺🇸 [https://amzn.to/30gVVj1](Amazon USA / International)
+- 🇮🇹 [Amazon Italy](https://amzn.to/2LGRqWc)
+- 🇬🇧 [Amazon UK](https://amzn.to/2AzOG6D)
+- 🇺🇸 [Amazon USA / International](https://amzn.to/30gVVj1)
 
 Do not hesitate to leave feedback on Amazon or [send me an email](/contact/)!

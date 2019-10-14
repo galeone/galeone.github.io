@@ -101,8 +101,6 @@ We're now going to see how this CAE performs on single and three channels images
 
 In fact, if the input depth is 1 the number of encoding parameters is $$3\cdot 3\cdot 1 \cdot32 = 288$$, whilst if the input depth is 3, then the number of parameters is $$3 \cdot 3 \cdot 3 \cdot 32 = 864$$.
 
-{% include inarticlead.html %}
-
 # Train
 
 DTB allows us to train the model with different inputs simply changing the `--dataset` CLI flag.

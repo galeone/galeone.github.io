@@ -46,8 +46,6 @@ From the information theory prospective the loss can be seen as:
 
 $$ \min \mathcal{L} = \min || x - \text{decode}(\text{encode}(x)) ||_p $$
 
-{% include inarticlead.html %}
-
 # Constraints are everything
 
 It can be easily noticed that if the number of units in the hidden layer is greater than or equal to the number of input units, the network will learn the identity function easily.

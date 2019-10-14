@@ -35,8 +35,6 @@ A brief explanation of why we need that:
 
 OK, let's start!
 
-{% include inarticlead.html %}
-
 ## Archlinux ARM
 
 I choose this one instead of the most common Raspbian because I love Archlinux. Also, it's really easy to install and use. More importantly, `geth` (the command line interface for running a full ethereum node) is already packaged and available in the community repository, therefore installing it is as easy as `pacman -Syu geth`.
@@ -230,8 +228,6 @@ reboot
 After the upgrade, we're unable to login via ssh as `root` (that's a good thing). Let's login as `geth`.
 
 We're now going to install `geth`, configure it to start at boot and fix some little problem that using external HDDs can cause to our RAID-1 setup.
-
-{% include inarticlead.html %}
 
 ### geth & startup services
 

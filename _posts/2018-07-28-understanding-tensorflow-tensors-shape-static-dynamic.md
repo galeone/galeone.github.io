@@ -103,8 +103,6 @@ decode = tf.layers.conv2d(
 	name="decode")
 ```
 
-{% include inarticlead.html %}
-
 This example hides some interesting features of Tensorflow's ops I/O shapes. Let's analyze in detail the shape of every layer, this will help us understand a lot about the shaping system.
 
 ## Dynamic input shape handling

@@ -58,8 +58,6 @@ The reprojection error is the total sum of squared distances between the observe
 
 Now that we have recalled the basics of the camera calibration we can go through the guidelines required to achieve a good camera calibration.
 
-{% include inarticlead.html %}
-
 ## Guidelines
 
 Before going trough the guidelines for the calibration it is worth to spend a few words on the camera physical setup. If you're developing a machine vision application, in which the camera must remain fixed and the objects to measure can span the FOV, it's worth to first do the camera setup (hence do the math for the working distance calculation giving your lenses, the sensor size, the accuracy required, ecc... hint: there's a good tool by Basler that can help you doing the setup [^2]) and once the camera is in its working place start with the calibration.
@@ -91,9 +89,7 @@ To respect the assumptions, the pattern must follow this rules:
 2. **Pattern borders**: finding the inner corners of the chessboard requires to first identify the chessboard. The white margins around the chessboard allows the corner detection algorithm to work well and faster (intuitively: it's easier to find the chessboard and its corners when the chessboard itself is easily identifiable thanks to the white margins). A white margin as big as the chessboard side is usually OK.
 3. **Pattern manufacturing quality**: do not print the pattern at home. Seriously. Go to a professional print shop and ask them to create the pattern for you. They have the right software to create the chessboard with squares with the real desired square size with an extremely high accuracy. More than everything, they can print the pattern on a **white opaque, rigid and planar** material. Stress the print shop to print on some extremely rigid opaque white material.
 
-    In short: choose a big pattern with a good number of inner corners and a reasonable thick white border. Do not print the pattern at home. Do not make it print on paper or any other material that's not rigid and opaque.
-
-{% include inarticlead.html %}
+In short: choose a big pattern with a good number of inner corners and a reasonable thick white border. Do not print the pattern at home. Do not make it print on paper or any other material that's not rigid and opaque.
 
 ### Taking pictures
 

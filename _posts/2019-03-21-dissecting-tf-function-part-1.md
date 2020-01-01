@@ -297,4 +297,4 @@ Stay tuned for part 2!
 
 If you find this article useful, feel free to share it using the buttons below!
 
-
+**Update**: link to [part 2](/tensorflow/tf.function/2019/04/03/dissecting-tf-function-part-2/).

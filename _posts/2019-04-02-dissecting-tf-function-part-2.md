@@ -356,3 +356,5 @@ In addition, we found out that certain functions work with `tf.function` but the
 This second part was thought to be the last one, but due to the overwhelming list of peculiarities to know and analyze, the behavior of `tf.function` and AutoGraph when the function body is more complex than a `print` function invocation haven't been analyzed yet; so stay tuned for the part 3!
 
 If you find this article useful, feel free to share it using the buttons below!
+
+**Update**: link to [part 3](/tensorflow/tf.function/2019/05/10/dissecting-tf-function-part-3/).

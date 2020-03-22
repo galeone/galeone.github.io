@@ -3,12 +3,12 @@ layout: post
 title: "FaceCTRL: control your media player with your face"
 date: 2020-03-25 12:00:00
 categories: tensorflow opencv playerctl
-summary: "After being interrupted dozens of times a day while I was coding and listening to my favorite music, I decided to find a solution that eliminates the stress of pausing and re-paying the song I was listening to. The solution is machine learning based application developed with TensorFlow 2, OpenCV, and Playerctl."
+summary: "After being interrupted dozens of times a day while coding with my headphones on, I decided to find a solution that eliminates the stress of pausing and re-playing the song I was listening to. The solution is machine learning application developed with TensorFlow 2, OpenCV, and Playerctl. This article will guide you trough the step required to develop such an application."
 authors:
     - pgaleone
 ---
 
-After being interrupted dozens of times a day while I was coding and listening to my favorite music, I decided to find a solution that eliminates the stress of pausing and re-paying the song I was listening to.
+After being interrupted dozens of times a day while coding with my headphones on, I decided to find a solution that eliminates the stress of pausing and re-playing the song I was listening to.
 
 The idea is trivial:
 
@@ -28,17 +28,31 @@ In this article I'm going to describe the architecture and the implementation de
 
 Below you can see how FaceCTRL works when launched in debug mode:
 
-<iframe width="1280" height="720" src="https://www.youtube.com/embed/48N4IU5XB6c" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+{:.center}
+<iframe width="720" height="480" src="https://www.youtube.com/embed/48N4IU5XB6c" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+In the following we will analyze the steps required to build this application. In particular we will focus on:
 
+- The problem definition
+- The technical requirements
+- The software architecture
+- The machine learning solutions
+- Conclusions
 
-
+Let's start!
 
 ## Problem definition
 
-The problem we want so solve in mainly
+The goal of this application is pretty clear: we have to detect if the person in front of the cameras wears headphones and control the chosen media player depending on the presence/absence of the person and of his/her headphones.
 
-The problem of detecting when a person wears headphones can be modeled in two different ways:
+The goal, thus, can be divided in two different parts. The computer vision part that's the part of the software dedicated to the image processing, and the media player part that's dedicated to the control of the media-player. Additionally, The computer vision goal can be divided in 2 separated sub-goals:
+
+1. Detect a face in front of the camera
+2. Understand if the person is warning headphones
+
+The problem of detecting a face in an image is a traditional computer vision problem and as such, there exist several face detector algorithm ready to use that works pretty well.
+
+The problem of detecting when a person wears headphones, instead, can be modeled in two different ways:
 
 1. **One class classification / Anomaly detection**. If we follow this path, we must train a model on positive samples only (headphones on), and then use the trained model to detect anomalies.
 

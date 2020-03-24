@@ -26,7 +26,7 @@ In this article I'm going to describe the software architecture and the implemen
 
 ## Overview
 
-Let's start by looking at the final result: below you can see how FaceCTRL works when launched in debug mode-
+Let's start by looking at the final result: below you can see how FaceCTRL works when launched in debug mode.
 
 {:.center}
 <iframe width="720" height="480" src="https://www.youtube.com/embed/48N4IU5XB6c" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -73,11 +73,26 @@ How we should define, instead, the **media player control** part? The second par
 
 Moreover, the computer vision pipeline and media player control must work concurrently and communicate any status change almost in real time.
 
-## Technical requirements
-
 From the problem definition, is pretty clear that we want to develop a real time application. This requirement imposes constraints on both the computer vision and media player control parts.
 
-### Computer Vision pipeline
+## Software architecture
+
+The software architecture naturally follows from the analysis of the requirements presented above. The diagram below shows the high level architecture, without any implementation detail.
+
+{:.center}
+![software high level architecture](/images/facectrl/flowchart.png)
+
+The red blocks are the inputs. In practice, these are implemented as a separate thread that **always** grab frames freely, without waiting for the image processing pipeline.
+
+The green blocks represent the computer vision and machine learning **inference** pipeline.
+
+The yellow blocks represent the media player control pipeline.
+
+To conclude, the blue blocks are the actions: in practice FaceCTRL only have two output actions, play and pause.
+
+Without digging too much into the implementation details (you can have a look at the complete source code [on Github](https://github.com/galeone/facecetrl)), we just want to emphasize that the whole green part is the machine learning **inference** pipeline, and below present some of the building blocks of the architecture.
+
+## Computer Vision pipeline
 
 We want to have a lightweight image processing pipeline, thus we need the face detection and tracking part to have:
 
@@ -87,7 +102,216 @@ We want to have a lightweight image processing pipeline, thus we need the face d
 At this purpose, OpenCV offers us a whole set of ready to use [Haar Feature-based cascade classifiers](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_objdetect/py_face_detection/py_face_detection.html) trained to detect faces. These classifiers work on a pyramid of images and thus, the classifiers themselves are capable of working efficiently on images with different resolutions.
 OpenCV (**note** not the python module, you need it installed system-wise) comes with this pre-trained models ready to use, we only need to load the parameters from XML files.
 
-Also for the face tracking, OpenCV (**note** in its contrib module) offers a long list of object tracking algorithms already implemented and ready to use. A nice analysis of the trackers has been made by Adrian Rosebrock [here](https://www.pyimagesearch.com/2018/07/30/opencv-object-tracking/).
+We can thus define a `FaceDetector` class that abstract the features we need. The most important part of the code below (file `detector.py`), is the usage of `cv2.CascadeClassifier.detectMultiScale` method, that executes the cascade classification on the image pyramid.
+
+The `crop` method, instead, has the `expansion` parameter that's useful since we're interested in detecting not only the face, but also the headphones. For this reason we want to expand the detected bounding box by a certain amount.
+
+```python
+from pathlib import Path
+from typing import Tuple
+
+import cv2
+import numpy as np
+
+
+class FaceDetector:
+    """Initialize a classifier and uses it to detect the bigger
+    face present into an image.
+    """
+
+    def __init__(self, params: Path) -> None:
+        """Initializes the face detector using the specified parameters.
+
+        Args:
+            params: the path of the haar cascade classifier XML file.
+        """
+        self.classifier = cv2.CascadeClassifier(str(params))
+
+    def detect(self, frame: np.array) -> Tuple:
+        """Search for faces into the input frame.
+        Returns the bounding box containing the bigger (close to the camera)
+        detected face, if any.
+        When no face is detected, the tuple returned has width and height void.
+
+        Args:
+            frame: the BGR input image.
+        Returns:
+            (x,y,w,h): the bounding box.
+        """
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        proposals = np.array(
+            self.classifier.detectMultiScale(
+                frame,
+                scaleFactor=1.5,  # 50%
+                # that's big, but we're interested
+                # in detecting faces closes to the camera, so
+                # this is OK.
+                minNeighbors=4,
+                # We want at least "minNeighbors" detections
+                # around the same face,
+                minSize=(frame.shape[0] // 4, frame.shape[1] // 4),
+                # Only bigger faces -> we suppose the face to be at least
+                # 25% of the content of the input image
+                maxSize=(frame.shape[0], frame.shape[1]),
+            )
+        )
+
+        # If faces have been detected, find the bigger one
+        if proposals.size:
+            bigger_id = 0
+            bigger_area = 0
+            for idx, (_, _, width, height) in enumerate(proposals):
+                area = width * height
+                if area > bigger_area:
+                    bigger_id = idx
+                    bigger_area = area
+            return tuple(proposals[bigger_id])  # (x,y,w,h)
+        return (0, 0, 0, 0)
+
+    @staticmethod
+    def crop(frame, bounding_box, expansion=(0, 0)) -> np.array:
+        """
+        Extract from the input frame the content of the bounding_box.
+        Applies the required expension to the bounding box.
+
+        Args:
+            frame: BGR image
+            bounding_box: tuple with format (x,y,w,h)
+            expansion: the amount of pixesl the add to increase the
+                       bouding box size, from the center.
+        Returns:
+            cropped: BGR image with size, at least (bounding_box[2], bounding_box[3]).
+        """
+
+        x, y, width, height = [
+            int(element) for element in bounding_box
+        ]  # pylint: disable=invalid-name
+
+        if x < 0:
+            x = 0
+        if y < 0:
+            y = 0
+
+        halfs = (expansion[0] // 2, expansion[1] // 2)
+        if width + halfs[0] <= frame.shape[1]:
+            width += halfs[0]
+        if x - halfs[0] >= 0:
+            x -= halfs[0]
+        if height + halfs[1] <= frame.shape[0]:
+            height += halfs[1]
+        if y - halfs[1] >= 0:
+            y -= halfs[1]
+
+        image_crop = frame[y : y + height, x : x + width]
+        return image_crop
+```
+
+Also for the face tracking, OpenCV (**note** in its contrib module) offers a long list of object tracking algorithms already implemented and ready to use. A nice analysis of the trackers has been made by Adrian Rosebrock [here](https://www.pyimagesearch.com/2018/07/30/opencv-object-tracking/). We decided to use the CSRT tracking algorithm because it's fast enough and it tracks successfully the face even when rotated.
+
+From the flowchart, it's also clear that the tracker must use a trained classifier and use it to classify the tracked object. In the snippet below you can also see how we handle the tracking failures (the person covers the webcam or walks away) using a threshold; the most important method here is `track_and_classify`.
+It's also pretty clear that we abstracted the classifier results using the Enum class `ClassificationResult` (not reported in this article for brevity).
+
+```python
+from typing import Tuple
+
+import cv2
+import numpy as np
+
+from facectrl.ml import ClassificationResult, Classifier, FaceDetector
+
+
+class Tracker:
+    """Tracks one object. It uses the CSRT tracker."""
+
+    def __init__(
+        self, frame, bounding_box, max_failures=10, debug: bool = False,
+    ) -> None:
+        """Initialize the frame tracker: start tracking the object
+        localized into the bounding box in the current frame.
+        Args:
+            frame: BGR input image
+            bounding_box: the bounding box containing the object to track
+            max_failures: the number of frame to skip, before raising an
+                          exception during the "track" call.
+            debug: set to true to enable visual debugging (opencv window)
+        Returns:
+            None
+        """
+        self._tracker = cv2.TrackerCSRT_create()
+        self._golden_crop = FaceDetector.crop(frame, tuple(bounding_box))
+        self._tracker.init(frame, bounding_box)
+        self._max_failures = max_failures
+        self._failures = 0
+        self._debug = debug
+        self._classifier = None
+
+    def track(self, frame) -> Tuple[bool, Tuple]:
+        """Track the object (selected during the init), in the current frame.
+        If the number of attempts of tracking exceed the value of max_failures
+        (selected during the init), this function throws a ValueError exception.
+        Args:
+            frame: BGR input image
+        Returns:
+            success, bounding_box: a boolean that indicates if the tracking succded
+            and a bounding_box containing the tracked objecrt positon.
+        """
+        return self._tracker.update(frame)
+
+    @property
+    def classifier(self) -> Classifier:
+        """Get the classifier previousluy set. None otherwise."""
+        return self._classifier
+
+    @classifier.setter
+    def classifier(self, classifier: Classifier) -> None:
+        """
+        Args:
+            classifier: the Classifier to use
+        """
+        self._classifier = classifier
+
+    @property
+    def max_failures(self) -> int:
+        """Get the max_failures value: the number of frame to skip
+        before raising an exception during the "track" call."""
+        return self._max_failures
+
+    @max_failures.setter
+    def max_failures(self, value):
+        """Update the max_failures value."""
+        self._max_failures = value
+
+    def track_and_classify(
+        self, frame: np.array, expansion=(100, 100)
+    ) -> ClassificationResult:
+        """Track the object (selected during the init), in the current frame.
+        If the number of attempts of tracking exceed the value of max_failures
+        (selected during the init), this function throws a ValueError exception.
+        Args:
+            frame: BGR input image
+            expansion: expand the ROI around the detected object by this amount
+        Return:
+            classification_result (ClassificationResult)
+        """
+        if not self._classifier:
+            raise ValueError("You need to set a classifier first.")
+        success, bounding_box = self.track(frame)
+        classification_result = ClassificationResult.UNKNOWN
+        if success:
+            self._failures = 0
+
+            crop = FaceDetector.crop(frame, bounding_box, expansion=expansion)
+            classification_result = self._classifier(self._classifier.preprocess(crop))[
+                0
+            ]
+        else:
+            self._failures += 1
+            if self._failures >= self._max_failures:
+                raise ValueError(f"Can't find object for {self._max_failures} times")
+
+        return classification_result
+```
 
 The third and last part of the image processing pipeline is the classification of the tracked subject. Since we want our model for the classification to be *fast* (since we want to use it on every frame, while tracking) we have to design a model that:
 
@@ -103,25 +327,115 @@ Moreover, since we want to work only with the information contained into the bou
 
 TODO
 
-## Software architecture
-
-The software architecture naturally follows from the analysis of the requirements presented above. The diagram below shows the high level architecture, without any implementation detail.
-
-{:.center}
-![software high level architecture](/images/FaceCTRL.png)
-
-The red blocks are the inputs. In practice, these are implemented as a separate thread that **always** grab frames freely, without waiting for the image processing pipeline.
-
-The green blocks represent the computer vision and machine learning **inference** pipeline.
-
-The yellow blocks represent the media player control pipeline.
-
-To conclude, the blue blocks are the actions: in practice FaceCTRL only have two output actions, play and pause.
-
-Without digging too much into the implementation details (you can have a look at the complete source code [on Github](https://github.com/galeone/facecetrl)), we just want to emphasize that the whole green part is the **inference** pipeline.
-
-Since we decided to use a pre-build face detector and a pre-build tracker, in the next section we'll describe the machine learning workflow followed to develop this solution able to classify the input crop.
-
 ## The machine learning workflow
 
-The most important part of every machine learning project is the data.
+The most important part of every machine learning project is the data. Thus, since from the software architecture we know that our classifier should be able to classify the face while being tracked, I good idea is to create a dataset using the tracker itself.
+
+```python
+import os
+import sys
+import time
+from argparse import ArgumentParser
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+from facectrl.ml import FaceDetector
+from facectrl.video import Tracker, VideoStream
+
+
+class Builder:
+    """Builds the dataset interactively."""
+
+    def __init__(self, dest: Path, params: Path, src: int = 0) -> None:
+        """Initializes the dataset builder.
+
+        Args:
+            dest: the destination folder for the dataset.
+            params: Path of the haar cascade classifier parameters.
+            src: the ID of the video stream to use (input of VideoStream).
+        Returns:
+            None
+        """
+        self._on_dir = dest / "on"
+        self._off_dir = dest / "off"
+        if not self._on_dir.exists():
+            os.makedirs(self._on_dir)
+        if not self._off_dir.exists():
+            os.makedirs(self._off_dir)
+        self._stream = VideoStream(src)
+        self._detector = FaceDetector(params)
+
+    def _acquire(self, path, expansion, prefix) -> None:
+        """Acquire and store into path the samples.
+        Args:
+            path: the path where to store the cropped images.
+            expansion: the expansion to apply to the bounding box detected.
+            prefix: prefix added to the opencv window
+        Returns:
+            None
+        """
+        i = 0
+        quit_key = ord("q")
+        start = len(list(path.glob("*.png")))
+        with self._stream:
+            detected = False
+            while not detected:
+                frame = self._stream.read()
+                bounding_box = self._detector.detect(frame)
+                detected = bounding_box[-1] != 0
+
+            tracker = Tracker(frame, bounding_box)
+            success = True
+            while success:
+                success, bounding_box = tracker.track(frame)
+                if success:
+                    bounding_box = np.int32(bounding_box)
+                    crop = FaceDetector.crop(frame, bounding_box, expansion)
+                    crop_copy = crop.copy()
+                    cv2.putText(
+                        crop_copy,
+                        f"{prefix} {i + 1}",
+                        (30, crop.shape[0] - 30),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale=1,
+                        color=(0, 0, 255),
+                        thickness=2,
+                    )
+                    cv2.imshow("grab", crop_copy)
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == quit_key:
+                        success = False
+                    cv2.imwrite(str(path / Path(str(start + i) + ".png")), crop)
+                    i += 1
+                frame = self._stream.read()
+        cv2.destroyAllWindows()
+
+    def headphones_on(self, expansion=(70, 70)) -> None:
+        """Acquire and store the images with the headphones on.
+        Args:
+            expansion: the expansion to apply to the bounding box detected.
+        Returns:
+            None
+        """
+        return self._acquire(self._on_dir, expansion, "ON")
+
+    def headphones_off(self, expansion=(70, 70)) -> None:
+        """Acquire and store the images with the headphones off.
+        Args:
+            expansion: the expansion to apply to the bounding box detected.
+        Returns:
+            None
+        """
+        return self._acquire(self._off_dir, expansion, "OFF")
+```
+
+Using this class is it possible to create a dataset that contains images like these:
+
+{:.center}
+![headphones on](/images/facectrl/on.png)
+
+{:.center}
+![headphones on](/images/facectrl/off.png)
+

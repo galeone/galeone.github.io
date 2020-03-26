@@ -65,7 +65,7 @@ In the following we will see how to implement and end-to-end solution to solve t
 
 We now have an idea of the problem we want to solve: we know from an high level perspective what's the architecture we expect for the computer vision / machine learning pipeline.
 
-How we should define, instead, the **media player control** part? The second part of the problem, thus, is the development of an application that:
+How should we define, instead, the **media player control** part? The second part of the problem, thus, is the development of an application that:
 
 1. Knows how to communicate with a media player: is the media player running?
 2. Knows how to play/pause/stop the music.

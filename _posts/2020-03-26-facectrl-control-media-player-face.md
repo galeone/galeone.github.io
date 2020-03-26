@@ -442,7 +442,7 @@ As it can be easily seen, controlling the media player is easy; but of course th
 
 ## Machine learning pipeline
 
-The most important part of every machine learning project is the data. Thus, since from the software architecture we know that our classifier should be able to classify the face while being tracked, I good idea is to create a dataset using the tracker itself (file [dataset.py](https://github.com/galeone/facectrl/blob/master/facectrl/dataset.py)):
+The most important part of every machine learning project is the data. Thus, since from the software architecture we know that our classifier should be able to classify the face while being tracked, a good idea is to create a dataset using the tracker itself (file [dataset.py](https://github.com/galeone/facectrl/blob/master/facectrl/dataset.py)):
 
 ```python
 import os

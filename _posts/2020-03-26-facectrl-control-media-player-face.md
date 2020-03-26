@@ -13,8 +13,8 @@ After being interrupted dozens of times a day while coding with my headphones on
 The idea is trivial:
 
 - When you're in front of your PC with your headphones on: the music plays.
-- Someone interrupts you, and you have to remove your headphones: the music pause.
-- You walk away from your PC: the music pause.
+- Someone interrupts you, and you have to remove your headphones: the music pauses.
+- You walk away from your PC: the music pauses.
 - You come back to your PC, and you put the headphones on: the music plays again.
 - If you want to manually control the player, the manual control has the precedence; e.g. if you have your headphones off and you press play, the music plays as you expect.
 
@@ -46,7 +46,7 @@ Focusing on the first part of the problem, we can define a **computer vision pip
 2. **Face tracking**: the face detection task is usually implemented using neural networks or other traditional methods that, often, are not adequate for a real-time application. Thus, we have to use a tracking algorithm to track the detected face.
 3. **Classification**: while tracking we have to understand if the person is wearing headphones.
 
-The problem of detecting a face in an image is a traditional computer vision problem and as such, there exists several face detection algorithm ready to use that works pretty well.
+The problem of detecting a face in an image is a traditional computer vision problem and as such, there exist several face detection algorithms ready to use that work pretty well.
 The same reasoning applies to the face tracking, there are several trackers ready to use that are fast, accurate, and robust to subject transformations and occlusions.
 
 The problem of detecting when a person wears headphones, instead, can be modeled in two different ways:
@@ -69,7 +69,7 @@ How should we define, instead, the **media player control** part? The second par
 
 1. Knows how to communicate with a media player: is the media player running?
 2. Knows how to play/pause/stop the music.
-3. It allows us to receive change of status (e.g. the person while still wearing headphones pressed the pause button - we don't want to automatically restart the music only because he/she still have headphones on)
+3. It allows us to receive change of status (e.g. the person while still wearing headphones pressed the pause button - we don't want to automatically restart the music only because he/she still has headphones on)
 
 Moreover, the computer vision pipeline and media player control must work concurrently and communicate any status change almost in real time.
 
@@ -88,7 +88,7 @@ The green blocks represent the computer vision and machine learning **inference*
 
 The yellow blocks represent the media player control pipeline.
 
-To conclude, the blue blocks are the actions: in practice FaceCTRL only have two output actions: play and pause.
+To conclude, the blue blocks are the actions: in practice FaceCTRL only has two output actions: play and pause.
 
 Without digging too much into the implementation details (you can have a look at the complete source code [on Github](https://github.com/galeone/facecetrl)), we just want to emphasize that the whole green part is the machine learning **inference** pipeline, and below present some of the building blocks of the architecture.
 
@@ -96,8 +96,8 @@ Without digging too much into the implementation details (you can have a look at
 
 We want to have a lightweight image processing pipeline, thus we need the face detection and tracking blocks that:
 
-1. Executes in real time, thus a fast execution.
-2. Has a low memory footprint.
+1. Execute in real time, thus a fast execution.
+2. Have a low memory footprint.
 
 At this purpose, OpenCV offers us a whole set of ready to use [Haar Feature-based cascade classifiers](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_objdetect/py_face_detection/py_face_detection.html) trained to detect faces. These classifiers work on a pyramid of images and thus, the classifiers themselves are capable of working efficiently on images with different resolutions.
 OpenCV (**note:** not the python module, you need OpenCV installed system-wise) comes with this pre-trained models ready to use, we only need to load the parameters from XML files.
@@ -207,7 +207,7 @@ class FaceDetector:
         return image_crop
 ```
 
-Also for the face tracking, OpenCV (**note:** in its contrib module) offers a long list of object tracking algorithms already implemented and ready to use. A nice analysis of the trackers has been made by Adrian Rosebrock [here](https://www.pyimagesearch.com/2018/07/30/opencv-object-tracking/). We decided to use the CSRT tracking algorithm because it's fast enough and it tracks successfully the face even when rotated.
+Also for the face tracking, OpenCV (**note:** in its contrib module) offers a long list of object tracking algorithms already implemented and ready to use. A nice analysis of the trackers has been made by Adrian Rosebrock [here](https://www.pyimagesearch.com/2018/07/30/opencv-object-tracking/). We decided to use the CSRT tracking algorithm because it's fast enough and it successfully tracks the face even when rotated.
 
 From the flowchart, it's also clear that the tracker must use a trained classifier (to classify if the subject wears the headphones) and use it to classify the tracked object. In the snippet below (file [tracker.py](https://github.com/galeone/facectrl/blob/master/facectrl/video/tracker.py)) you can also see how we handle the tracking failures (the person covers the webcam or walks away) using a threshold; the most important method here is `track_and_classify`.
 It's also pretty clear that we abstracted the classifier results using the Enum class `ClassificationResult` (not reported in this article for brevity).

@@ -31,7 +31,8 @@ class ActivityTracker(tf.Module):
         self._model = k.Sequential(
             [
                 k.layers.Input(
-                    shape=(1, self.num_features), batch_size=self.batch_size
+                    shape=(1, self.num_features),
+                    batch_size=self.batch_size,
                 ),
                 # Note the stateful=True
                 k.layers.LSTM(64, stateful=True),
@@ -68,7 +69,7 @@ class ActivityTracker(tf.Module):
                 " is ",
                 labels[0],
             )
-            self._last_tracked_activity.assign_sub(labels[0])
+            self._last_tracked_activity.assign(labels[0])
             self._model.reset_states()
 
         self._global_step.assign_add(1)
@@ -78,14 +79,14 @@ class ActivityTracker(tf.Module):
 
         gradient = tape.gradient(loss, self._model.trainable_variables)
         self._optimizer.apply_gradients(zip(gradient, self._model.trainable_variables))
-        return loss
+        return {"loss": loss}
 
     @tf.function(input_signature=[tf.TensorSpec(shape=(None, 1, 3), dtype=tf.float32)])
     def predict(self, sensor_data):
         predictions = self._model(sensor_data)
         predicted = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
         tf.print(self.mapping.lookup(predicted))
-        return predicted
+        return {"predictions": predicted}
 
 
 def main() -> int:
@@ -98,9 +99,16 @@ def main() -> int:
     )
     at.predict(tf.zeros((at.batch_size, 1, 3), dtype=tf.float32))
 
-    tf.saved_model.save(at, "at")
+    # https://www.tensorflow.org/guide/saved_model#specifying_signatures_during_export
+    tf.saved_model.save(
+        at,
+        "at",
+        signatures={
+            "learn": at.learn,
+            "predict": at.predict,
+        },
+    )
 
-    restored = tf.saved_model.load("at")
     return 0
 
 

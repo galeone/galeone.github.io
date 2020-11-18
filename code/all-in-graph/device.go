@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/csv"
+	//"encoding/gob"
 	tg "github.com/galeone/tfgo"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -22,12 +24,12 @@ func predict(model *tg.Model, sensorData *tf.Tensor) int32 {
 		model.Op("StatefulPartitionedCall_2", 0),
 	}, map[tf.Output]*tf.Tensor{
 		model.Op("predict_sensor_data", 0): sensorData,
-	})[0].Value().([]int32)
+	})[0].Value().([][]int32)
 
 	var votes map[int32]int
 	votes = make(map[int32]int)
 	for i := 0; i < len(predictions); i++ {
-		votes[predictions[i]]++
+		votes[predictions[i][0]]++
 	}
 
 	var maxVote int = -1
@@ -39,6 +41,33 @@ func predict(model *tg.Model, sensorData *tf.Tensor) int32 {
 		}
 	}
 	return topLabel
+}
+
+func observationsToTensor(observations [batchSize]Observation) *tf.Tensor {
+
+	var sensorData [batchSize][1][3]float32
+	size := len(observations)
+	if size < batchSize {
+		log.Fatalf("Observations size %d < batch size %d", size, batchSize)
+	}
+
+	for i := 0; i < size; i++ {
+		sensorData[i][0] = [3]float32{observations[i].X, observations[i].Y, observations[i].Z}
+	}
+
+	var err error
+	var sensorTensor *tf.Tensor
+
+	if sensorTensor, err = tf.NewTensor(sensorData); err != nil {
+		log.Fatal(err)
+	}
+
+	return sensorTensor
+}
+
+func Predict(model *tg.Model, observations [batchSize]Observation) int32 {
+	sensorData := observationsToTensor(observations)
+	return predict(model, sensorData)
 }
 
 /*signature_def['learn']:
@@ -72,6 +101,8 @@ signature_def['predict']:
   Method name is: tensorflow/serving/predict
 */
 
+const batchSize int = 32
+
 // learn runs an optimization step on the model, using a batch of values
 // coming from the same observed activity.
 // NOTE: all the observations must have the same label in the same batch.
@@ -90,11 +121,11 @@ func learn(model *tg.Model, sensorData *tf.Tensor, labels *tf.Tensor) float32 {
 	return loss.Value().(float32)
 }
 
-func Learn(model *tg.Model, observations [32]Observation) float32 {
-	var sensorData [32][1][3]float32
-	var labels [32]int32
+func Learn(model *tg.Model, observations [batchSize]Observation) float32 {
+	var sensorData [batchSize][1][3]float32
+	var labels [batchSize]int32
 
-	for i := 0; i < 32; i++ {
+	for i := 0; i < batchSize; i++ {
 		sensorData[i][0] = [3]float32{observations[i].X, observations[i].Y, observations[i].Z}
 		labels[i] = observations[i].Label
 	}
@@ -125,35 +156,35 @@ type Observation struct {
 	Z         float32
 }
 
-func NewObservation(record []string, mapping map[string]int32) Observation {
+func NewObservation(record []string, mapping map[string]int32) (*Observation, error) {
 	var err error
 	var id int
 	if id, err = strconv.Atoi(record[0]); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	activity := strings.ToLower(record[1])
 
 	var sec int
 	if sec, err = strconv.Atoi(record[2]); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	var x, y, z float64
 
 	if x, err = strconv.ParseFloat(record[3], 32); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if y, err = strconv.ParseFloat(record[4], 32); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if z, err = strconv.ParseFloat(strings.TrimRight(record[5], ";"), 32); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return Observation{
+	return &Observation{
 		ID:        id,
 		Activity:  activity,
 		Label:     mapping[activity],
@@ -161,33 +192,22 @@ func NewObservation(record []string, mapping map[string]int32) Observation {
 		X:         float32(x),
 		Y:         float32(y),
 		Z:         float32(z),
-	}
+	}, nil
 }
 
-func main() {
+func train(model *tg.Model, datasetPath string, mapping map[string]int32) {
 	var err error
 	var filePtr *os.File
 
-	if filePtr, err = os.Open("WISDM_ar_v1.1/WISDM_ar_v1.1_raw.txt"); err != nil {
+	if filePtr, err = os.Open(datasetPath); err != nil {
 		log.Fatal(err)
 	}
 
 	defer func() {
 		if err := filePtr.Close(); err != nil {
-			log.Fatal(err)
+			log.Fatalf("close: %s", err)
 		}
 	}()
-
-	mapping := map[string]int32{
-		"walking":    0,
-		"jogging":    1,
-		"upstairs":   2,
-		"downstairs": 3,
-		"sitting":    4,
-		"standing":   5,
-	}
-
-	model := tg.LoadModel("at", []string{"serve"}, nil)
 
 	reader := csv.NewReader(filePtr)
 
@@ -196,8 +216,6 @@ func main() {
 	// 33,Jogging,49106062271000,5.012288,11.264028,0.95342433;
 	var user int
 	var label int32
-
-	const batchSize int = 32
 
 	var observations [32]Observation
 
@@ -211,7 +229,11 @@ func main() {
 			log.Fatal(err)
 		}
 
-		o := NewObservation(record, mapping)
+		var o *Observation
+		if o, err = NewObservation(record, mapping); err != nil {
+			log.Printf("Skipping observation %v", record)
+			continue
+		}
 		read++
 		// Set the user for the current set of observations
 		// The user and the label must be the same for all the training batch
@@ -232,13 +254,129 @@ func main() {
 			label = o.Label
 		}
 
-		observations[read-1] = o
+		observations[read-1] = *o
 
 		if read == batchSize {
-			loss := Learn(model, observations)
+			Learn(model, observations)
 			read = 0
-			log.Printf("[Go] loss %f\n", loss)
+		}
+	}
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
+
+func main() {
+	mapping := map[string]int32{
+		"walking":    0,
+		"jogging":    1,
+		"upstairs":   2,
+		"downstairs": 3,
+		"sitting":    4,
+		"standing":   5,
+	}
+
+	var model tg.Model = *tg.LoadModel("at", []string{"serve"}, nil)
+
+	// First train:
+	// NOTE: the dataset has been manually fixed since thanks to
+	// the error handlig in the CSV reading, we found out a wrong line
+	// Try it yourself and find it too :)
+	train(&model, "WISDM_ar_v1.1/WISDM_ar_v1.1_raw.txt", mapping)
+
+	// TODO: find a way to serialize the model.
+	// Currently tensorflow/go and also tfgo do not support model serialization easily.
+	// However, it should be possibile to use encoding/gob + the TensorFlow C API
+	// to correctly serialize the tf.SavedModel status and restore it.
+
+	// If we find a way to save a SavedModel in the SavedModel serialization format
+	// then we can just use SavedModels to save/restore models using the TensorFlow API.
+	// I guess this is the best way.
+
+	// Otherwise, we can create a different file format, that's like a modifiable SavedModel
+	// that starts from a real SavedModel with tf.Variable inside.
+	// We load it in memory and train it (as we did in the previous line), and
+	// after that we serialize in a binary file (or whatever) the SavedModel status.
+	// After that, when we want to use and restore it, we reload from this file
+	// (that's not a SavedModel, thus we can't use the TensorFlow C API) and use it.
+
+	// With a trained model, we are ready to receive other observations
+	// and use them to train it during its lifetime.
+
+	observations := make(chan Observation, batchSize)
+	prediction := make(chan int32, 1)
+
+	go func() {
+		var obs [batchSize]Observation
+		for i := 0; i < batchSize; i++ {
+			obs[i] = <-observations
 		}
 
-	}
+		prediction <- Predict(&model, obs)
+		// requeue all the observations in the same channel
+		// in order to let other routines to use the same
+		// observations (for training with the predicted/adjusted label)
+		for i := 0; i < batchSize; i++ {
+			observations <- obs[i]
+		}
+
+	}()
+
+	done := make(chan bool, 1)
+	go func() {
+		// This is an example of a real case
+		// where the sensor is gathering some data
+		// and the user labels it (perhaps after our model suggestion that
+		// can be used as a hint for the user to set the label :) ).
+
+		// This function generates the data of the activity
+		// and sends a batch of this data in the observation channel.
+
+		// On the other side of the channel we have the model waiting
+		// for this data, that sends back a suggested label and waits for a
+		// user confirmation.
+
+		// Generate sensor data
+
+		var min, max float32 = 1, 10
+		rand.Seed(time.Now().UnixNano())
+
+		for i := 0; i < batchSize; i++ {
+			x := min + rand.Float32()*(max-min)
+			y := min + rand.Float32()*(max-min)
+			z := min + rand.Float32()*(max-min)
+
+			observations <- Observation{
+				Timestamp: time.Now(),
+				X:         x,
+				Y:         y,
+				Z:         z,
+			}
+		}
+
+		predictedLabel := <-prediction
+		log.Printf("predicted label: %d", predictedLabel)
+
+		// In the real case, the predicted label is asked for
+		// confirmation to the user and if the user accepts the suggestion
+		// the model is trained with the current set of the observations
+		// and the confirmed label (or the new label given by the user)
+
+		var obs [batchSize]Observation
+		for i := 0; i < batchSize; i++ {
+			obs[i] = <-observations
+			obs[i].Label = predictedLabel
+		}
+
+		Learn(&model, obs)
+		// Here we terminarte the application, but in the real scenario
+		// this is an endless loop with frequent checkpoints
+		// and model versioning.
+		done <- true
+	}()
+
+	<-done
+
 }

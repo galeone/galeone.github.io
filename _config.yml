@@ -26,7 +26,6 @@ show_related_posts:   true
 show_post_footers:    false
 show_social_icons:    true
 show_mailchimp:       true
-ajaxify_contact_form: false
 enable_mathjax:       true
 extended_fonts:       false
 enable_anchorjs:      true
@@ -78,6 +77,9 @@ share_tumblr: true
 share_reddit: true
 share_stumbleupon: true
 share_hackernews: true
+
+formspree:
+  form_path: "f/xrgoljqa"
 
 text:
   pagination:

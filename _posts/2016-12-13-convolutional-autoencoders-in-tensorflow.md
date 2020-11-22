@@ -46,13 +46,13 @@ The convention introduced by DTB tells us to create the models into the `models`
 
 ### models/SingleLayerCAE.py
 
-{% gist 95206786d9c73670075dbd83552f2595 SingleLayerCAESkeleton.py %}
+<script src="https://gist.github.com/95206786d9c73670075dbd83552f2595.js?file=SingleLayerCAESkeleton.py"></script>
 
 As we already know, a single layer CAE is just an encoding convolution followed by a decoding convolution. The first convolution must be padded in order to build the appropriate input for the decoding convolution.
 
 Knowing this, we're going to define the private method `_pad` in the file that contains our model.
 
-{% gist 95206786d9c73670075dbd83552f2595 SingleLayerCAE_pad.py %}
+<script src="https://gist.github.com/95206786d9c73670075dbd83552f2595.js?file=SingleLayerCAE_pad.py"></script>
 
 Now that we have the method that correctly pads the input we can use the function
 
@@ -64,7 +64,7 @@ that's a wrapper around the `tf.nn.conv2d` method, that will create summaries an
 
 We can now implement the whole model into the `get` method:
 
-{% gist 95206786d9c73670075dbd83552f2595 SingleLayerCAEget.py %}
+<script src="https://gist.github.com/95206786d9c73670075dbd83552f2595.js?file=SingleLayerCAEget.py"></script>
 
 It's worth noting that every convolutional layer has the builtin support for the weight decay penalization. When the model gets instantiated, it's thus possible to enable/disable the weight decay.
 
@@ -82,7 +82,7 @@ $$  \frac{1}{2n} \sum^{n}_{i=i}{(x_i - \tilde{x}_i)^2} $$
 
 Where obviously $$x$$ is the original input image in the current batch, $$\tilde{x}$$ is the reconstructed image. In Tensorflow the following formula can be easily implemented:
 
-{% gist 95206786d9c73670075dbd83552f2595 SingleLayerCAEloss.py %}
+<script src="https://gist.github.com/95206786d9c73670075dbd83552f2595.js?file=SingleLayerCAEloss.py"></script>
 
 Moreover, it has been added the support for the L2 regularization term to the loss. Thus, mathematically, the formula becomes:
 

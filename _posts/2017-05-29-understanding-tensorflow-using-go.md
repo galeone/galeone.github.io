@@ -330,7 +330,7 @@ Hooray!
 
 Here's a Gist with the complete code of `attempt3` in case you'd like too build and run it (also remember that's a Gist, you can contribute if you see something that can be improved!)
 
-{% gist 09657143df49a90536f4ac4893c64696 attempt3.go %}
+<script src="https://gist.github.com/09657143df49a90536f4ac4893c64696.js?file=attempt3.go"></script>
 
 #### Question time
  

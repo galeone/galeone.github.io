@@ -14,6 +14,19 @@ import (
 	"time"
 )
 
+type Observation struct {
+	// 3,Jogging,49106062271000,5.012288,11.264028,0.95342433
+	ID        int
+	Activity  string
+	Label     int32
+	Timestamp time.Time
+	X         float32
+	Y         float32
+	Z         float32
+}
+
+const batchSize int = 32
+
 // predict invokes the predict method of the model and returns the majority class
 // predicted for the input batch.
 //
@@ -101,7 +114,6 @@ signature_def['predict']:
   Method name is: tensorflow/serving/predict
 */
 
-const batchSize int = 32
 
 // learn runs an optimization step on the model, using a batch of values
 // coming from the same observed activity.
@@ -145,16 +157,6 @@ func Learn(model *tg.Model, observations [batchSize]Observation) float32 {
 
 }
 
-type Observation struct {
-	// 3,Jogging,49106062271000,5.012288,11.264028,0.95342433
-	ID        int
-	Activity  string
-	Label     int32
-	Timestamp time.Time
-	X         float32
-	Y         float32
-	Z         float32
-}
 
 func NewObservation(record []string, mapping map[string]int32) (*Observation, error) {
 	var err error

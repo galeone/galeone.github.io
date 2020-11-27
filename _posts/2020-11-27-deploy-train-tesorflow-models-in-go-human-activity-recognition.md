@@ -370,7 +370,7 @@ I just leave a link to the project I maintain, **tfgo**, that allows to **do not
 
 <small>Just a small note, the [fork that is automatically installed when go-getting tfgo](https://github.com/galeone/tensorflow/tree/r2.3-go) is just a fork of the TensorFlow repository (branch r2.3) that contains all the compiled protobuf files needed to make go-gettable the package.</small>
 
-> **tfgo**: https://github.com/galeone/tfgo
+> **tfgo**: [https://github.com/galeone/tfgo](https://github.com/galeone/tfgo)
 
 From the [SavedModel inspection](#savedmodel-inspection), we know everything we need to use the graphs we defined.
 

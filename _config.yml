@@ -70,7 +70,7 @@ show_sharing_icons: true
 # Change to 'true' to enable individual icons
 share_facebook: true
 share_twitter: true
-share_googleplus: true
+share_googleplus: false
 share_linkedin: true
 share_digg: true
 share_tumblr: true

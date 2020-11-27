@@ -16,7 +16,7 @@ Some lucky model, however, reaches the final stage - or because the management h
 
 <div>
     <div class="video-container">
-        <iframe width="960" height="720" src="https://www.youtube.com/embed/5p8wTOr8AbU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>>
+        <iframe width="960" height="720" src="https://www.youtube.com/embed/5p8wTOr8AbU" style="border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>>
     </div>
     <footer>We have a great plan: deploy everything to production right now!</footer>
 </div>
@@ -61,7 +61,7 @@ The process of data acquisition has been documented and we have a nice YouTube v
 
 <div>
     <div class="video-container">
-    <iframe width="665" height="510" src="https://www.youtube.com/embed/XOEN9W05_4A" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe width="665" height="510" src="https://www.youtube.com/embed/XOEN9W05_4A" style="border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
     <footer>The Smartlab has developed a new publicly available database of daily human activities that has been recorded using accelerometer and gyroscope data from a waist-mounted Android-OS smartphone (Samsung Galaxy S II). The six studied activities are: Walking, Walking Upstairs, Walking Downstairs, Sitting, Standing and Laying down. <br>
     

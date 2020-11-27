@@ -139,7 +139,7 @@ Thus, the probability of dropping out exactly $$np = 512$$ neurons is of only $$
 
 A python 3 script can help us to visualize how neurons are dropped for different values of $$p$$ and a fixed value of $$n$$. The code is commented.
 
-{% gist a3e4d773bc6c4cbc9b18e9940e246a00 draw_binomial_distribution.py %}
+<script src="https://gist.github.com/a3e4d773bc6c4cbc9b18e9940e246a00.js?file=draw_binomial_distribution.py"></script>
 
 {:.center}
 ![Binomial distribution](/images/dropout/distributions.png)

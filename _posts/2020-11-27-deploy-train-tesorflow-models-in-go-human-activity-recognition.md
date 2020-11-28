@@ -261,7 +261,7 @@ In this function, we also use the mapping created in the `__init__` to print the
 
 After having defined everything inside a `tf.Module` and having correctly decorated the functions we want to export as graphs, all we need to do is to use the `tf.saved_model.save` function.
 
-Since we are exporting a `tf.Module` we have to remember that the **default behavior is to do not export serving signature** (that are handy entry points inside the SavedModel that tools like `saved_model_cli` and to Go bindings (and all the others) can use to load the correct graph from the SavedModel), and thus we have to explicit the `signatures` by ourselves.
+Since we are exporting a `tf.Module` we have to remember that the **default behavior is to do not export the serving signature defs** (that are handy entry points inside the SavedModel that tools like `saved_model_cli` and to Go bindings (and all the others) can use to load the correct graph from the SavedModel), and thus we have to explicit the `signatures` by ourselves.
 
 **Important**: the process of graph creation is executed only after the function execution is traced, we have to run the functions with some dummy input (but with the correct shape and dtype).
 
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-Saving the file as and executing it with `python export.py` we end up with the `at` folder inside our current working directory that contains our SavedModel.
+Saving the file as `export.py` and executing it with `python export.py` we end up with the `at` folder inside our current working directory that contains our SavedModel.
 
 ## SavedModel inspection
 
@@ -366,7 +366,7 @@ But first, we perform the training directly in Go :)
 
 The setup of the Go environment and the installation of the TensorFlow's C library goes beyond the scope of this article and it won't get covered.
 
-I just leave a link to the project I maintain, **tfgo**, that allows to **do not** install the **official** TensorFlow Go (because it's not go-gettable, see [#39307](https://github.com/tensorflow/tensorflow/issues/39307), [#41808](https://github.com/tensorflow/tensorflow/issues/41808), [#35133](https://github.com/tensorflow/tensorflow/issues/35133)) and it gives to you, as a dependency automatically installed by `go get`, a working version of the tensorflow package together with all the features exposed by the tfgo package.
+I just leave a link to the project I maintain, **tfgo**, that allows **not to install the official TensorFlow Go package** (because it's not go-gettable, see [#39307](https://github.com/tensorflow/tensorflow/issues/39307), [#41808](https://github.com/tensorflow/tensorflow/issues/41808), [#35133](https://github.com/tensorflow/tensorflow/issues/35133)) and it gives to you, as a dependency automatically installed by `go get`, a working version of the tensorflow package together with all the features exposed by the tfgo package.
 
 <small>Just a small note, the [fork that is automatically installed when go-getting tfgo](https://github.com/galeone/tensorflow/tree/r2.3-go) is just a fork of the TensorFlow repository (branch r2.3) that contains all the compiled protobuf files needed to make go-gettable the package.</small>
 
@@ -769,7 +769,7 @@ Using [tfgo](https://github.com/galeone/tfgo) it's possible to have a working ve
 
 It's possible to train a model in Go (although not recommended until we can save the status of a SavedModel) and in general, it's really easy to use any graph defined inside a `tf.Module` if it has been correctly designed and exported.
 
-The Go Philosophy of *"Don't communicate by sharing memory; share memory by communicating* fits well with the interactions that an ML model has with its deploy environment, especially if we are interested in incremental learning.
+The Go Philosophy of *"Don't communicate by sharing memory; share memory by communicating"* fits well with the interactions that an ML model has with its deploy environment, especially if we are interested in incremental learning.
 
 
 <small>**Disclaimer**: The actual Python code executed in the article is not an RNN but I replaced the RNN with a Dense layer. Not for my choice but because TensorFlow has an open bug with the deployment of RNNs that should be addressed ASAP in my opinion (after all, this bug is preventing the deployment of stateful RNNs :S): [#44428](https://github.com/tensorflow/tensorflow/issues/44428) - unfortunately the bug is still open and not addressed after 29 days (at the time of writing).</small>

@@ -10,7 +10,7 @@ authors:
 
 Custom ops are a way for extending the TensorFlow framework by adding operations that are not natively available in the framework. Adding a new operation is a relatively simple thing especially if you work in the officially supported environment (Ubuntu16, CUDA 10). However, if you built TensorFlow from scratch to support your target environment (e.g. Archlinux, CUDA 11) the official TensorFlow support for creating a custom op - that relies upon a Docker image - becomes useless.
 
-This article will guide you through the steps required to build TensorFlow from source and create a custom op. Moreover, the conversion process required to adapt a "custom op" (designed to be created with the Docker image), and a "user op" (an operation placed inside the TensorFlow source code and build with Bazel) is presented. So, we'll see in order:
+This article will guide you through the steps required to build TensorFlow from source and create a custom op. Moreover, the conversion process required to adapt a "custom op" (designed to be created with the Docker image), and a "user op" (an operation placed inside the TensorFlow source code and built with Bazel) is presented. So, we'll see in order:
 
 - Building TensorFlow from source.
 - Custom Ops overview.
@@ -509,6 +509,8 @@ Since inside the container there's CUDA 10, we can't use it - even the nightly c
 ## Conclusion
 
 Having a custom TensorFlow setup built from source allows complete customization of the framework: we can enable/disable features, enable device-specific optimizations, tailor the framework on our hardware. However, if our running environment is not compatible with the officially supported setup (Ubuntu, CUDA 10), doing it is not straightforward. Moreover, customizing the framework via Custom Ops is a really nice feature that allows us to create shared objects usable from Python in a relatively easy way. The ABI compatibility should always be taken into account when creating shared objects (especially on different environments like the containers) and the dependencies on other runtime libraries (like CUDA) can cause other headaches.
+
+Bazel has a steep learning curve, and since it's highly customizable understanding what every user-defined function does is really difficult (I found myself reading the .bzl files in the TensorFlow source code repository very often).
 
 In the next article, we'll see how to migrate from custom op to user op, or better, we'll try :)
 

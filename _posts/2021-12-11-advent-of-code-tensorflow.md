@@ -216,4 +216,4 @@ I'm doing this for fun (and I'm having fun, really), so expect another article f
 
 For any feedback or comment, please use the Disqus form below - thanks!
 
-PS: I'm posting all the solutions also on GitHub, you can find them here: https://github.com/galeone/tf-aoc
+PS: I'm posting all the solutions also on GitHub, you can find them here: [https://github.com/galeone/tf-aoc](galeone/tf-aoc).

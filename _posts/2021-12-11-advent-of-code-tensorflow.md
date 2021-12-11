@@ -215,3 +215,5 @@ Solving the AoC puzzles with TensorFlow can be not just fun (come on, it's a nic
 I'm doing this for fun (and I'm having fun, really), so expect another article for day 2 coming soon!
 
 For any feedback or comment, please use the Disqus form below - thanks!
+
+PS: I'm posting all the solutions also on GitHub, you can find them here: https://github.com/galeone/tf-aoc

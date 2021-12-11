@@ -184,6 +184,7 @@ The idea is to create 3 different datasets by shifting by 1 element every time. 
 The 3 datasets can be merged interleaving the values, using the order `1,2,3`, `1,2,3` and so on. This order means: pick the i-th element from the first dataset, then pick the i-th element from the second dataset, then pick the i-th element from the third dataset, then increment i. Repeat until all the dataset consumed all the elements.
 
 ```python
+datasets = [dataset, dataset.skip(1), dataset.skip(2)]
 for idx, dataset in enumerate(datasets):
     datasets[idx] = dataset.batch(3, drop_remainder=True).map(tf.reduce_sum)
 
@@ -216,4 +217,4 @@ I'm doing this for fun (and I'm having fun, really), so expect another article f
 
 For any feedback or comment, please use the Disqus form below - thanks!
 
-PS: I'm posting all the solutions also on GitHub, you can find them here: [https://github.com/galeone/tf-aoc](galeone/tf-aoc).
+PS: I'm posting all the solutions also on GitHub, you can find them here: [https://github.com/galeone/tf-aoc](https://github.com/galeone/tf-aoc).

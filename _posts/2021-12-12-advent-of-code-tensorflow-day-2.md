@@ -136,6 +136,8 @@ Just create an instance of the `PositionCounter` and call it over the dataset pr
 
 A **limitation** of the type annotation when used with TensorFlow is pretty easy to spot: we only have the `tf.Tensor` type, and the information of the TensorFlow data type (e.g. `tf.int64`, `tf.string`, `tf.bool`, ...) is not available.
 
+A possible (partial) solution is provided by the package `tensor_annotations` by Deepmind: [TensorAnnotations](https://github.com/deepmind/tensor_annotations).
+
 Anyway, the execution gives the correct result :) and this brings us to part 2.
 
 ## [Day 2: Dive!](https://adventofcode.com/2021/day/2): part two
@@ -197,6 +199,8 @@ I created two different files for the two different parts, only because I'm lazy
 The day 2 exercise is really easy and almost identical to the one presented on day 1. Also from the TensorFlow side, there are not many peculiarities to highlight.
 
 I showed how to use Enums (in short, we can only use types that are TensorFlow compatible, hence no pure python Enums) and I presented a limitation that's related to the missing typing of the `tf.Tensor` in the type annotations, but that's all.
+
+A possible (partial) solution is provided by the package `tensor_annotations` by Deepmind: [TensorAnnotations](https://github.com/deepmind/tensor_annotations) - however, this package helps only partially because when creating TensorFlow programs we are interested also in the type and not just to the name of the field (e.g. Batch, Time, Height, ...), and it looks like the package doesn't provide support for what I do really need.
 
 Luckily, I've already completed the challenges for days 3 and 4. Both of them are interesting, and in both, we'll see some interesting features of TensorFlow. A little spoiler, we'll use the `tf.TensorArray` :)
 

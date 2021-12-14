@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Advent of Code 2021 in pure TensorFlow - day 3"
-date: 2021-12-13 08:00:00
+date: 2021-12-14 08:00:00
 categories: tensorflow
 summary: "A Solution to the AoC day 3 puzzle in pure TensorFlow. This challenge allows us to explore the TensorArray data type and find their limitations when used inside a static-graph context. We'll also use a tf.function experimental (but very useful) feature for avoiding useless retraces and reusing the same graph with tensors of different shapes."
 authors:

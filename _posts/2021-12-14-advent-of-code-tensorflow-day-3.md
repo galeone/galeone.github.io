@@ -8,7 +8,7 @@ authors:
     - pgaleone
 ---
 
-The day 3 challenge is very different from to easy challenges faced during [day 1](/tensorflow/2021/12/11/advent-of-code-tensorflow/) and [day 2](/tensorflow/2021/12/12/advent-of-code-tensorflow-day-2/). This time, we need to face a more difficult challenge and by doing so we'll explore some useful, although not widely used, TensorFlow features like `tf.TensorArray`.
+The day 3 challenge is very different from the easy challenges faced during [day 1](/tensorflow/2021/12/11/advent-of-code-tensorflow/) and [day 2](/tensorflow/2021/12/12/advent-of-code-tensorflow-day-2/). This time, we need to face a more difficult challenge and by doing so we'll explore some useful, although not widely used, TensorFlow features like `tf.TensorArray`.
 
 Moreover, we'll find some limitations (bug?) of the `TensorArray` data type and we'll write some interesting utility that's not present in the TensorFlow standard library.
 
@@ -190,7 +190,7 @@ class RateFinder(tf.Module):
         self._zero = tf.constant(0, tf.int64)
         self._one = tf.constant(1, tf.int64)
         self._two = tf.constant(2, tf.int64)
-        # ... we'll add more fields later in the tuturial
+        # ... we'll add more fields later in the tutorial
 
     @tf.function(experimental_relax_shapes=True)
     def filter_by_bit_criteria(

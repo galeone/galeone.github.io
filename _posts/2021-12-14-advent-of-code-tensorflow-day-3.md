@@ -307,9 +307,9 @@ Very similar to the previous execution, this time we create our `finder` that's 
     finder = RateFinder(bits=tf.size(epsilon_rate))
 
     oxygen_generator_rating = finder.find(tensor_dataset, True)
-    tf.print("Oxigen generator rating (bin): ", oxygen_generator_rating)
+    tf.print("Oxygen generator rating (bin): ", oxygen_generator_rating)
     oxygen_generator_rating_dec = bin2dec(oxygen_generator_rating)
-    tf.print("Oxigen generator rating (dec): ", oxygen_generator_rating_dec)
+    tf.print("Oxygen generator rating (dec): ", oxygen_generator_rating_dec)
 
     co2_generator_rating = finder.find(tensor_dataset, False)
     tf.print("C02 scrubber rating (bin): ", co2_generator_rating)

@@ -217,7 +217,7 @@ Solving this problem having experience in the computer vision domain has been ea
 
 The challenge in the challenge of using only TensorFlow for solving the problem is slowly progressing, so far I solved all the puzzles up to Day 8 (inclusive). So get ready for at least 3 more articles :) Let's see when (and if!) TensorFlow alone won't be enough.
 
-If you missed the articles about the previous days solutions, here's an handy list:
+If you missed the articles about the previous days' solutions, here's a handy list:
 
 - [Day 1](/tensorflow/2021/12/11/advent-of-code-tensorflow/)
 - [Day 2](/tensorflow/2021/12/12/advent-of-code-tensorflow-day-2/)

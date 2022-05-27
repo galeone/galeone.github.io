@@ -432,3 +432,73 @@ However, things can become way more complex than this especially if the third-pa
 What could happen if the third-party library has among its dependencies `zlib` or `libpng`?. `zlib` and `libpng` are libraries that Unreal Engine provides and, thus, uses during the linking phase of the various modules - especially when packaging a project.
 
 We'll try to answer this question in the next article where we cover the *source code available scenario*. In that article, we'll see what happens if we use the system toolchain when compiling the library and what happens when we use the Unreal toolchain also for compiling the third-party library.
+
+##### Bonus
+
+The whole article talked about `std::string`, but the problem is totally general. There's no standard ABI in C++ and, thus, there's no ABI compatibility for every structure in `libc++` and `libstdc++`.
+
+Let's take this final example:
+
+The library header.
+```cpp
+//lib.h
+#include <memory>
+
+class B {
+};
+
+class A {
+    std::unique_ptr<B> _p;
+    public:
+    A(std::unique_ptr<B>&&);
+};
+```
+
+The library source code.
+
+```cpp
+//lib.cpp
+#include "lib.h"
+
+A::A(std::unique_ptr<B>&& p) : _p(std::move(p)) {}
+```
+
+The library compilation (`libc++`):
+
+```
+clang -stdlib=libc++ lib.cpp -shared -o liblib.so
+```
+
+The main program
+
+```cpp
+//main.cpp
+
+#include "lib.h"
+#include <memory>
+
+int main() {
+    std::unique_ptr<B> p = std::make_unique<B>();
+
+    A x(std::move(p));
+    return 0;
+}
+```
+
+The working compilation (compile with `libc++`) and the execution
+
+```bash
+clang++ -stdlib=libc++ main.cpp -o main -L. -llib
+LD_LIBRARY_PATH=. ./main
+```
+
+The failing linking (compile with `libstdc++`):
+
+```bash
+clang++ main.cpp -o main -L. -llib
+/usr/bin/ld: /tmp/main-857110.o: in function `main':
+main.cpp:(.text+0x3a): undefined reference to `A::A(std::unique_ptr<B, std::default_delete<B> >&&)'
+clang-13: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+I hope this last example - with zero Unreal Engine - helps understanding the ABI compatibility problem.

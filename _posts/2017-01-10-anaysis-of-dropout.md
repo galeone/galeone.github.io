@@ -157,9 +157,9 @@ The scaling factor has been added by the authors to compensate the activation va
 
 # Dropout & other regularizers
 
-Dropout is often used with L2 normalization and other parameter constraint techniques (such as *Max Norm* [^1]), this is not a case. Normalizations help to keep model parameters value low, in this way a parameter can't grow too much.
+Dropout is often used with L2 regularization and other parameter constraint techniques (such as *Max Norm* [^1]), this is not a case. Regularization help to keep model parameters value low, in this way a parameter can't grow too much.
 
-In brief, the L2 normalization (for example) is an additional term to the loss, where $$\lambda \in [0, 1]$$ is an hyper-parameter called regularization strength, $$F(W; x)$$ is the model and $$\mathcal{E}$$ is the error function between the real $$y$$ and the predicted $$\hat{y}$$ value.
+In brief, the L2 regularization (for example) is an additional term to the loss, where $$\lambda \in [0, 1]$$ is an hyper-parameter called regularization strength, $$F(W; x)$$ is the model and $$\mathcal{E}$$ is the error function between the real $$y$$ and the predicted $$\hat{y}$$ value.
 
 $$ \mathcal{L}(y, \hat{y}) = \mathcal{E}(y, F(W;x)) + \frac{\lambda}{2}W^{2} $$
 
@@ -171,19 +171,19 @@ Dropout alone, instead, does not have any way to prevent parameter values from b
 
 ## Inverted Dropout and other regularizers
 
-Since Dropout does not prevent parameters from growing and overwhelming each other, applying L2 regularization (or any other regularization technique that constraints the parameter values) can help.
+Since Dropout does not prevent parameters from growing and overwhelming each other, applying L2 regularization (or any other regularization techniques that constraint the parameter values) can help.
 
 Making explicit the scaling factor, the previous equation becomes:
 
 $$ w \leftarrow w - \eta \left( \frac{1}{q} \frac{\partial F(W;x)}{\partial w} + \lambda w \right) $$
 
-It can be easily seen that when using Inverted Dropout, the learning rate is scaled by a factor of $$q$$. Since $$q$$ has values in $$]0, 1]$$ the ratio between $$\eta$$ and $$q$$ can vary between:
+It can be easily seen that when using Inverted Dropout, the learning rate is scaled by a factor of $$q$$. Since $$q$$ has values in $$[0, 1]$$ the ratio between $$\eta$$ and $$q$$ can vary between:
 
 $$ r(q) = \frac{\eta}{q} \in [\eta = \lim_{q \rightarrow 1} r(q), +\infty =  \lim_{q \rightarrow 0} r(q)] $$
 
 For this reason, from now on we'll call $$q$$ **boosting factor** because it boosts the learning rate. Moreover, we'll call $$r(q)$$ the **effective learning rate**.
 
-The effective learning rate, thus, is higher respect to the learning rate chosen: for this reason normalizations that constrain the parameter values can help to simplify the learning rate selection process.
+The effective learning rate, thus, is higher respect to the learning rate chosen: for this reason, regularizers that constrain the parameter values can help to simplify the learning rate selection process.
 
 # Summary
 
@@ -192,7 +192,7 @@ The effective learning rate, thus, is higher respect to the learning rate chosen
 3. Dropout on a set of neurons can be modeled using a Binomial random variable
 4. Even if the probability of dropping exactly $$np$$ neurons is low, $$np$$ neurons are dropped on average on a layer of $$n$$ neurons.
 5. Inverted Dropout boost the learning rate
-6. Inverted Dropout should be using together with other normalization techniques that constrain the parameter values in order to simplify the learning rate selection procedure
+6. Inverted Dropout should be using together with other regularization techniques that constrain the parameter values in order to simplify the learning rate selection procedure
 7. Dropout helps to prevent overfitting in deep neural networks.
 
 [1]: https://arxiv.org/abs/1207.0580 "Improving neural networks by preventing co-adaptation of feature detectors"

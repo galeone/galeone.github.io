@@ -63,11 +63,70 @@ The problem can be breakdown into 4 simple steps:
 1. Read the second part of the input: parse the instructions
 1. Iteratively transform the previously created data structure according to the instructions
 
-As anticipated in the [previous article](/tensorflow/2022/12/04/advent-of-code-tensorflow-day-1-and-2/#input-pipeline) the input pipeline will never change in the AoC problems, thus this part won't be presented in the article. It is, and always will be, a dataset that produces `tf.string` items (every single line read from the input).
 
-### Splitting strings: ragged tensors
+### Parsing strings: tf.strings & regex
 
-The [`tf.strings`](https://www.tensorflow.org/api_docs/python/tf/strings/) module contains several utilities for working with `tf.Tensor` with `dtype=tf.string`. For splitting in two identical halves every line, the `tf.strings.substr` function is perfectly suited. Since we want to apply the same transformation to every line of the dataset we can define a function (that, thus, we'll always be executed in graph mode) that process the line and returns the two strings.
+The [`tf.strings`](https://www.tensorflow.org/api_docs/python/tf/strings/) module contains several utilities for working with `tf.Tensor` with `dtype=tf.string`. Unfortunately, there are **a tons** of limitations when working with strings and `tf.function`-decorated functions (we'll see some of these limitations later). Moreover, perhaps the most powerful tool for string parsing and manipulation (the [regular expressions](https://en.wikipedia.org/wiki/Regular_expression)) has a very limited integration. We only have 2 functions to use:
+
+- [tf.strings.regex_full_match](https://www.tensorflow.org/api_docs/python/tf/strings/regex_full_match): check if the input matches the regex pattern.
+- [tf.strings.regex_replace](https://www.tensorflow.org/api_docs/python/tf/strings/regex_replace(input, pattern, rewrite)): replace elements of input matching regex pattern with rewrite.
+
+That's all. So, if we want to use regular expression for parsing the crates or the moves, we are forced to use only these 2 functions, together with the other basic strings manipulation functions offered by the module.
+
+
+### Parsing the crates
+
+We are quite lucky because every line containing at least a crate contains the character `[`. Thus, a regex pattern for this pattern is `".*\[.*`.
+
+We can thus easily filter every line that contains a crate by applying this condition to every line of the input dataset.
+
+```python
+stacks_dataset = dataset.filter(
+        lambda line: tf.strings.regex_full_match(line, r".*\[.*")
+    )
+```
+
+Now, we need to find a way to extract every stack of crates. This can be quite easily done noticing that every stack is just a column of 4 characters. Thus, moving 4 characters at a time over every line, we can understand where a crate is and extract is letter.
+
+Of course, the tool to use is `tf.TensorArray` since every stack could contain a variable number of crates, and `tf.TensorArray` is the only tool we can use in static-graph mode for having such behavior.
+
+
+```python
+@tf.function
+def to_array(line):
+    length = tf.strings.length(line) + 1
+    stacks = length // 4
+    ta = tf.TensorArray(tf.string, size=0, dynamic_size=True)
+    for i in tf.range(stacks):
+        substr = tf.strings.strip(tf.strings.substr(line, i * 4, 4))
+        stripped = tf.strings.regex_replace(substr, r"\[|\]", "")
+        ta = ta.write(i, stripped)
+
+    return ta.stack()
+```
+
+the `to_array` function accepts a line `[Z] [M] [P]` as input, parses it by moving 4 characters at a time along its length, removes the square brackets, and saves the letter in the correct position of the stack (0 indexed).
+
+```python
+stacks_dataset = stacks_dataset.map(to_array)
+```
+
+The lines are read from the first to the last, that means every stack is built from the **top to the bottom*.
+
+Now that we have a dataset that produces stacks when iterated, we can convert it to a `tf.Tensor`. In this way our `stacks_tensor` contains a bunch of very important information:
+
+- The number of stacks (its shape along the 1-dimension)
+- The height of the highest stack
+
+
+```python
+stacks_tensor = tf.convert_to_tensor(list(stacks_dataset))
+num_stacks = tf.shape(stacks_tensor, tf.int64)[1] + 1
+```
+
+`stacks_tensor` is unmodifiable not being a `tf.Variable`. However, we are in a particular situation in which TensorFlow is not perfectly suited. In fact, even if `stacks_tensor' is converted into a `tf.Variable` we have no idea about the maximum height that can be reached when applying the various instructions and moving the crates.
+
+In fact, even if there's a `validate_shape` parameter in the `tf.Variable` constructor, as we'll see at the end of the article (in the second part), this doesn't allow us to change the shape of a `tf.Variable` object at runtime'.
 
 ```python
 @tf.function

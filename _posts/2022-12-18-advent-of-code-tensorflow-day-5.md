@@ -3,14 +3,14 @@ layout: post
 title: "Advent of Code 2022 in pure TensorFlow - Day 5"
 date: 2022-12-18 08:00:00
 categories: tensorflow
-summary: "Differently from the previous 2 articles, where I merged the description of the solutions of two problems into one article, this time the whole article is dedicated to the pure TensorFlow solution of the problem number 5. The reason is simple: solving this problem in pure TensorFlow hasn't been straightforward and for this reason it is worth explaining all the limitations and the subtle bugs (?) found during the solution."
+summary: ""
 authors:
     - pgaleone
 ---
 
-Differently from the previous 2 articles, where I merged the description of the solutions of two problems into one article, this time the whole article is dedicated to the pure TensorFlow solution of the problem number 5. The reason is simple: solving this problem in pure TensorFlow hasn't been straightforward and for this reason it is worth explaining all the limitations and the subtle bugs (?) found during the solution.
+Differently from the previous 2 articles, where I merged the description of the solutions of two problems into one article, this time the whole article is dedicated to the pure TensorFlow solution to problem number 5. The reason is simple: solving this problem in pure TensorFlow hasn't been straightforward so it is worth explaining all the limitations and the subtleties found during the solution.
 
-In the first part of the article I'll explain the solution that solves completely both parts of the puzzle. In the second part, instead, I'll analyze the problem I encountered in the first design of the solution where I wanted to solve the puzzle using a `tf.Variable` with an "undefined shape". Feature available for every `tf.Variable` but not clearly documented (IMHO). So, at the end of this article, we'll understand a little bit more about what happend when the `validate_shape` argument of `tf.Variable` is set to `False`.
+In the first part of the article I'll explain the solution that solves completely both parts of the puzzle. In the second part, instead, I'll propose a potential alternative solution to the problem that uses a `tf.Variable` with an "undefined shape". Feature available for every `tf.Variable` but not clearly documented (IMHO). So, at the end of this article, we'll understand a little bit more about what happened when the `validate_shape` argument of `tf.Variable` is set to `False`.
 
 
 ## [Day 5: Supply Stacks](https://adventofcode.com/2022/day/5)
@@ -30,7 +30,7 @@ move 2 from 2 to 1
 move 1 from 1 to 2
 ```
 
-Part 1, that wants us to move the crates one at the time, ends up with this final configuration
+Part 1, which wants us to move the crates one at a time, ends up with this final configuration
 
 <pre>
         [<b>Z</b>]
@@ -66,12 +66,12 @@ The problem can be breakdown into 4 simple steps:
 
 ### Parsing strings: tf.strings & regex
 
-The [`tf.strings`](https://www.tensorflow.org/api_docs/python/tf/strings/) module contains several utilities for working with `tf.Tensor` with `dtype=tf.string`. Unfortunately, there are **a tons** of limitations when working with strings and `tf.function`-decorated functions (we'll see some of these limitations later). Moreover, perhaps the most powerful tool for string parsing and manipulation (the [regular expressions](https://en.wikipedia.org/wiki/Regular_expression)) has a very limited integration. We only have 2 functions to use:
+The [`tf.strings`](https://www.tensorflow.org/api_docs/python/tf/strings/) module contains several utilities for working with `tf.Tensor` with `dtype=tf.string`. Unfortunately, there are **tons** of limitations when working with strings and `tf.function`-decorated functions (we'll see some of these limitations later). Moreover, perhaps the most powerful tool for string parsing and manipulation (the [regular expressions](https://en.wikipedia.org/wiki/Regular_expression)) has a very limited integration. We only have 2 functions to use:
 
 - [tf.strings.regex_full_match](https://www.tensorflow.org/api_docs/python/tf/strings/regex_full_match): check if the input matches the regex pattern.
 - [tf.strings.regex_replace](https://www.tensorflow.org/api_docs/python/tf/strings/regex_replace(input, pattern, rewrite)): replace elements of input matching regex pattern with rewrite.
 
-That's all. So, if we want to use regular expression for parsing the crates or the moves, we are forced to use only these 2 functions, together with the other basic strings manipulation functions offered by the module.
+That's all. So, if we want to use regular expressions for parsing the crates or the moves, we are forced to use only these 2 functions, together with the other basic string manipulation functions offered by the module.
 
 
 ### Parsing the crates
@@ -86,7 +86,7 @@ stacks_dataset = dataset.filter(
     )
 ```
 
-Now, we need to find a way to extract every stack of crates. This can be quite easily done noticing that every stack is just a column of 4 characters. Thus, moving 4 characters at a time over every line, we can understand where a crate is and extract is letter.
+Now, we need to find a way to extract every stack of crates. This can be quite easily done noticing that every stack is just a column of 4 characters. Thus, by moving 4 characters at a time over every line, we can understand where a crate is and extract its letter.
 
 Of course, the tool to use is `tf.TensorArray` since every stack could contain a variable number of crates, and `tf.TensorArray` is the only tool we can use in static-graph mode for having such behavior.
 
@@ -111,11 +111,11 @@ the `to_array` function accepts a line `[Z] [M] [P]` as input, parses it by movi
 stacks_dataset = stacks_dataset.map(to_array)
 ```
 
-The lines are read from the first to the last, that means every stack is built from the **top to the bottom*.
+The lines are read from the first to the last, that means every stack is built from the *top to the bottom*.
 
 Now that we have a dataset that produces stacks when iterated, we can convert it to a `tf.Tensor`. In this way our `stacks_tensor` contains a bunch of very important information:
 
-- The number of stacks (its shape along the 1-dimension)
+- The number of stacks (the shape along the 1-dimension)
 - The height of the highest stack
 
 
@@ -126,252 +126,263 @@ num_stacks = tf.shape(stacks_tensor, tf.int64)[1] + 1
 
 `stacks_tensor` is unmodifiable not being a `tf.Variable`. However, we are in a particular situation in which TensorFlow is not perfectly suited. In fact, even if `stacks_tensor' is converted into a `tf.Variable` we have no idea about the maximum height that can be reached when applying the various instructions and moving the crates.
 
-In fact, even if there's a `validate_shape` parameter in the `tf.Variable` constructor, as we'll see at the end of the article (in the second part), this doesn't allow us to change the shape of a `tf.Variable` object at runtime'.
+### Stacking crates: the limitations of tf.Variable
+
+As it's easy to understand, we have no idea how tall a stack can become, everything depends on the instructions. Since a `tf.Variable` **requires** a well-defined shape, we are forced to guess this maximum size and hope it's enough. That's for sure a huge limitation of this solution.
+
+However, in the last part of the article I'll suggest to the reader a potential starting point for designing a more general solution that uses the `validate_shape=False` parameter of the `tf.Variable` - that's a not widely used feature, but very powerful.
 
 ```python
-@tf.function
-def split(line):
-    length = tf.strings.length(line) // 2
-    position = length
+max_stack_size = 200
+stacks = tf.Variable(tf.zeros((max_stack_size, num_stacks - 1, 1), dtype=tf.string))
+```
 
-    return tf.strings.substr(line, pos=0, len=length), tf.strings.substr(
-        line, pos=position, len=length
+`stacks` is a `tf.Variable` with shape `(200, number of stacks -1, 1)`:
+
+- 200 is the maximum number of crates in a stack our solution supports (the limitation)
+- `num_stacks -1` is the number of stacks (0-based).
+- `1` is the dimension of the inner dimension. Let's say that's not required (since the unary dimensions can be squeezed) but having it simplifies the usage of the `tf.tensor_scatter_nd_*` functions.
+
+The `stacks` variable is initialized with zeros, but we have our `stacks_tensor` that represents the initial state. So, we can define a function that initializes to the initial state the `stacks` variable every time is called.
+
+```python
+def initialize_stacks():
+    stacks.assign(tf.zeros_like(stacks))
+
+    indices_x, indices_y = tf.meshgrid(
+        tf.range(max_stack_size - tf.shape(stacks_tensor)[0], max_stack_size),
+        tf.range(tf.shape(stacks_tensor)[1]),
     )
+    indices = tf.stack([indices_x, indices_y], axis=-1)
+
+    updates = tf.expand_dims(tf.transpose(stacks_tensor), axis=2)
+    stacks.assign(tf.tensor_scatter_nd_update(stacks, indices, updates))
+
+initialize_stacks()
 ```
 
-The code is trivial. The only thing to note is that strings are a variable-length data type. Thus, functions like `substr`, or `split` cannot return a `tf.Tensor` since a `tf.Tensor` is always made of **identical** dimensions (e.g. every element in a Tensor has a well-defined shape). Instead, these functions work with [`tf.RaggedTensor`](https://www.tensorflow.org/api_docs/python/tf/RaggedTensor?hl=en)s as input or output.
+First, we reset the status of the `stacks` variable to zero. Then, we create the indices we want to use while assigning elements of `updates` to `stacks`. The idea is to assign the elements "at the bottom" which means that a stack in `stack_tensor` (like `ZND` up to down) is assigned to its corresponding stack in the `stacks` tensor at the position `max_stack_size -3` onwards (e.g. `Z` in position `max_stack_size-3`, `N` in position max_stack_size-2`, and so on).
 
-Applying this transformation is just the invocation of the `.map` method over the input dataset. 
+Then, we use the [`tf.tensor_scatter_nd_update`](https://www.tensorflow.org/api_docs/python/tf/tensor_scatter_nd_update) function to scatter `updates` into `stacks` according to `indices`. This function returns a new tensor with the same shape of `stacks`, that thus can be perfectly assigned to the `stacks` variable.
 
-```python
-splitted_dataset = dataset.map(split)
-```
+Having a single `tf.Variable` containing all the stacks at once, we have lost the information about the number of crates per stack. In fact, `tf.shape(stacks)` will always return the whole variable shape without information about the non-empty elements present along every dimension.
 
-The `splitted_dataset` is a `tf.data.Dataset` whose elements are 2 ragged tensors.
+Thus, we need to keep track manually of this information, which needs to be re-computed every time we apply a transformation to the `stacks` variable.
 
-### Items to priority: StaticHashTable
 
-The mapping between items and the corresponding priorities is known in advance (and not known at runtime), thus we can create a lookup table that given a character, it returns the corresponding priority. The perfect tool is the [tf.lookup.StaticHashTable`](https://www.tensorflow.org/api_docs/python/tf/lookup/StaticHashTable?hl=en).
+### Counting crates: mutable hashmaps
 
-TensorFlow's flexibility allows us to create this mapping in a single call. We only need
+The idea is simple: the zero element for the  `tf.string` dtype is the empty string (`""`). Thus, we can count the number of non-empty elements along the 0-axis, and save the result inside a mutable hashmap that maps the stack number to its number of crates.
 
-1. The characters to map (we can write manually the lowercase/uppercase alphabet or get this constant from the python `string` module)
-2. The priority values
+Once again, the perfect tool (although still experimental, it works fine!) is [tf.lookup.experimental.MutableHashTable](https://www.tensorflow.org/api_docs/python/tf/lookup/experimental/MutableHashTable).
 
 ```python
-keys_tensor = tf.concat(
-    [
-        tf.strings.bytes_split(string.ascii_lowercase),
-        tf.strings.bytes_split(string.ascii_uppercase),
-    ],
-    0,
-)
-vals_tensor = tf.concat([tf.range(1, 27), tf.range(27, 53)], 0)
-
-item_priority_lut = tf.lookup.StaticHashTable(
-    tf.lookup.KeyValueTensorInitializer(keys_tensor, vals_tensor), default_value=-1
-)
-```
-
-we now have a lookup table ready to use. Thus, we can create a `to_priority(first, second)` function that will map every character in `first` and `second` to their corresponding priority.
-
-TensorFlow allows us to do the mapping of every character to its priority in parallel. Using [`tf.strings.byte_split`](https://www.tensorflow.org/api_docs/python/tf/strings/bytes_split) we can pass from a string ("abc..") to a tensor of characters ('a', 'b', 'c', ...).
-
-```python
-@tf.function
-def to_priority(first, second):
-    first = tf.strings.bytes_split(first)
-    second = tf.strings.bytes_split(second)
-    return item_priority_lut.lookup(first), item_priority_lut.lookup(second)
-```
-
-as anticipated, the lookup is done in parallel (the `first` parameter input to `lookup` is a tensor of characters, and the lookup for every character is done in a single pass).
-
-The `to_priority` function returns a pair of `tf.Tensor` containing the corresponding priorities.
-
-Once again, applying the transformation to the dataset is trivial
-
-```python
-splitted_priority_dataset = splitted_dataset.map(to_priority)
-```
-
-### Finding common priorities: tf.sets and tf.sparse.SparseTensor
-
-Working with sets in TensorFlow is not as simple as working with sets in other languages. In fact, every function in the [`tf.sets`](https://www.tensorflow.org/api_docs/python/tf/sets/) module accepts a particular input data representation.
-
-You cannot pass, for example, two tensors like (1,2,3) and (1,0,0) to the `tf.sets.intersection` function, and expect to get the value `1`. You need to reshape them, making the input parameters behave like an array of sets represented as a sparse tensor (since TensorFlow is designed for executing the same operation in parallel). That's why you'll see the `tf.expand_dims` call in the code below.
-
-```python
-@tf.function
-def to_common(first, second):
-    first = tf.expand_dims(first, 0)
-    second = tf.expand_dims(second, 0)
-    intersection = tf.sets.intersection(first, second)
-    return tf.squeeze(tf.sparse.to_dense(intersection))
-```
-
-The `intersection` is a [`tf.sparse.SparseTensor`](https://www.tensorflow.org/api_docs/python/tf/sparse/SparseTensor) that's a compact representation for a `tf.Tensor`. Usually, this representation is very useful when working with "sparse problems" (e.g. problems dealing with huge matrices/tensors where the majority of the elements are 0). For our problem instead, it's useless and we can get the dense representation from its sparse counterpart (with `tf.sparse.to_dense`), and then return the single common priority as a scalar tensor by squeezing all the dimensions of size 1 from the shape of the dense tensor.
-
-Once again, we transform the dataset
-
-```python
-common_elements = splitted_priority_dataset.map(to_common)
-```
-
-Perfect! The `common_elements` is a `tf.data.Dataset` that contains the common priority for every line of the original dataset. We can now loop over it (`list`) and covert it to a `tf.Tensor` so we can use the `tf.reduce_sum` for getting the sum of the identified common priorities.
-
-```python
-tensor = tf.convert_to_tensor(list(common_elements.as_numpy_iterator()))
-tf.print("sum of priorities of common elements: ", tf.reduce_sum(tensor))
-```
-
-Part one: ✅
-
-## [Day 3: Rucksack Reorganization](https://adventofcode.com/2022/day/3): part two
-
-The second part of the problem asks us to do not to consider a single rucksack, but a group of 3 rucksacks. Every 3 rucksacks have a single element in common, we need to identify it, find its priority, and get the sum of these newly identified priorities.
-
-The problem can be breakdown into 3 steps:
-
-1. Create the group of characters: using `tf.data.Dataset` is trivial, it means to just call `batch(3)`.
-2. Mapping the characters to the priorities
-3. Find the common priority for every batch (instead of every line as we did in the previous part) and sum them.
-
-The steps to follow are very similar to part 1, so instead of detailing every single step, we can just go straight to the solution.
-
-```python
-# batch
-grouped_dataset = dataset.batch(3)
-
-# mapping
-grouped_priority_dataset = grouped_dataset.map(
-    lambda line: item_priority_lut.lookup(tf.strings.bytes_split(line))
+num_elements = tf.lookup.experimental.MutableHashTable(
+    tf.int64, tf.int64, default_value=-1
 )
 
-@tf.function
-def to_common_in_batch(batch):
-    intersection = tf.sets.intersection(
-        tf.sets.intersection(
-            tf.expand_dims(batch[0], 0), tf.expand_dims(batch[1], 0)
-        ),
-        tf.expand_dims(batch[2], 0),
-    )
-    return tf.squeeze(tf.sparse.to_dense(intersection))
-
-grouped_common_elements = grouped_priority_dataset.map(to_common_in_batch)
-tensor = tf.convert_to_tensor(list(grouped_common_elements.as_numpy_iterator()))
-tf.print("sum of priorities of grouped by 3 elements: ", tf.reduce_sum(tensor))
-```
-
-Here we go, day 3 problem solved!
-
-The day 4 problem is quite easy and, from the TensorFlow point of view, it doesn't use new functionalities. So it's not worth writing a dedicated article about it but I'll try to summarize the main peculiarities in the section below.
-
-## [Day 4: Camp Cleanup](https://adventofcode.com/2022/day/4): part one
-
-You can click on the title above to read the full text of the puzzle. The TLDR version is: given a list of pairs of ranges (the puzzle input) we need to count in how many pairs one range **fully contains** the other.
-
-The puzzle input is something like
-
-```
-2-4,6-8
-2-3,4-5
-5-7,7-9
-2-8,3-7
-6-6,4-6
-2-6,4-8
-```
-
-Thus, the first pair is made of the range (2,3,4) and (6,7,8). They have no elements in common and thus it doesn't satisfy the requirement. The ranges 2-8 and 3-7, instead satisfy this requirement since 3-7 (3,4,5,6,7) is fully contained in 2-8 (2,**3,4,5,7**,8).
-
-Problem breakdown:
-
-1. Parse the data and get the start and end number for every range in every pair
-2. Just filter (`tf.data.Dataset.filter`) the dataset, and keep only the elements that satisfy the condition.
-
-```python
-pairs = dataset.map(lambda line: tf.strings.split(line, ","))
-ranges = pairs.map(
-    lambda pair: tf.strings.to_number(tf.strings.split(pair, "-"), tf.int64)
-)
-
-contained = ranges.filter(
-    lambda pair: tf.logical_or(
-        tf.logical_and(
-            tf.math.less_equal(pair[0][0], pair[1][0]),
-            tf.math.greater_equal(pair[0][1], pair[1][1]),
-        ),
-        tf.logical_and(
-            tf.math.less_equal(pair[1][0], pair[0][0]),
-            tf.math.greater_equal(pair[1][1], pair[0][1]),
+def update_num_elements():
+    num_elements.insert(
+        tf.range(num_stacks - 1),
+        tf.squeeze(
+            tf.reduce_sum(tf.cast(tf.not_equal(stacks, ""), tf.int64), axis=[0])
         ),
     )
-)
+
+update_num_elements()
 ```
 
-It's really just a filter function over the element of a dataset. To solve the problem, we just need to count the elements of this dataset. We can do it by looping over it, converting the result to a `tf.Tensor` and get its outer dimension.
+Here we go, we have the `stacks` variable populated with the initial state, and the `num_elements` lookup table that contains the number of elements for each stack.
+
+We can now parse the remaining part of the dataset and, line by line (thus, while looping over the dataset), execute all the instructions provided.
+
+### Instruction parsing & execution
+
+Part 1 requires to move one crate at a time, while part 2 requires to move the specified number of creates at the same time.
+
+Moving one element at a time, means inserting the elements in reversed order (read `ABC`, insert `CBA`). We can keep track of this requirement with a boolean variable.
 
 ```python
-pairs = dataset.map(lambda line: tf.strings.split(line, ","))
-ranges = pairs.map(
-    lambda pair: tf.strings.to_number(tf.strings.split(pair, "-"), tf.int64)
-)
+one_at_a_time = tf.Variable(True)
+```
 
-contained = ranges.filter(
-    lambda pair: tf.logical_or(
-        tf.logical_and(
-            tf.math.less_equal(pair[0][0], pair[1][0]),
-            tf.math.greater_equal(pair[0][1], pair[1][1]),
+Now we can focus on the line parsing. As anticipated, we have a very limited number of functions in the `tf.strings` package for working with strings, thus the manipulation is a bit cumbersome.
+
+Given a line in the format
+
+```
+move X from A to B
+```
+
+<!-- TODO: spellcheck from here -->
+
+our goal it to extract the numbers `X` (amount), `A` (source), `B` (destination) and use them for reading from the stack with ID `source`, the required `amount` of elements from the top (where our "top" is given by the number of non empty elements in the stack), and move them into `B` according to the strategy defined by `one_at_a_time`.
+
+
+```python
+def move(line):
+    amount = tf.strings.to_number(
+        tf.strings.regex_replace(
+            tf.strings.regex_replace(line, "move ", ""), r" from \d* to \d*$", ""
         ),
-        tf.logical_and(
-            tf.math.less_equal(pair[1][0], pair[0][0]),
-            tf.math.greater_equal(pair[1][1], pair[0][1]),
-        ),
+        tf.int64,
     )
-)
-contained_tensor = tf.convert_to_tensor(
-    list(iter(contained.map(lambda ragged: tf.sparse.to_dense(ragged.to_sparse()))))
-)
-tf.print("Fully contained ranges: ", tf.shape(contained_tensor)[0])
-```
 
-Part 1 completed!
-
-## [Day 4: Camp Cleanup](https://adventofcode.com/2022/day/4): part two
-
-The second part of the problem simply asks to find the number of ranges that **partially** overlap (e.g. 5-7,7-9 overlaps in a single section (7), 2-8,3-7 overlaps all of the sections 3 through 7, and so on...).
-
-The solution is even easier than the previous part.
-
-```python
-overlapping = ranges.filter(
-    lambda pair: tf.logical_not(
-        tf.logical_or(
-            tf.math.less(pair[0][1], pair[1][0]),
-            tf.math.less(pair[1][1], pair[0][0]),
+    source_dest = tf.strings.regex_replace(line, r"move \d* from ", "")
+    source = (
+        tf.strings.to_number(
+            tf.strings.regex_replace(source_dest, r" to \d*$", ""), tf.int64
         )
+        - 1
     )
-)
 
-overlapping_tensor = tf.convert_to_tensor(
-    list(
-        iter(overlapping.map(lambda ragged: tf.sparse.to_dense(ragged.to_sparse())))
+    dest = (
+        tf.strings.to_number(
+            tf.strings.regex_replace(source_dest, r"\d* to ", ""), tf.int64
+        )
+        - 1
     )
-)
 
-tf.print("Overlapping ranges: ", tf.shape(overlapping_tensor)[0])
+    num_element_source = num_elements.lookup([source])[0]
+    top = max_stack_size - num_element_source
+
+    read = stacks[top : top + amount, source]
+
+    # remove from source
+    indices_x, indices_y = tf.meshgrid(tf.range(top, top + amount), [source])
+    indices = tf.reshape(tf.stack([indices_x, indices_y], axis=-1), (-1, 2))
+    updates = tf.reshape(tf.repeat("", amount), (-1, 1))
+
+    stacks.assign(
+        tf.tensor_scatter_nd_update(stacks, indices, updates), use_locking=True
+    )
+
+    num_element_dest = num_elements.lookup([dest])[0]
+    top = max_stack_size - num_element_dest - 1
+
+    # one a at a time -> reverse
+    if one_at_a_time:
+        insert = tf.reverse(read, axis=[0])
+        insert = tf.reshape(insert, (-1, 1))
+    else:
+        insert = tf.reshape(read, (-1, 1))
+
+    indices_x, indices_y = tf.meshgrid(tf.range(top - amount + 1, top + 1), [dest])
+    indices = tf.reshape(tf.stack([indices_x, indices_y], axis=-1), (-1, 2))
+
+    stacks.assign(
+        tf.tensor_scatter_nd_update(stacks, indices, insert), use_locking=True
+    )
+
+    update_num_elements()
+    return stacks
 ```
 
-That's all, day 4 problem is completely solved in pure TensorFlow!
+The `move` function does all the job. Reads the line, parses it, extracts the values, removes them from source (set the to emptyu string), and inserts into the destination stack the read values according to the strategy.
+
+It's not immediate to understand all the indices manipulation, so take your time for reading the code carefully. In particular, the reader should focus to the [`tf.meshgrid`](https://www.tensorflow.org/api_docs/python/tf/meshgrid?hl=en) function used to create the various indices along the two dimensions.
+
+
+### Solving the problem
+
+The `move` function works only on the instructions lines, thus we need to create a dataset that only contains these lines. It's trivial with the `tf.data.Dataset.skip` method.
+
+```python
+moves_dataset = dataset.skip(tf.shape(stacks_tensor, tf.int64)[0] + 2)
+```
+
+We are now ready to play, solve the problem and visualize the final stack:
+
+
+```python
+tf.print("part 1")
+play = moves_dataset.map(move)
+
+list(play)
+
+indices_x = tf.range(num_stacks - 1)
+indices_y = max_stack_size - tf.reverse(num_elements.export()[1], axis=[0])
+indices = tf.reshape(tf.stack([indices_y, indices_x], axis=-1), (-1, 2))
+
+tf.print(tf.strings.join(tf.squeeze(tf.gather_nd(stacks, indices)), ""))
+```
+
+The thing worth noting is that playing this game is the iteration of the `play` dataset, invocated by converting the dataset object to a list (`list(play)`).
+
+The `num_elements` lookup table contains the index of every top-crate, thus we can just gather them, join as a single string and and print them for getting the expected result.
+
+Part two is identicaly, we only need to toggle the `one_at_a_time` variable, reset the `stacks` the its initial state, play once again the very same game, and gather the result as above.
+
+```python
+tf.print("part 2")
+initialize_stacks()
+update_num_elements()
+one_at_a_time.assign(False)
+play = moves_dataset.map(move)
+list(play)
+
+indices_x = tf.range(num_stacks - 1)
+indices_y = max_stack_size - tf.reverse(num_elements.export()[1], axis=[0])
+indices = tf.reshape(tf.stack([indices_y, indices_x], axis=-1), (-1, 2))
+
+tf.print(tf.strings.join(tf.squeeze(tf.gather_nd(stacks, indices)), ""))
+```
+
+Here we go, day 5 problem solved in pure TensorFlow!
+
+
+## tf.Variable undefined shape & validation
+
+In this part of the article I just want to highlight a not widely used behavior of the `tf.Variable` object: the possibility of creating a `tf.Variable` wihtout specifying its shape.
+
+The `tf.Variable` [documentation](https://www.tensorflow.org/api_docs/python/tf/Variable?hl=en) mentions the `validate_shape` parameter only twice:
+
+1. When documenting the `initial_value` parameter.
+   > The initial value must have a shape specified unless validate_shape is set to False.
+1. When documenting the `validate_shape` parameter itself.
+   > If False, allows the variable to be initialized with a value of unknown shape. If True, the default, the shape of `initial_value` must be known.
+
+So, by reading the documentation we can say that's possible to define a `tf.Variable` without shape, assigning it a `tf.Tensor` with a different shape without any problem. In this way, we could avoid the limitation of specifying a `max_stack_size` and writing a very general solution without this hard constraint.
+
+So, instead of giving a complete solution I just want to leave here a potential starting point for designing the more general solution.
+
+
+```python
+stacks = tf.Variable(
+   stacks_tensor, validate_shape=False, dtype=tf.string, shape=tf.TensorShape(None)
+)
+# ...
+
+def initialize_stacks():
+    stacks.assign(tf.zeros_like(stacks))
+    shape = tf.shape(stacks)
+    stacks.assign(
+       tf.reshape(
+           stacks,
+           [
+               shape[0],
+               shape[1],
+               1,
+           ],
+       )
+    )
+    # ...
+```
+
+The goal is the remove from the [solution](https://github.com/galeone/tf-aoc/blob/main/2022/5/main.py) the `max_stack_size` and always working with a `tf.Variable` with a variable shape: the tricky part will be the indexing, I guarantee it!
 
 ## Conclusion
 
-You can see the complete solutions in folders `3` and `4` in the dedicated GitHub repository (in the `2022` folder): [https://github.com/galeone/tf-aoc](https://github.com/galeone/tf-aoc).
+You can see the complete solution in the folder `5` in the dedicated GitHub repository (in the `2022` folder): [https://github.com/galeone/tf-aoc](https://github.com/galeone/tf-aoc).
 
-Solving these 2 problems has been straightforward and, in practice, both solutions are just transformations of every line of the input dataset to something else, until we end up with a single `tf.Tensor` containing the result we are looking for.
+Using TensorFlow for solving this problem allowed us to understad that the `tf.strings` package contains only a small set of utilities for working with strings, and that the regular expression support is quite limited.
+Once again, we relied upon the *experimental* `tf.lookup.experimental.MutableHashTable`, that altough being still experimental (by several years!) it works quite well.
 
-So far, TensorFlow has demonstrated to be flexible enough for solving these simple programming challenges. Anyway, I've already solved other problems, and some of them will show the limitations of using TensorFlow as a generic programming language (and perhaps, I found some bugs!).
+In the last part of the article I suggested an alternative approach to the problem, that should allow a better design of this solution without a constraint on the maximum number of stacks (and thus, without a constraint on the variable dimension). If you want to contribute and submit to the repository a merge request with your alternate solution in pure TensorFlow with a `tf.Variable` with an undefined shape, I'd be very happy to review and talk about it!
 
-If you missed the article about the previous days’ solutions, here's a link: [Advent of Code 2022 in pure TensorFlow - Days 1 & 2](/tensorflow/2022/12/04/advent-of-code-tensorflow-day-1-and-2/).
+If you missed the article about the previous days’ solutions, here's a handy list
+
+- [Advent of Code 2022 in pure TensorFlow - Days 1 & 2](/tensorflow/2022/12/04/advent-of-code-tensorflow-day-1-and-2/).
+- [Advent of Code 2022 in pure TensorFlow - Days 3 & 4](/tensorflow/2022/12/11/advent-of-code-tensorflow-day-3-and-4/).
 
 For any feedback or comment, please use the Disqus form below - thanks!

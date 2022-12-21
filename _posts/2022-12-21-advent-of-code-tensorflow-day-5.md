@@ -1,17 +1,16 @@
 ---
 layout: post
 title: "Advent of Code 2022 in pure TensorFlow - Day 5"
-date: 2022-12-18 08:00:00
+date: 2022-12-21 05:00:00
 categories: tensorflow
-summary: ""
+summary: "In the first part of the article, I'll explain the solution that solves completely both parts of the puzzle. As usual, focusing on the TensorFlow features used during the solution and all the various technical details worth explaining. In the second part, instead, I'll propose a potential alternative solution to the problem that uses a tf.Variable with an undefined shape. This is a feature of tf.Variable that's not clearly documented and, thus, widely used. So, at the end of this article, we'll understand how to solve the day 5 problem in pure TensorFlow and also have an idea of how to re-design the solution using a tf.Variable with the validate_shape argument set to False."
 authors:
     - pgaleone
 ---
 
 Differently from the previous 2 articles, where I merged the description of the solutions of two problems into one article, this time the whole article is dedicated to the pure TensorFlow solution to problem number 5. The reason is simple: solving this problem in pure TensorFlow hasn't been straightforward so it is worth explaining all the limitations and the subtleties found during the solution.
 
-In the first part of the article I'll explain the solution that solves completely both parts of the puzzle. In the second part, instead, I'll propose a potential alternative solution to the problem that uses a `tf.Variable` with an "undefined shape". Feature available for every `tf.Variable` but not clearly documented (IMHO). So, at the end of this article, we'll understand a little bit more about what happened when the `validate_shape` argument of `tf.Variable` is set to `False`.
-
+In the first part of the article, I'll explain the solution that solves completely both parts of the puzzle. As usual, focusing on the TensorFlow features used during the solution and all the various technical details worth explaining. In the second part, instead, I'll propose a potential alternative solution to the problem that uses a `tf.Variable` with an "undefined shape". This is a feature of `tf.Variable` that's not clearly documented and, thus, widely used. So, at the end of this article, we'll understand how to solve the day 5 problem in pure TensorFlow and also have an idea of how to re-design the solution using a `tf.Variable` with the `validate_shape` argument set to `False`.
 
 ## [Day 5: Supply Stacks](https://adventofcode.com/2022/day/5)
 
@@ -214,9 +213,7 @@ Given a line in the format
 move X from A to B
 ```
 
-<!-- TODO: spellcheck from here -->
-
-our goal it to extract the numbers `X` (amount), `A` (source), `B` (destination) and use them for reading from the stack with ID `source`, the required `amount` of elements from the top (where our "top" is given by the number of non empty elements in the stack), and move them into `B` according to the strategy defined by `one_at_a_time`.
+our goal is to extract the numbers `X` (amount), `A` (source), `B` (destination) and use them for reading from the stack with ID `source`, the required `amount` of elements from the top (where our "top" is given by the number of nonempty elements in the stack), and move them into `B` according to the strategy defined by `one_at_a_time`.
 
 
 ```python
@@ -278,9 +275,9 @@ def move(line):
     return stacks
 ```
 
-The `move` function does all the job. Reads the line, parses it, extracts the values, removes them from source (set the to emptyu string), and inserts into the destination stack the read values according to the strategy.
+The `move` function does all the job. Reads the line, parses it, extracts the values, removes them from source (set the to empty string), and inserts into the destination stack the read values according to the strategy.
 
-It's not immediate to understand all the indices manipulation, so take your time for reading the code carefully. In particular, the reader should focus to the [`tf.meshgrid`](https://www.tensorflow.org/api_docs/python/tf/meshgrid?hl=en) function used to create the various indices along the two dimensions.
+It's not immediate to understand all the indices manipulation, so take your time for reading the code carefully. In particular, the reader should focus on the [`tf.meshgrid`](https://www.tensorflow.org/api_docs/python/tf/meshgrid?hl=en) function used to create the various indices along the two dimensions.
 
 
 ### Solving the problem
@@ -309,9 +306,9 @@ tf.print(tf.strings.join(tf.squeeze(tf.gather_nd(stacks, indices)), ""))
 
 The thing worth noting is that playing this game is the iteration of the `play` dataset, invocated by converting the dataset object to a list (`list(play)`).
 
-The `num_elements` lookup table contains the index of every top-crate, thus we can just gather them, join as a single string and and print them for getting the expected result.
+The `num_elements` lookup table contains the index of every top-crate, thus we can just gather them, join as a single string and print them for getting the expected result.
 
-Part two is identicaly, we only need to toggle the `one_at_a_time` variable, reset the `stacks` the its initial state, play once again the very same game, and gather the result as above.
+Part two is identical, we only need to toggle the `one_at_a_time` variable, reset the `stacks` variable to its initial state, play once again the very same game, and gather the result as above.
 
 ```python
 tf.print("part 2")
@@ -333,7 +330,7 @@ Here we go, day 5 problem solved in pure TensorFlow!
 
 ## tf.Variable undefined shape & validation
 
-In this part of the article I just want to highlight a not widely used behavior of the `tf.Variable` object: the possibility of creating a `tf.Variable` wihtout specifying its shape.
+In this part of the article, I just want to highlight a not widely used behavior of the `tf.Variable` object: the possibility of creating a `tf.Variable` without specifying its shape.
 
 The `tf.Variable` [documentation](https://www.tensorflow.org/api_docs/python/tf/Variable?hl=en) mentions the `validate_shape` parameter only twice:
 
@@ -344,7 +341,7 @@ The `tf.Variable` [documentation](https://www.tensorflow.org/api_docs/python/tf/
 
 So, by reading the documentation we can say that's possible to define a `tf.Variable` without shape, assigning it a `tf.Tensor` with a different shape without any problem. In this way, we could avoid the limitation of specifying a `max_stack_size` and writing a very general solution without this hard constraint.
 
-So, instead of giving a complete solution I just want to leave here a potential starting point for designing the more general solution.
+So, instead of giving a complete solution I just want to leave here a potential starting point for designing a more general solution.
 
 
 ```python
@@ -369,14 +366,14 @@ def initialize_stacks():
     # ...
 ```
 
-The goal is the remove from the [solution](https://github.com/galeone/tf-aoc/blob/main/2022/5/main.py) the `max_stack_size` and always working with a `tf.Variable` with a variable shape: the tricky part will be the indexing, I guarantee it!
+The goal is the remove from the [solution](https://github.com/galeone/tf-aoc/blob/main/2022/5/main.py) the `max_stack_size` and always work with a `tf.Variable` with a variable shape: the tricky part will be the indexing, I guarantee it!
 
 ## Conclusion
 
-You can see the complete solution in the folder `5` in the dedicated GitHub repository (in the `2022` folder): [https://github.com/galeone/tf-aoc](https://github.com/galeone/tf-aoc).
+You can see the complete solution in folder `5` in the dedicated GitHub repository (in the `2022` folder): [https://github.com/galeone/tf-aoc](https://github.com/galeone/tf-aoc).
 
-Using TensorFlow for solving this problem allowed us to understad that the `tf.strings` package contains only a small set of utilities for working with strings, and that the regular expression support is quite limited.
-Once again, we relied upon the *experimental* `tf.lookup.experimental.MutableHashTable`, that altough being still experimental (by several years!) it works quite well.
+Using TensorFlow for solving this problem allowed us to understand that the `tf.strings` package contains only a small set of utilities for working with strings, and that the regular expression support is quite limited.
+Once again, we relied upon the *experimental* `tf.lookup.experimental.MutableHashTable`, although still experimental (by several years!) it works quite well.
 
 In the last part of the article I suggested an alternative approach to the problem, that should allow a better design of this solution without a constraint on the maximum number of stacks (and thus, without a constraint on the variable dimension). If you want to contribute and submit to the repository a merge request with your alternate solution in pure TensorFlow with a `tf.Variable` with an undefined shape, I'd be very happy to review and talk about it!
 

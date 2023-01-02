@@ -31,7 +31,7 @@ The rucksack contains 2 compartments and thus the first half (e.g. `vJrwpWtwJgWr
 The problem asks us, for each rucksack:
 
 1. To find the only common item type present in both compartments (e.g. for the first rucksack is the letter **p**).
-2. Assigning a priority to every item (`a` to `z` have priorities `1` to `26, and `A` to `Z` have priorities `27` to `52`) and getting the sum of priorities of the common item types (e.g. 16 (p), 38 (L), 42 (P), 22 (v), 20 (t), and 19 (s); the sum of these is 157).
+2. Assigning a priority to every item (`a` to `z` have priorities `1` to `26`, and `A` to `Z` have priorities `27` to `52`) and getting the sum of priorities of the common item types (e.g. 16 (p), 38 (L), 42 (P), 22 (v), 20 (t), and 19 (s); the sum of these is 157).
 
 ### Design Phase
 

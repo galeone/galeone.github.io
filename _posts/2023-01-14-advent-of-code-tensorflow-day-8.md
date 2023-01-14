@@ -3,7 +3,7 @@ layout: post
 title: "Advent of Code 2022 in pure TensorFlow - Day 8"
 date: 2023-01-14 08:00:00
 categories: tensorflow
-summary: ""
+summary: "Solving problem 8 of the AoC 2022 in pure TensorFlow is straightforward. After all, this problem requires working on a bi-dimensional grid and evaluating conditions by rows or columns. TensorFlow is perfectly suited for this kind of task thanks to its native support for reduction operators (tf.reduce) which are the natural choice for solving problems of this type."
 authors:
     - pgaleone
 ---

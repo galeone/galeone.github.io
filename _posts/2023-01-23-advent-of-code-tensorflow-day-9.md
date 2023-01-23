@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Advent of Code 2022 in pure TensorFlow - Day 9"
-date: 2023-01-22 08:00:00
+date: 2023-01-23 08:00:00
 categories: tensorflow
 summary: "In this article, we'll show two different solutions to the Advent of Code 2022 day 9 problem. Both of them are purely TensorFlow solutions. The first one, more traditional, just implement a solution algorithm using only TensorFlow's primitive operations - of course, due to some TensorFlow limitations this solution will contain some details worth reading (e.g. using a pairing function for being able to use n-dimensional tf.Tensor as keys for a mutable hashmap). The second one, instead, demonstrates how a different interpretation of the problem paves the way to completely different solutions. In particular, this solution is Keras based and uses a multi-layer convolutional model for modeling the rope movements."
 authors:

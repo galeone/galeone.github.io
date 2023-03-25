@@ -209,6 +209,6 @@ If you missed the article about the previous days’ solutions, here's a handy l
 - [Advent of Code 2022 in pure TensorFlow - Day 6](/tensorflow/2022/12/27/advent-of-code-tensorflow-day-6/)
 - [Advent of Code 2022 in pure TensorFlow - Day 7](/tensorflow/2022/12/29/advent-of-code-tensorflow-day-7/)
 - [Advent of Code 2022 in pure TensorFlow - Day 8](/tensorflow/2023/01/14/advent-of-code-tensorflow-day-8/)
-- [Advent of Code 2022 in pure TensorFlow - Day 9](/tensorflow/2023/01/22/advent-of-code-tensorflow-day-9/)
+- [Advent of Code 2022 in pure TensorFlow - Day 9](/tensorflow/2023/01/23/advent-of-code-tensorflow-day-9/)
 
 For any feedback or comment, please use the Disqus form below - thanks!

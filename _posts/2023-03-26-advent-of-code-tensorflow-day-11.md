@@ -6,6 +6,7 @@ categories: tensorflow
 summary: "In this article, we'll show how to solve problem 11 from the Advent of Code 2022 (AoC 2022) using TensorFlow. We'll first introduce the problem and then provide a detailed explanation of our TensorFlow solution. The problem at hand revolves around the interactions of multiple monkeys inspecting items, making decisions based on their worry levels, and following a set of rules."
 authors:
     - pgaleone
+    - chatGPT
 ---
 
 In this article, we demonstrate how to solve problem 11 of the Advent of Code 2022 using pure TensorFlow. While TensorFlow is primarily known for its applications in deep learning and neural networks, it offers powerful and flexible tools for working with tensors and performing computations on them. The problem at hand revolves around the interactions of multiple monkeys inspecting items, making decisions based on their worry levels, and following a set of rules. By leveraging TensorFlow's features, such as `tf.TensorArray`, `tf.data.Dataset.scan`, and `tf.function`, we can implement an efficient and elegant solution to this challenging puzzle. We will delve into the code, analyze different sections, and explain the rationale behind the various techniques used. Furthermore, this article provides insights into how TensorFlow can be employed for solving complex problems beyond its traditional applications in machine learning.
@@ -253,6 +254,6 @@ If you missed the article about the previous days’ solutions, here's a handy l
 - [Advent of Code 2022 in pure TensorFlow - Day 7](/tensorflow/2022/12/29/advent-of-code-tensorflow-day-7/)
 - [Advent of Code 2022 in pure TensorFlow - Day 8](/tensorflow/2023/01/14/advent-of-code-tensorflow-day-8/)
 - [Advent of Code 2022 in pure TensorFlow - Day 9](/tensorflow/2023/01/23/advent-of-code-tensorflow-day-9/)
-- [Advent of Code 2022 in pure TensorFlow - Day 10](/tensorflow/2023/03/22/advent-of-code-tensorflow-day-10/)
+- [Advent of Code 2022 in pure TensorFlow - Day 10](/tensorflow/2023/03/25/advent-of-code-tensorflow-day-10/)
 
 For any feedback or comment, please use the Disqus form below - thanks!

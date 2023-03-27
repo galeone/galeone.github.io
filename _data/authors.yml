@@ -20,3 +20,8 @@ tjwei:
     linkedin: "https://www.linkedin.com/in/tzer-jen-wei-7b4ba447/"
     github: "https://github.com/tjwei"
     bio: "Google Developer Expert in Machine Learning."
+
+chatGPT:
+  name: ChatGPT
+  uri: https://openai.com/blog/chatgpt
+  bio: ChatGPT (Chat Generative Pre-trained Transformer) is an artificial intelligence chatbot developed by OpenAI.

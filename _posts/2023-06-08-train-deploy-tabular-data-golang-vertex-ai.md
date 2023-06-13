@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "End-to-end AutoML pipeline on VertexAI with Go"
+title: "End-to-end AutoML pipeline on VertexAI in Go"
 date: 2023-06-08 08:00:00
 categories: golang vertexai
 summary: ""
 authors:
     - pgaleone
-    - chatgpt
+    - chatGPT
 ---
 
 Automated Machine Learning (AutoML) has revolutionized the way we approach building and deploying machine learning models. Gone are the days of painstakingly handcrafting complex models from scratch. With AutoML, the process becomes faster, more accessible, and remarkably efficient.
@@ -114,10 +114,10 @@ Supposing that we have all the CSV rows gathered in the slice `allUserData` we c
 // VertexAI autoML pipeline requires at least 1000 rows.
 // Thus we random sample the data to get 1000 rows
 if len(allUserData) < 1000 {
-	tot := len(allUserData) - 1
-	for i := 0; i < 1000-tot+2; i++ {
-		allUserData = append(allUserData, allUserData[rand.Intn(tot)])
-	}
+    tot := len(allUserData) - 1
+    for i := 0; i < 1000-tot+2; i++ {
+        allUserData = append(allUserData, allUserData[rand.Intn(tot)])
+    }
 }
 ```
 
@@ -155,8 +155,8 @@ Now can can start using the VertexAI client, imported as follows. Reminder: we m
 
 ```go
 import (
-	vai "cloud.google.com/go/aiplatform/apiv1beta1"
-	vaipb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
+    vai "cloud.google.com/go/aiplatform/apiv1beta1"
+    vaipb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
     "google.golang.org/protobuf/types/known/structpb"
 )
 ```
@@ -269,9 +269,9 @@ After that, we need to formulate the correct request with the client. Once again
 
 That's the body of the request to send to the API endpoint, if we are interacting with VertexAI using a pure REST client. With our `pipelineClient` we need to create the very same request, but according to the API requirements.
 
-TODO
+All the fields in UPPER CASE are the variable fields that we need to adapt to our problem. Using the client we have control over the `"trainingTaskInputs"` fields.
 
-All the fields in UPPER CASE are the variable fields that we need to adapt to our problem. We must specify **all the columns** and **the transformations** to apply (mandatory).
+In particular (another thing not documented clearly and found after trial & error and a log of Googling around in the [python source code](https://github.com/googleapis/python-aiplatform/blob/1fda4172baaf200414d95e7217bfef0e500cc16a/google/cloud/aiplatform/utils/column_transformations_utils.py#L67)) we must specify **all the columns** and **the transformations** to apply (mandatory) **except** for the target column, that mustn't have any transformation applied (note: the transformations can be all "auto" automatically determined by the data itself).
 
 ```go
 var modelDisplayName string = "sleep-efficiency-predictor"
@@ -288,9 +288,9 @@ var transformations string
 tot := len(csvHeaders(allUserData)) - 1
 for i, header := range csvHeaders(allUserData) {
     if header == targetColumn {
-        // required because with auto the pipeline fails with error message:
-        // "The values in target column SleepEfficiency have to be numeric for regression model."
-        transformations += fmt.Sprintf(`{"numeric": {"column_name": "%s"}}`, header)
+        // skip the target column, it mustn't be included in the transformations
+        continue
+
     } else {
         transformations += fmt.Sprintf(`{"auto": {"column_name": "%s"}}`, header)
     }
@@ -313,13 +313,18 @@ if err = trainingTaskInput.UnmarshalJSON([]byte(
 
 ```
 
-TODO
+Now we have all the inputs defined, and we are ready to create our training pipeline. Once again, there are parameters to specify that are not clearly documented.
+
+- `Parent` is the name of the resource location where to create the training pipeline (this information seems redundant)
+- `TrainingTaskDefinition` is the URI (available on the public bucket where all the AutoML training job definitions are published) that describes the AutoML training job on tabular data.
+- `InputDataConfig` is a structure to fill with the Dataset ID (previosly created)
+- `TrainingTaskInputs` is the JSON (converted into the corresponding protobuf representation) that describes all the inputs for the training pipeline.
 
 ```go
 if trainingPipeline, err = pipelineClient.CreateTrainingPipeline(ctx, &vaipb.CreateTrainingPipelineRequest{
     // Required. The resource name of the Location to create the TrainingPipeline
     // in. Format: `projects/{project}/locations/{location}`
-    Parent: fmt.Sprintf("projects/%s/locations/%s", _vaiProjectID, _vaiLocation),
+    Parent: fmt.Sprintf("projects/%s/locations/%s", os.Getenv("VAI_PROJECT_ID"), os.Getenv("VAI_LOCATION")),
     TrainingPipeline: &vaipb.TrainingPipeline{
         DisplayName:            modelDisplayName,
         TrainingTaskDefinition: "gs://google-cloud-aiplatform/schema/trainingjob/definition/automl_tables_1.0.0.yaml",
@@ -339,6 +344,26 @@ if trainingPipeline, err = pipelineClient.CreateTrainingPipeline(ctx, &vaipb.Cre
 }
 ```
 
+Here we go!
+
+We can monitor for the next 1h (because of the "traingBudgetMilleNodeHours" has been set to 1000 milliseconds = 1h of training time) to created training pipeline by querying the `trainingPipeline` in a loop (or whatever):
+
+ ```go
+fmt.Println("Training pipeline ID:", trainingPipeline.GetName())
+fmt.Println("Training pipeline display name:", trainingPipeline.GetDisplayName())
+fmt.Println("Training pipeline input data config:", trainingPipeline.GetInputDataConfig())
+fmt.Println("Training pipeline training task inputs:", trainingPipeline.GetTrainingTaskInputs())
+fmt.Println("Training pipeline state:", trainingPipeline.GetState())
+fmt.Println("Training pipeline error:", trainingPipeline.GetError())
+fmt.Println("Training pipeline create time:", trainingPipeline.GetCreateTime())
+fmt.Println("Training pipeline start time:", trainingPipeline.GetStartTime())
+fmt.Println("Training pipeline end time:", trainingPipeline.GetEndTime())
+```
+
+At the end of this process, we endup with a trained model stored on the Vertex AI model registry. During the training we can open the dashboard of VertexAI and monitor the training process from that location as well.
+
 ## Conclusion
+
+
 
 For any feedback or comment, please use the Disqus form below - thanks!

@@ -374,4 +374,6 @@ Although the official Go client documentation may lack explicit examples, we dis
 
 By following the step-by-step instructions provided in this article, Go developers can overcome the initial hurdles and harness the power of VertexAI and AutoML to develop and deploy tabular models efficiently. The ability to leverage Go for machine learning tasks opens up exciting opportunities for Go enthusiasts and empowers them to create intelligent applications with ease.
 
+A final note: working on Google Cloud has a cost. This article has been possible thanks to the Google ML Developer Programs team that supported this work by providing Google Cloud Credit.
+
 For any feedback or comment, please use the Disqus form below - thanks!

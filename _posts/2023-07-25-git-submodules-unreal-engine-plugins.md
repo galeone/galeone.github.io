@@ -325,7 +325,17 @@ git checkout v1.1.0
 
 Using this tag system, it's also possible to see that a new major version has been released (2.0.0), and thus if we want to switch to the latest version with breaking changes inside, we can once again `git checkout`, but this time we must be careful and understand how those breaking changes will affect our codebase.
 
-### Conclusion
+### Versioning of marketplace's plugin
+
+The workflow I suggest following is to create a private git repository, and to respect the intellectual property of the plugin creator, commit the source code into it. Use the tagging strategy to give meaningful tags to the plugins you downloaded.
+
+Periodically, download the plugin and overwrite its content. Use `git diff` to check if something changed. Of course, you should only focus your effort on the changes in the `Public` folder of the plugin. So you can just run `git diff Public`.
+
+Depending on the type of changes apply to semantic versioning strategies described above to perform a correct versioning of the plugin, even if the plugin's creator is not doing it.
+
+It's a manual process but it's perhaps the best way to have a correct understanding of the plugin you're using. In this way, you keep track of the changes and understand the effort you need to put into updating your codebase (that's using the public interface of the plugin): if nothing changed in the public API, the effort is zero. If there are only additions without modification, the effort is zero once again. If there are changes in the public API you're forced to upgrade your code.
+
+## Conclusion
 
 One of the keys to achieving fast development is leveraging Unreal Engine plugins. These plugins serve as libraries, providing ready-to-use functionalities and allowing developers to avoid reinventing the wheel.
 

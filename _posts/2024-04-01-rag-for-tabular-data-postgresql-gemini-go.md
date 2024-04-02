@@ -36,10 +36,100 @@ With these relevant documents at hand, the detective (generative model) can then
 
 Given this structure we need:
 
-- The detective: Gemini, used through Vertex AI.
+- The detective: in our case it will be Gemini used through Vertex AI.
 - The **vectorizer** a model able to create embeddings from a document
 - The archive: PostgreSQL. We need to **convert** the structured information from the database to a format valid for the vectorizer. Then store the embeddings on the database.
 - The informant: [pgvector](https://github.com/pgvector/pgvector). The open-source vector similarity search extension for PostgreSQL
+
+The vectorizer is able to create embeddings only of *a document*. So, we need to find a way to convert the structured representation into a document as first step.
+
+## From structured to Unstructured data
+
+LLMs are very good at extracting information from textual data and to execute tasks described using text. Depending on our data, we may be lucky to have something easy "to narrate".
+
+In the case described in this article we are going to use all the data related to sleep, physical activities, food, heart rate, number of steps (and other) gathered during a day for a single user. With these information it's quite easy to extract a regular description of an user day, section by section. Being the data so regular, we can try to make it fit in a **template**.
+
+### The template: the daily report
+
+We can define a template that summarized/highlights the important part we want to be able to retrieve while searching through our RAG. The template will be used by Gemini as part of its prompt in a chat session. In this chat session, we are going to ask the model to extract from the JSON data the information that we want to display in the report.
+
+```markdown
+### Date [LLM to write date]
+
+## Activity
+
+- Total Active Time: [LLM to fill from activities_summaries.active_minutes]
+- Calories Burned: [LLM to fill from activities_summaries.calories_out]
+- Steps Taken: [LLM to fill from activities_summaries.steps]
+- Distance Traveled: [LLM to fill from activities_summaries.distance / activities_summary_distances.distance]
+- List of activities: [LLM to iterate through activities_summary_activities and fill name, duration, calories burned]
+
+### Active Minutes Breakdown
+
+- Lightly Active Minutes: [LLM to fill from activities_summaries.lightly_active_minutes]
+- Fairly Active Minutes: [LLM to fill from activities_summaries.fairly_active_minutes]
+- Very Active Minutes: [LLM to fill from activities_summaries.very_active_minutes]
+
+### Heart Rate Zones
+
+- [LLM to iterate through activities_summary_heart_rate_zones and fill from heart_rate_zones (zone name, minutes)]
+
+## Sleep
+
+- Total Sleep Duration: [LLM to fill from sleep_logs.duration]
+- Sleep Quality: [LLM to fill from sleep_logs.efficiency]
+- Deep Sleep: [LLM to fill from sleep_stage_details where sleep_stage='deep sleep'] (minutes)
+- Light Sleep: [LLM to fill from sleep_stage_details where sleep_stage='light sleep'] (minutes)
+- REM Sleep: [LLM to fill from sleep_stage_details where sleep_stage='rem sleep'] (minutes)
+- Time to Fall Asleep: [LLM to fill from sleep_logs.minutes_to_fall_asleep]
+
+## Exercise Activities
+
+- [LLM to iterate through daily_activity_summary_activities / minimal_activities and fill name, duration, calories burned (from activity_logs)]
+...
+```
+
+### The Go data structure
+
+In Go, we can embed files directly inside the binary using the [embed](https://pkg.go.dev/embed) package. Embedding a template is the perfect use-case for this module:
+
+```go
+import "embed"
+
+var (
+	//go:embed templates/daily_report.md
+	dailyReportTemplate string
+)
+```
+
+We can design a data type `Reporter` whose goal is to to generate these reports.
+
+```go
+type Reporter struct {
+	user             *types.User
+	genaiClient      *genai.Client
+	ctx              context.Context
+}
+
+func NewReporter(user *types.User) (*Reporter, error) {
+	ctx := context.Background()
+
+	var genaiClient *genai.Client
+	const region = "us-central1"
+	if genaiClient, err = genai.NewClient(ctx, _vaiProjectID, region, option.WithCredentialsFile(_vaiServiceAccountKey)); err != nil {
+		return nil, err
+	}
+
+	return &Reporter{user: user, genaiClient: genaiClient, ctx: ctx}, nil
+}
+```
+
+We can now use Go to interact with Vertex AI using the (well-known) pattern: create the client for the service you need, use it, close it.
+
+
+## The archive & the informant: PostgreSQL & pgvector
+
+
 
 ## Conclusion
 

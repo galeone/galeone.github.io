@@ -37,11 +37,11 @@ With these relevant documents at hand, the detective (generative model) can then
 Given this structure we need:
 
 - The detective: in our case it will be Gemini used through Vertex AI.
-- The **vectorizer** a model able to create embeddings from a document
-- The archive: PostgreSQL. We need to **convert** the structured information from the database to a format valid for the vectorizer. Then store the embeddings on the database.
-- The informant: [pgvector](https://github.com/pgvector/pgvector). The open-source vector similarity search extension for PostgreSQL
+- The **embedding model**: a model able to create embeddings from a document.
+- The archive: PostgreSQL. We need to **convert** the structured information from the database to a format valid for the embedding model. Then store the embeddings on the database.
+- The informant: [pgvector](https://github.com/pgvector/pgvector). The open-source vector similarity search extension for PostgreSQL.
 
-The vectorizer is able to create embeddings only of *a document*. So, we need to find a way to convert the structured representation into a document as first step.
+The **embedding model** is able to create embeddings only of *a document*. So, we need to find a way to convert the structured representation into a document as first step.
 
 ## From structured to Unstructured data
 
@@ -89,7 +89,72 @@ We can define a template that summarized/highlights the important part we want t
 ...
 ```
 
+Before digging inside the Go code, we have to design the structure for our data in the database.
+
+The simplest solution is to create a table containing the textual reports that our LLM will generate together with its "compact representation" (the embeddings).
+
+## The table creation
+
+Being our data already stored on PostgreSQL it would be ideal to use the same database also for storing the embeddings and perform spatial query on them, and not introduce a new "vector database".
+
+[pgvector](https://github.com/pgvector/pgvector) is the extension for postgreSQL that allows us to define a data type "vector" and it gives our operators and function to perform measures like cosine distance, l2 distance and many others.
+
+Once installed and granted the superuser access to our database user, we can enable the extension and define the table for storing our data.
+
+```sql
+-- Enable the pgvector extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    report_type TEXT NOT NULL,
+    report TEXT NOT NULL,
+    embedding VECTOR
+);
+```
+
+After enabling the `vector` extension we can define the `embedding` field of type `vector`. There's no need to specify the maximum length of the vector since the extension supports dynamically shaped vectors.
+
+The table is defined to store all the users report. In this article we are going to cover only the daily reports (so `start_date` will be equal to `end_date`) but to concept is easily generalizable to different kind of reports. This also the reason for the `report_type` field.
+
 ### The Go data structure
+
+It's a good practice to map a table to a struct. Using [galeone/igor](https://github.com/galeone/igor) for interacting with PostgreSQL from Go this is also mandatory.
+
+```go
+import (
+	"time"
+	"github.com/pgvector/pgvector-go"
+)
+
+type Report struct {
+	ID         int64 `igor:"primary_key"`
+	UserID     int64
+	StartDate  time.Time
+	EndDate    time.Time
+	ReportType string
+	Report     string
+	Embedding  pgvector.Vector
+}
+
+func (r *Report) TableName() string {
+	return "reports"
+}
+```
+
+That's all we are now ready to interact with Vertex AI to:
+
+1. Go from structured to unstructured data, making Gemini filling the previously defined template
+2. Generate the embeddings of the report
+3. Let the user create a chat session with Gemini and create the embeddings of its prompt
+4. Doing a spatial query for retrieving the (hopefully) relevant documents we have in the database
+5. Pass these documents to Gemini as its search context.
+6. Ask the model to answer the user question looking at the provided document
+
+### Go: Generate reports and embedding
 
 In Go, we can embed files directly inside the binary using the [embed](https://pkg.go.dev/embed) package. Embedding a template is the perfect use-case for this module:
 
@@ -102,17 +167,28 @@ var (
 )
 ```
 
-We can design a data type `Reporter` whose goal is to to generate these reports.
+We can design a data type `Reporter` whose goal is to to generate these reports. Using the (well-known after these 3 articles) pattern for the interaction with Vertex AI, we are going to create 2 different clients:
+
+- The generative AI client for Gemini
+- The prediction client for our embedding model
 
 ```go
 type Reporter struct {
 	user             *types.User
+	predictionClient *vai.PredictionClient
 	genaiClient      *genai.Client
 	ctx              context.Context
 }
 
+// NewReporter creates a new Reporter
 func NewReporter(user *types.User) (*Reporter, error) {
 	ctx := context.Background()
+
+	var predictionClient *vai.PredictionClient
+	var err error
+	if predictionClient, err = vai.NewPredictionClient(ctx, option.WithEndpoint(_vaiEndpoint)); err != nil {
+		return nil, err
+	}
 
 	var genaiClient *genai.Client
 	const region = "us-central1"
@@ -120,15 +196,15 @@ func NewReporter(user *types.User) (*Reporter, error) {
 		return nil, err
 	}
 
-	return &Reporter{user: user, genaiClient: genaiClient, ctx: ctx}, nil
+	return &Reporter{user: user, predictionClient: predictionClient, genaiClient: genaiClient, ctx: ctx}, nil
+}
+
+// Close closes the client
+func (r *Reporter) Close() {
+	r.predictionClient.Close()
+	r.genaiClient.Close()
 }
 ```
-
-We can now use Go to interact with Vertex AI using the (well-known) pattern: create the client for the service you need, use it, close it.
-
-
-## The archive & the informant: PostgreSQL & pgvector
-
 
 
 ## Conclusion

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Building a RAG for tabular data with PostgreSQL & Gemini - in Go"
+title: "Building a RAG for tabular data in Go with PostgreSQL & Gemini"
 date: 2024-04-01 08:00:00
 categories: golang vertexai
 summary: ""
@@ -447,6 +447,12 @@ for {
 Note that point 3 is partial: we are inside a chatSession where the initial prompt instructed Gemini to behave in a certain way, and that we'll send messages with reports and the user question.
 
 Point 4 instead is a demonstration on how to receive a streaming response from gemini - useful when creating a websocket-based application where the Gemini response can be streamed back to the user directly through the websocket.
+
+The image below shows how this interaction allows the users to get insights on their data :)
+
+<div markdown="1" class="blog-image-container">
+![Chatting with data example](/images/ragdb/ch2.png){:class="blog-image"}
+</div>
 
 ## Conclusion
 

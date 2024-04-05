@@ -126,46 +126,35 @@ It's a good practice to map a table to a struct. Using [galeone/igor](https://gi
 
 ```go
 import (
-	"time"
-	"github.com/pgvector/pgvector-go"
+    "time"
+    "github.com/pgvector/pgvector-go"
 )
 
 type Report struct {
-	ID         int64 `igor:"primary_key"`
-	UserID     int64
-	StartDate  time.Time
-	EndDate    time.Time
-	ReportType string
-	Report     string
-	Embedding  pgvector.Vector
+    ID         int64 `igor:"primary_key"`
+    UserID     int64
+    StartDate  time.Time
+    EndDate    time.Time
+    ReportType string
+    Report     string
+    Embedding  pgvector.Vector
 }
 
 func (r *Report) TableName() string {
-	return "reports"
+    return "reports"
 }
 ```
 
-That's all we are now ready to interact with Vertex AI to:
+That's all. We are now ready to interact with Vertex AI to:
 
 1. Go from structured to unstructured data, making Gemini filling the previously defined template
-2. Generate the embeddings of the report
+2. Generate the embeddings of both the report
 3. Let the user create a chat session with Gemini and create the embeddings of its prompt
 4. Doing a spatial query for retrieving the (hopefully) relevant documents we have in the database
 5. Pass these documents to Gemini as its search context.
 6. Ask the model to answer the user question looking at the provided document
 
-### Go: Generate reports and embedding
-
-In Go, we can embed files directly inside the binary using the [embed](https://pkg.go.dev/embed) package. Embedding a template is the perfect use-case for this module:
-
-```go
-import "embed"
-
-var (
-	//go:embed templates/daily_report.md
-	dailyReportTemplate string
-)
-```
+### The Reporter type
 
 We can design a data type `Reporter` whose goal is to to generate these reports. Using the (well-known after these 3 articles) pattern for the interaction with Vertex AI, we are going to create 2 different clients:
 
@@ -173,41 +162,295 @@ We can design a data type `Reporter` whose goal is to to generate these reports.
 - The prediction client for our embedding model
 
 ```go
+import (
+    vai "cloud.google.com/go/aiplatform/apiv1beta1"
+    vaipb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
+    "cloud.google.com/go/vertexai/genai"
+    "google.golang.org/api/option"
+    "google.golang.org/protobuf/types/known/structpb"
+)
 type Reporter struct {
-	user             *types.User
-	predictionClient *vai.PredictionClient
-	genaiClient      *genai.Client
-	ctx              context.Context
+    user             *types.User
+    predictionClient *vai.PredictionClient
+    genaiClient      *genai.Client
+    ctx              context.Context
 }
 
 // NewReporter creates a new Reporter
 func NewReporter(user *types.User) (*Reporter, error) {
-	ctx := context.Background()
+    ctx := context.Background()
 
-	var predictionClient *vai.PredictionClient
-	var err error
-	if predictionClient, err = vai.NewPredictionClient(ctx, option.WithEndpoint(_vaiEndpoint)); err != nil {
-		return nil, err
-	}
+    var predictionClient *vai.PredictionClient
+    var err error
+    if predictionClient, err = vai.NewPredictionClient(ctx, option.WithEndpoint(_vaiEndpoint)); err != nil {
+        return nil, err
+    }
 
-	var genaiClient *genai.Client
-	const region = "us-central1"
-	if genaiClient, err = genai.NewClient(ctx, _vaiProjectID, region, option.WithCredentialsFile(_vaiServiceAccountKey)); err != nil {
-		return nil, err
-	}
+    var genaiClient *genai.Client
+    const region = "us-central1"
+    if genaiClient, err = genai.NewClient(ctx, _vaiProjectID, region, option.WithCredentialsFile(_vaiServiceAccountKey)); err != nil {
+        return nil, err
+    }
 
-	return &Reporter{user: user, predictionClient: predictionClient, genaiClient: genaiClient, ctx: ctx}, nil
+    return &Reporter{user: user, predictionClient: predictionClient, genaiClient: genaiClient, ctx: ctx}, nil
 }
 
 // Close closes the client
 func (r *Reporter) Close() {
-	r.predictionClient.Close()
-	r.genaiClient.Close()
+    r.predictionClient.Close()
+    r.genaiClient.Close()
 }
 ```
 
+Our `Reporter` will be used to generate both the reports and its vector representation (embedding).
+
+### Generate the embeddings
+
+We can start by using the `predictionClient` to invoke a text embedding model.
+
+The pattern is always the same. Working with Vertex AI in Go is quite convoluted because every client request has to be created by filling the correct protobuf fields and this is verbose and not immediate. Just look at all the boilerplate code we have to write to extract the embeddings from the response.
+
+`_vaiEmbeddingsEndpoint` is the global variable containing the endpoint for the chosen model. In our case the endpoint for the Google's model `textembedding-gecko@003`.
+
+This method returns a `pgvector.Vector` offered by the [pgvector/pgvector-go](https://github.com/pgvector/pgvector-go) package.
+
+```go
+import "github.com/pgvector/pgvector-go"
+
+// GenerateEmbeddings uses VertexAI to generate embeddings for a given prompt
+func (r *Reporter) GenerateEmbeddings(prompt string) (embeddings pgvector.Vector, err error) {
+    var promptValue *structpb.Value
+    if promptValue, err = structpb.NewValue(map[string]interface{}{"content": prompt}); err != nil {
+        return
+    }
+
+    // PredictRequest: create the model prediction request
+    // autoTruncate: false
+    var autoTruncate *structpb.Value
+    if autoTruncate, err = structpb.NewValue(map[string]interface{}{"autoTruncate": false}); err != nil {
+        return
+    }
+
+    req := &vaipb.PredictRequest{
+        Endpoint:   _vaiEmbeddingsEndpoint,
+        Instances:  []*structpb.Value{promptValue},
+        Parameters: autoTruncate,
+    }
+
+    // PredictResponse: receive the response from the model
+    var resp *vaipb.PredictResponse
+    if resp, err = r.predictionClient.Predict(r.ctx, req); err != nil {
+        return
+    }
+
+    // Extract the embeddings from the response
+    mapResponse, ok := resp.Predictions[0].GetStructValue().AsMap()["embeddings"].(map[string]interface{})
+    if !ok {
+        err = fmt.Errorf("error extracting embeddings")
+        return
+    }
+    values, ok := mapResponse["values"].([]interface{})
+    if !ok {
+        err = fmt.Errorf("error extracting embeddings")
+        return
+    }
+    rawEmbeddings := make([]float32, len(values))
+    for i, v := range values {
+        rawEmbeddings[i] = float32(v.(float64))
+    }
+
+    embeddings = pgvector.NewVector(rawEmbeddings)
+    return
+}
+```
+
+It should be pointed out that we are not taking into account the model's input length limitations because we suppose that the report text and the model input stays always below [3072 tokens](https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#get_text_embeddings_for_a_snippet_of_text). Anyway with the `autoTruncate` parameter set to false, this method will fail if the input length exceeds the limit.
+
+This function can now be used by the final users (for embedding their questions) and by the report generation method, that will create the `type.Report` (that will be inserted inside the database).
+
+### Generate the reports
+
+In Go, we can embed files directly inside the binary using the [embed](https://pkg.go.dev/embed) package. Embedding a template is the perfect use-case for this module:
+
+```go
+import "embed"
+
+var (
+    //go:embed templates/daily_report.md
+    dailyReportTemplate string
+)
+```
+
+The method `GenerateDailyReport` will use `gemini-pro` to fill the template as requested. After filling the template, we'll invoke the previously defined `GenerateEmbeddings` method to completely fill the `Report` structure previously defined.
+
+```go
+// GenerateDailyReport generates a daily report for the given user
+func (r *Reporter) GenerateDailyReport(data *UserData) (report *types.Report, err error) {
+	gemini := r.genaiClient.GenerativeModel("gemini-pro")
+	temperature := ChatTemperature
+	gemini.Temperature = &temperature
+
+	var builder strings.Builder
+	fmt.Fprintln(&builder, "This is a markdown template you have to fill with the data I will provide you in the next message.")
+	fmt.Fprintf(&builder, "```\n%s```\n\n", dailyReportTemplate)
+	fmt.Fprintln(&builder, "You can find the sections to fill highlighted with \"[LLM to ...]\" with instructions on how to fill the section.")
+	fmt.Fprintln(&builder, "I will send you the data in JSON format in the next message.")
+	introductionString := builder.String()
+
+	chatSession := gemini.StartChat()
+	chatSession.History = []*genai.Content{
+		{
+			Parts: []genai.Part{
+				genai.Text(introductionString),
+			},
+			Role: "user",
+		},
+		{
+			Parts: []genai.Part{
+				genai.Text("Send me the data in JSON format. I will fill the template you provided using this data"),
+			},
+			Role: "model",
+		},
+	}
+
+	var jsonData []byte
+	if jsonData, err = json.Marshal(data); err != nil {
+		return nil, err
+	}
+
+	var response *genai.GenerateContentResponse
+	if response, err = chatSession.SendMessage(r.ctx, genai.Text(string(jsonData))); err != nil {
+		return nil, err
+	}
+	report = &types.Report{
+		StartDate:  data.Date,
+		EndDate:    data.Date,
+		ReportType: "daily",
+		UserID:     r.user.ID,
+	}
+	for _, candidates := range response.Candidates {
+		for _, part := range candidates.Content.Parts {
+			report.Report += fmt.Sprintf("%s\n", part)
+		}
+	}
+
+	if report.Embedding, err = r.GenerateEmbeddings(report.Report); err != nil {
+		return nil, err
+	}
+
+	return report, nil
+}
+```
+
+We created a `ChatSession` with Gemini giving the model a fake history as context and sending the JSON-serialized user-data as it's only source of information.
+
+For example, a (partial) report generated is:
+
+```markdown
+### April 4, 2024
+
+## Activity
+
+- Total Active Time: 41 minutes
+- Calories Burned: 346
+- Steps Taken: 704
+- Distance Traveled: 0 miles
+- List of activities:
+  - Weights: 41 minutes, 346 calories
+
+### Active Minutes Breakdown
+
+- Lightly Active Minutes: 254
+- Fairly Active Minutes: 18
+- Very Active Minutes: 35
+
+### Heart Rate Zones
+
+- Out of Range: 6 minutes
+- Fat Burn: 35 minutes
+- Cardio: 0 minutes
+- Peak: 0 minutes
+
+## Sleep
+
+- Total Sleep Duration: 6 hours 40 minutes
+- Sleep Quality: 42%
+- Deep Sleep: 0 minutes
+- Light Sleep: 0 minutes
+- REM Sleep: 0 minutes
+- Time to Fall Asleep: 0 minutes
+
+## Exercise Activities
+
+- Weights: 41 minutes, 346 calories
+
+...
+```
+
+The information are correct, apart for certain information that were available in the JSON data but weren't added (e.g. deep/light/rem/total sleep time). So, there's room for improvement.
+
+### Chatting with the data
+
+Supposing that we have inserted all the reports inside the database, we can now receive messages from the user and trying to answer.
+
+Let's suppose that `msg` contains the user question. We have to:
+
+1. Generate the embeddings
+2. Search for the best similar reports available (top-k with k=3 just for limiting the context size)
+3. Share the reports with Gemini inside a chatSession and ask the user question
+4. Send the result
+
+```go
+// 1. Generate the embeddings
+var queryEmbeddings pgvector.Vector
+if queryEmbeddings, err = reporter.GenerateEmbeddings(msg); err != nil {
+    return err
+}
+
+// 2. Search for similar reports
+var reports []string
+// Top-3 related reports, sorted by l2 similarity
+if err = _db.Model(&types.Report{}).Where(&types.Report{UserID: user.ID})
+        .Order(fmt.Sprintf("embedding <-> '%s'", queryEmbeddings.String()))
+        .Select("report").Limit(3).Scan(&reports); err != nil {
+    return err
+}
+
+// 3. Share the reports with Gemini inside a chatSession and ask the user question
+builder.Reset() // builder is a stringBuilder
+fmt.Fprintln(&builder, "Here are the reports to help you with the analysis:")
+fmt.Fprintln(&builder, "")
+for _, report := range reports {
+    fmt.Fprintln(&builder, report)
+}
+fmt.Fprintln(&builder, "")
+fmt.Fprintln(&builder, "Here's the user question you have to answer:")
+fmt.Fprintln(&builder, msg)
+
+var responseIterator *genai.GenerateContentResponseIterator = chatSession.SendMessageStream(ctx, genai.Text(builder.String()))
+
+// 4. Send the result
+for {
+    response, err := responseIterator.Next()
+    if err == iterator.Done {
+        break
+    }
+    for _, candidates := range response.Candidates {
+        for _, part := range candidates.Content.Parts {
+            reply := fmt.Sprintf("%s", part)
+            fmt.Println(reply)
+        }
+    }
+}
+```
+
+Note that point 3 is partial: we are inside a chatSession where the initial prompt instructed Gemini to behave in a certain way, and that we'll send messages with reports and the user question.
+
+Point 4 instead is a demonstration on how to receive a streaming response from gemini - useful when creating a websocket-based application where the Gemini response can be streamed back to the user directly through the websocket.
 
 ## Conclusion
+
+TODO
 
 For any feedback or comments, please use the Disqus form below - Thanks!
 

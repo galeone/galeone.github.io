@@ -3,7 +3,7 @@ layout: post
 title: "Building a RAG for tabular data in Go with PostgreSQL & Gemini"
 date: 2024-04-06 08:00:00
 categories: golang vertexai
-summary: "In this article we explore how to combine a large language model (LLM) with a relational database to allow users to ask questions about their data in a natural way. It demonstrates a Retrieval-Augmented Generation (RAG) system built with Go that utilizes PostgreSQL and pgvector for data storage and retrieval. The provided code showcases the core functionalities. This is an overview of how the the \"chat with your data\" feature of fitsleepinsights.app is being developed."
+summary: "In this article we explore how to combine a large language model (LLM) with a relational database to allow users to ask questions about their data in a natural way. It demonstrates a Retrieval-Augmented Generation (RAG) system built with Go that utilizes PostgreSQL and pgvector for data storage and retrieval. The provided code showcases the core functionalities. This is an overview of how the \"chat with your data\" feature of fitsleepinsights.app is being developed."
 authors:
     - pgaleone
 ---

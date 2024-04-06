@@ -1,16 +1,16 @@
 ---
 layout: post
 title: "Building a RAG for tabular data in Go with PostgreSQL & Gemini"
-date: 2024-04-01 08:00:00
+date: 2024-04-06 08:00:00
 categories: golang vertexai
-summary: ""
+summary: "In this article we explore how to combine a large language model (LLM) with a relational database to allow users to ask questions about their data in a natural way. It demonstrates a Retrieval-Augmented Generation (RAG) system built with Go that utilizes PostgreSQL and pgvector for data storage and retrieval. The provided code showcases the core functionalities. This is an overview of how the the \"chat with your data\" feature of fitsleepinsights.app is being developed."
 authors:
     - pgaleone
 ---
 
-Large Language Models (LLMs) are well-suited for working with non-structured data. So far, their usage with structured data hasn't been explored in depth although structured data is everywhere relational databases are. Make a LLM able to interact with a relational database can be an interesting idea since it will unlock the possibility of letting an user "chatting with the data" and to let the LLM discover relationship inside the [data lake](https://cloud.google.com/learn/what-is-a-data-lake)
+Large Language Models (LLMs) are well-suited for working with non-structured data. So far, their usage with structured data hasn't been explored in depth although structured data is everywhere relational databases are. Making an LLM able to interact with a relational database can be an interesting idea since it will unlock the possibility of letting a user "chat with the data" and let the LLM discover relationships inside the [data lake](https://cloud.google.com/learn/what-is-a-data-lake)
 
-In this article, we'll explore a possible integration of Gemini (the multimodal large language model developed by Google) with PostgreSQL, and how to build a Retrieval-Augmented Generation (RAG) system to navigate in the structured data. Everything will be done in Go.
+In this article, we'll explore a possible integration of Gemini (the multimodal large language model developed by Google) with PostgreSQL, and how to build a Retrieval-Augmented Generation (RAG) system to navigate in the structured data. Everything will be done using the Go programming language.
 
 This is the fourth article of a series about the usage of Vertex AI in Go, and as such, it will share the same prerequisite presented in both of them: the services account creation, the environment variables, and so on. The prerequisite parts can be read in each of those articles.
 
@@ -18,7 +18,7 @@ This is the fourth article of a series about the usage of Vertex AI in Go, and a
 - [AutoML pipeline for tabular data on VertexAI in Go](/golang/vertexai/2023/06/14/automl-pipeline-tabular-data-vertexai-go-golang/).
 - [Using Gemini in a Go application: limits and details](/golang/vertexai/2024/02/26/gemini-go-limits-details/)
 
-This article tries to implement the idea presented at the end of the last article. Given that converting all the user-data to a textual representation overflow the maximum context length of Gemini, we implement a RAG to overcome this limitation.
+This article tries to implement the idea presented at the end of the last article. Given that converting all the user data to a textual representation overflows the maximum context length of Gemini, we implement a RAG to overcome this limitation.
 
 ## RAG and Embeddings
 
@@ -28,30 +28,30 @@ Before going to the implementation in PostgreSQL, Go, and Gemini (through Vertex
 - **The Archive:** This is your PostgreSQL database, holding all the tabular data (your documents).
 - **The Informant:** This is the retriever, a special tool that understands both your questions and the data in the archive. It acts like your informant, scanning the archive to find the most relevant documents (clues) for the detective.
 
-But how does the informant know which documents are relevant? Here's where **embeddings** come in. Embeddings are like condensed summaries of information. Imagine each document and your question are shrunk down into unique sets of numbers. The closer these numbers are in space, the more similar the meaning.
+But how does the informant know which documents are relevant? Here's where **embeddings** come in. Embeddings are like condensed summaries of information. Imagine each document and your questions are shrunk down into unique sets of numbers. The closer these numbers are in space, the more similar the meaning.
 
 The informant uses an embedding technique to compare your question's embedding to all the document embeddings in the archive. It then retrieves the documents with the most similar embeddings, essentially pointing the detective in the right direction.
 
 With these relevant documents at hand, the detective (generative model) can then analyze them and use its knowledge to answer your question or complete your request.
 
-Given this structure we need:
+Given this structure, we need:
 
-- The detective: in our case it will be Gemini used through Vertex AI.
+- The detective: in our case, it will be Gemini used through Vertex AI.
 - The **embedding model**: a model able to create embeddings from a document.
 - The archive: PostgreSQL. We need to **convert** the structured information from the database to a format valid for the embedding model. Then store the embeddings on the database.
 - The informant: [pgvector](https://github.com/pgvector/pgvector). The open-source vector similarity search extension for PostgreSQL.
 
-The **embedding model** is able to create embeddings only of *a document*. So, we need to find a way to convert the structured representation into a document as first step.
+The **embedding model** is able to create embeddings only of *a document*. So, we need to find a way to convert the structured representation into a document as the first step.
 
 ## From structured to Unstructured data
 
-LLMs are very good at extracting information from textual data and to execute tasks described using text. Depending on our data, we may be lucky to have something easy "to narrate".
+LLMs are very good at extracting information from textual data and executing tasks described using text. Depending on our data, we may be lucky to have something easy "to narrate".
 
-In the case described in this article we are going to use all the data related to sleep, physical activities, food, heart rate, number of steps (and other) gathered during a day for a single user. With these information it's quite easy to extract a regular description of an user day, section by section. Being the data so regular, we can try to make it fit in a **template**.
+In the case described in this article, we are going to use all the data related to sleep, physical activities, food, heart rate, and number of steps (and others) gathered during a day for a single user. With this information it's quite easy to extract a regular description of a user's day, section by section. Being the data so regular, we can try to make it fit in a **template**.
 
 ### The template: the daily report
 
-We can define a template that summarized/highlights the important part we want to be able to retrieve while searching through our RAG. The template will be used by Gemini as part of its prompt in a chat session. In this chat session, we are going to ask the model to extract from the JSON data the information that we want to display in the report.
+We can define a template that summarizes/highlights the important part we want to be able to retrieve while searching through our RAG. The template will be used by Gemini as part of its prompt in a chat session. In this chat session, we are going to ask the model to extract from the JSON data the information that we want to display in the report.
 
 ```markdown
 ### Date [LLM to write date]
@@ -95,9 +95,9 @@ The simplest solution is to create a table containing the textual reports that o
 
 ## The table creation
 
-Being our data already stored on PostgreSQL it would be ideal to use the same database also for storing the embeddings and perform spatial query on them, and not introduce a new "vector database".
+Being our data already stored on PostgreSQL it would be ideal to use the same database also for storing the embeddings and performing spatial queries on them, and not introduce a new "vector database".
 
-[pgvector](https://github.com/pgvector/pgvector) is the extension for postgreSQL that allows us to define a data type "vector" and it gives our operators and function to perform measures like cosine distance, l2 distance and many others.
+[pgvector](https://github.com/pgvector/pgvector) is the extension for PostgreSQL that allows us to define a data type "vector" and it gives our operators and function to perform measures like cosine distance, l2 distance, and many others.
 
 Once installed and granted the superuser access to our database user, we can enable the extension and define the table for storing our data.
 
@@ -118,11 +118,11 @@ CREATE TABLE IF NOT EXISTS reports (
 
 After enabling the `vector` extension we can define the `embedding` field of type `vector`. There's no need to specify the maximum length of the vector since the extension supports dynamically shaped vectors.
 
-The table is defined to store all the users report. In this article we are going to cover only the daily reports (so `start_date` will be equal to `end_date`) but to concept is easily generalizable to different kind of reports. This also the reason for the `report_type` field.
+The table is defined to store all the users' reports. In this article, we are going to cover only the daily reports (so `start_date` will be equal to `end_date`) but to concept is easily generalizable to different kinds of reports. This is also the reason for the `report_type` field.
 
 ### The Go data structure
 
-It's a good practice to map a table to a struct. Using [galeone/igor](https://github.com/galeone/igor) for interacting with PostgreSQL from Go this is also mandatory.
+It's a good practice to map a SQL table to a struct. Using [galeone/igor](https://github.com/galeone/igor) for interacting with PostgreSQL from Go this is pretty much mandatory.
 
 ```go
 import (
@@ -147,16 +147,16 @@ func (r *Report) TableName() string {
 
 That's all. We are now ready to interact with Vertex AI to:
 
-1. Go from structured to unstructured data, making Gemini filling the previously defined template
-2. Generate the embeddings of both the report
-3. Let the user create a chat session with Gemini and create the embeddings of its prompt
-4. Doing a spatial query for retrieving the (hopefully) relevant documents we have in the database
+1. Go from structured to unstructured data, making Gemini filling the previously defined template.
+2. Generate the embeddings of both the report.
+3. Let the user create a chat session with Gemini and create the embeddings of its prompt.
+4. Doing a spatial query for retrieving the (hopefully) relevant documents we have in the database.
 5. Pass these documents to Gemini as its search context.
-6. Ask the model to answer the user question looking at the provided document
+6. Ask the model to answer the user question by looking at the provided document.
 
 ### The Reporter type
 
-We can design a data type `Reporter` whose goal is to to generate these reports. Using the (well-known after these 3 articles) pattern for the interaction with Vertex AI, we are going to create 2 different clients:
+We can design a data type `Reporter` whose goal is to generate these reports. Using the (well-known after three articles) pattern for the interaction with Vertex AI, we are going to create 2 different clients:
 
 - The generative AI client for Gemini
 - The prediction client for our embedding model
@@ -208,9 +208,9 @@ Our `Reporter` will be used to generate both the reports and its vector represen
 
 We can start by using the `predictionClient` to invoke a text embedding model.
 
-The pattern is always the same. Working with Vertex AI in Go is quite convoluted because every client request has to be created by filling the correct protobuf fields and this is verbose and not immediate. Just look at all the boilerplate code we have to write to extract the embeddings from the response.
+The pattern is always the same. Working with Vertex AI in Go is quite convoluted because every client request has to be created by filling in the correct protobuf fields and this is verbose and not immediate. Just look at all the boilerplate code we have to write to extract the embeddings from the response.
 
-`_vaiEmbeddingsEndpoint` is the global variable containing the endpoint for the chosen model. In our case the endpoint for the Google's model `textembedding-gecko@003`.
+`_vaiEmbeddingsEndpoint` is the global variable containing the endpoint for the chosen model. In our case the endpoint for Google's model `textembedding-gecko@003`.
 
 This method returns a `pgvector.Vector` offered by the [pgvector/pgvector-go](https://github.com/pgvector/pgvector-go) package.
 
@@ -264,7 +264,7 @@ func (r *Reporter) GenerateEmbeddings(prompt string) (embeddings pgvector.Vector
 }
 ```
 
-It should be pointed out that we are not taking into account the model's input length limitations because we suppose that the report text and the model input stays always below [3072 tokens](https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#get_text_embeddings_for_a_snippet_of_text). Anyway with the `autoTruncate` parameter set to false, this method will fail if the input length exceeds the limit.
+It should be pointed out that we are not taking into account the model's input length limitations because we suppose that the report text and the model input are always below [3072 tokens](https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#get_text_embeddings_for_a_snippet_of_text). Anyway, with the `autoTruncate` parameter set to false, this method will fail if the input length exceeds the limit.
 
 This function can now be used by the final users (for embedding their questions) and by the report generation method, that will create the `type.Report` (that will be inserted inside the database).
 
@@ -342,7 +342,7 @@ func (r *Reporter) GenerateDailyReport(data *UserData) (report *types.Report, er
 }
 ```
 
-We created a `ChatSession` with Gemini giving the model a fake history as context and sending the JSON-serialized user-data as it's only source of information.
+We created a `ChatSession` with Gemini giving the model a fake history as context and sending the JSON-serialized user data as it's only source of information.
 
 For example, a (partial) report generated is:
 
@@ -373,12 +373,12 @@ For example, a (partial) report generated is:
 
 ## Sleep
 
-- Total Sleep Duration: 6 hours 40 minutes
-- Sleep Quality: 42%
-- Deep Sleep: 0 minutes
-- Light Sleep: 0 minutes
-- REM Sleep: 0 minutes
-- Time to Fall Asleep: 0 minutes
+- Total Sleep Duration: 7 hours 30 minutes
+- Sleep Quality: 75%
+- Deep Sleep: 95 minutes
+- Light Sleep: 250 minutes
+- REM Sleep: 118 minutes
+- Time to Fall Asleep: 10 minutes
 
 ## Exercise Activities
 
@@ -387,11 +387,11 @@ For example, a (partial) report generated is:
 ...
 ```
 
-The information are correct, apart for certain information that were available in the JSON data but weren't added (e.g. deep/light/rem/total sleep time). So, there's room for improvement.
+Some information is true, but other information is missing although present in the data (e.g. Cardio/Peak info is present in the JSON but the model inserted 0 as value - that's wrong). Using an LLM for filling the template is just a way to speed up the template completion process, although being this data available in a structured format the best thing to do would have been to just create the right query to tell the right story. Avoiding thus the randomness of the LLM.
 
 ### Chatting with the data
 
-Supposing that we have inserted all the reports inside the database, we can now receive messages from the user and trying to answer.
+Supposing that we have inserted all the reports inside the database, we can now receive messages from the user and try to answer.
 
 Let's suppose that `msg` contains the user question. We have to:
 
@@ -446,17 +446,21 @@ for {
 
 Note that point 3 is partial: we are inside a chatSession where the initial prompt instructed Gemini to behave in a certain way, and that we'll send messages with reports and the user question.
 
-Point 4 instead is a demonstration on how to receive a streaming response from gemini - useful when creating a websocket-based application where the Gemini response can be streamed back to the user directly through the websocket.
+Point 4 instead is a demonstration of how to receive a streaming response from Gemini - useful when creating a websocket-based application where the Gemini response can be streamed back to the user directly through the websocket.
 
-The image below shows how this interaction allows the users to get insights on their data :)
+The image below shows how this interaction allows the users to get insights from their data :)
 
 <div markdown="1" class="blog-image-container">
 ![Chatting with data example](/images/ragdb/ch2.png){:class="blog-image"}
 </div>
 
-## Conclusion
+## Conclusion & FitSleepInsights
 
-TODO
+Interacting with Gemini and other models via Vertex AI is quite simple, once understood the pattern to follow and how to extract/insert data from the Protobuf structures. The presented solution that allows the creation of a RAG for data stored in PostgreSQL passes through the generation of a template. This template has been filled by Gemini - but a better solution (although longer to develop) would be to manually fill the template and create these "stories". In this way, we can remove the randomness of the LLM at least from the data generation part.
+
+The integration of pgvector allowed us to store embeddings on PostgreSQL and make spatial queries in a seamless way. 
+
+By the end of the article, we also leaked a screenshot of this feature implemented on [fitsleepinsights.app](https://fitsleepinsights.app/). By the time of the publication of this article, the application is not yet deployed - but the source code is available on Github @ [https://github.com/galeone/fitsleepinsights/](https://github.com/galeone/fitsleepinsights/).
 
 For any feedback or comments, please use the Disqus form below - Thanks!
 

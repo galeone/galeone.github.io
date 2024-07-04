@@ -54,9 +54,25 @@ ShippingSpecificMacEntitlements=(FilePath="/Game/Build/Mac/Resources/entitlement
 
 To get the `<APPLICATION IDENTIFIER>` and `<TEAM IDENTIFIER>` I redirect the reader to the Unreal Engine documentation about this topic: [Provisioning Profiles and Signing Certificates](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects). Please also note that you must login on Xcode using your Apple Developer Account. This is mandatory to correctly start the signing process using Xcode (invoked by the UBT).
 
+## The application & the distribution workflow
 
-### The application
+The `Config/DefaultEngine.ini` file is part of very trivial unreal engine application that, as mentioned in the first paragraph of the article, contains a couple of third-party plugins (`URedis` and `WebBrowserWidget`). The full project can be found here: [galeone/ue-bundle-project](https://github.com:galeone/ue-bundle-project).
 
-The `Config/DefaultEngine.ini` file is part of very trivial unreal engine application that, as mentioned in the first paragraph of the article, contains a couple of third-party plugins (`URedis` and `WebBrowserWidget`). The full project can be found here: TODO
+Briefly, the application contains an empty world with just an user widget, containing a Web Browser Widget pointing to this website. The world also contains an `ARedis` actor that `OnBeginPlay` it connects to the local Redis server, sets a value, fetch this value, and prints in the scene the retrieved value. That's all.
 
 In the article only the relevant parts for packaging, codesigning, and notarization are shown.
+
+We are interested in redistributing this application, and for doing it we need to:
+
+1. Create the app - this is the standard packaging process of the application
+2. Sign the app and its content.
+3. Create a signed `.pkg`.
+4. Send to the notarization server the `.pkg` to have the final verification from Apple that the application has been correctly signed, and contains the correct security features and the users can safely download the application and execute it (without being asked to trust the author of the app because Apple trusted this developer and the application - so offering to the users a better installation experience).
+
+Moreover, we want to insert in the bundle the crash report client provided by the engine. This is a separate application that will be bundled inside the `.app` automatically called when the application crashes, useful to collect the crash reports.
+
+[ue4cli](https://github.com/adamrehn/ue4cli) is the CLI tool used to easily invoke the various functionalities of the unreal build system.
+
+## Packaging & integrated code signing
+
+

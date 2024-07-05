@@ -71,8 +71,28 @@ We are interested in redistributing this application, and for doing it we need t
 
 Moreover, we want to insert in the bundle the crash report client provided by the engine. This is a separate application that will be bundled inside the `.app` automatically called when the application crashes, useful to collect the crash reports.
 
-[ue4cli](https://github.com/adamrehn/ue4cli) is the CLI tool used to easily invoke the various functionalities of the unreal build system.
-
 ## Packaging & integrated code signing
 
+The packaging process allows us to get a (correctly?) signed application. Using [ue4cli](https://github.com/adamrehn/ue4cli) we can easily invoke the UBT to create a shipping package with the crash report client inside. If you are following these steps using [galeone/ue-bundle-project](https://github.com:galeone/ue-bundle-project) you need to edit the `Config/DefaultEngine.ini`, `Build/Mac/Resources/Info.plist`, and `Build/Mac/Resources/entitlements.plist` replacing the `REPLACE_WITH_TEAM_ID` and `REPLACE_WITH_BUNDLE_ID` with the appropriate values.
 
+```sh
+LC_ALL="C" ue4 package Shipping -CrashReportClient
+```
+
+This will take a while. Once completed, the `BundleProject-Mac-Shipping.app` has been created inside the `dist/Mac` folder. Using `codesign` we can verify if the content has been signed (note: not correctly signed as requested by Apple for distribution!).
+
+
+```sh
+codesign --verify --verbose dist/Mac/BundleProject-Mac-Shipping.app
+```
+```text
+dist/Mac/BundleProject-Mac-Shipping.app: valid on disk
+dist/Mac/BundleProject-Mac-Shipping.app: satisfies its Designated requirement
+```
+
+Everything looks OK - but unfortunately, if we try to open this brand new app, it just crashes without giving us any clue.
+
+Unreal Engine from version 5.3 onward changed the flags required to create a valid package (only on macOS apparently). In fact, we can see the app content to only contain the main executable, but there are no dylibs! We expect to have at least the libraries of the URedis plugin.
+
+```tree
+```

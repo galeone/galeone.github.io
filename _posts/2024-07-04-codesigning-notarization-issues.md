@@ -19,6 +19,8 @@ In this article we'll go trough the problems faced during the packaging, codesig
 
 The problems presented are inside the Engine itself, and we try to fix them from the outside avoiding (when possible!) to modify the engine.
 
+The article describes all the attempts performed to reach the goal. If you are interested in the steps, you can jump to the [TL;DR](#TLDR) section.
+
 ## Creating distribution-signed code for macOS
 
 After creating an Unreal Engine application we, of course, want to distribute it to the world. On macOS we can decide to publish our app to the Mac App Store or to distribute it directly to our users (e.g. making it available for download on our website).
@@ -92,7 +94,186 @@ dist/Mac/BundleProject-Mac-Shipping.app: satisfies its Designated requirement
 
 Everything looks OK - but unfortunately, if we try to open this brand new app, it just crashes without giving us any clue.
 
-Unreal Engine from version 5.3 onward changed the flags required to create a valid package (only on macOS apparently). In fact, we can see the app content to only contain the main executable, but there are no dylibs! We expect to have at least the libraries of the URedis plugin.
+Unreal Engine from version 5.3 onward changed the flags required to create a valid package (only on macOS apparently). In fact, we can see the app content to only contain the main executable, but there are no dylibs! We expect to have at least the libraries of the URedis plugin. Moreover, there's no reference to CEF (required by the Web Browser widget) nor a reference to the CrashReportClient.app!
 
-```tree
+```sh
+tree -a dist/Mac/BundleProject-Mac-Shipping.app
 ```
+```text
+dist/Mac/BundleProject-Mac-Shipping.app
+└── Contents
+    ├── Info.plist
+    ├── MacOS
+    │   └── BundleProject-Mac-Shipping
+    ├── PkgInfo
+    ├── Resources
+    │   ├── AppIcon.icns
+    │   ├── Assets.car
+    │   ├── LaunchScreen.storyboardc
+    │   │   ├── 01J-lp-oVM-view-Ze5-6b-2t3.nib
+    │   │   ├── Info.plist
+    │   │   └── LaunchScreen.nib
+    │   └── UEMetadata
+    │       └── PrivacyInfo.xcprivacy
+    └── _CodeSignature
+        └── CodeResources
+```
+
+By copying the invocation of the UBT while creating the package from the editor, we find out that right now is required to explicit the `-package` flag.
+
+```sh
+LC_ALL="C" ue4 package Shipping -package -CrashReportClient
+```
+
+Now, also the name of the application changed from a developer friendly name, to a customer friendly name  (`BundleProject.app` without additional technical information).
+
+If we look inside the bundle we can see almost all the missing parts.
+
+```sh
+tree -a dist/Mac/BundleProject.app
+```
+```text
+dist/Mac/BundleProject.app
+└── Contents
+    ├── Frameworks
+    │   └── Chromium Embedded Framework.framework
+    │       ├── Chromium Embedded Framework
+    │       ├── Libraries
+    │       │   ├── libEGL.dylib
+    │       │   ├── libGLESv2.dylib
+    │       │   ├── libswiftshader_libEGL.dylib
+    │       │   ├── libswiftshader_libGLESv2.dylib
+    │       │   ├── libvk_swiftshader.dylib
+    │       │   └── vk_swiftshader_icd.json
+    │       ├── Resources
+    │       │   ├── Info.plist
+    │       │   ├── icudtl.dat
+    │       │   ├── snapshot_blob.bin
+    │       │   ├── v8_context_snapshot.arm64.bin
+    │       └── _CodeSignature
+    │           └── CodeResources
+    ├── Info.plist
+    ├── MacOS
+    ├── Resources
+    └── UE
+        ├── BundleProject
+        │   ├── Binaries
+        │   │   └── Mac
+        │   ├── BundleProject.uproject
+        │   ├── Config
+        │   ├── Content
+        │   └── Plugins
+        │       └── URedis
+        │           ├── Source
+        │           │   └── ThirdParty
+        │           │       └── URedisLibrary
+        │           │           └── mac
+        │           │               └── arm64
+        │           │                   ├── libhiredis.1.1.0.dylib
+        │           │                   └── libredis++.1.dylib
+        │           └── URedis.uplugin
+        ├── Engine
+        │   ├── Binaries
+        │   │   ├── Mac
+        │   │   │   ├── CrashReportClient.app
+        │   │   │   └── EpicWebHelper
+        │   │   └── ThirdParty
+        │   │       ├── Apple
+        │   │       ├── Intel
+        │   │       │   └── TBB
+        │   │       │       └── Mac
+        │   │       │           ├── libtbb.dylib
+        │   │       │           └── libtbbmalloc.dylib
+        │   │       ├── Ogg
+        │   │       └── Vorbis
+        │   ├── Config
+        │   ├── Content
+        │   ├── Extras
+        │   ├── Plugins
+        │   ├── Programs
+        │   │   └── CrashReportClient
+        │   └── Shaders
+        └── UECommandLine.txt
+```
+
+Note: the tree output has been post-processed to remove a lot of files that are not useful for the goal of this article.
+
+So far so good? It looks like all the libraries are there, as well as the CrashReporterClient.app.
+
+We can try to execute the application... It crashes. Once again 😭
+
+### Chromium Embedded Frameworks as a macOS framework
+
+Creating a Development package, we can get the application logs and use them to understand what's going on.
+
+```text
+[ERROR:icu_util.cc(178)] icudtl.dat not found in bundle
+[ERROR:icu_util.cc(242)] Invalid file descriptor to ICU data received.
+```
+
+This is strange, since `icudtl.dat` is in the bundle at the path `Contents/Frameworks/Chromium Embedded Framework.framework/Resource`.
+
+Digging into the engine source code looking for the correct CEF location, we can see in `MacPlatform.Automation.cs` this line.
+
+```cs
+public override void ProcessArchivedProject(ProjectParams Params, DeploymentContext SC)
+{
+	// nothing to do with modern
+	if (AppleExports.UseModernXcode(Params.RawProjectPath))
+	{
+        return;
+	}
+```
+
+This early return prevents the execution of the method `FixupFrameworks`. The first line of this method mentions `Engine/Binaries/ThirdParty/CEF3/Mac` as the target directory for CEF inside the bundle.
+
+However, we don't want to disable the modernized XCode framework, so we have 2 options:
+
+1. Manually move the `Chromium Embedded Framework.framework` folder inside `Engine/Binaries/ThirdParty/CEF3/Mac`. This is a valid option but it requires to codesign the package once again, since changing the content of the `.app` invalidates its signature.
+2. Prevent the UBT to create the Framework folder, and let the UBT copy the framework in the old (correct) location.
+
+This second option requires to modify the build file of CEF `CEF.build.cs`:
+
+```cs
+if (Target.LinkType == TargetLinkType.Modular || !AppleExports.UseModernXcode(Target.ProjectFile))
+{
+	// Add contents of framework directory as runtime dependencies
+	foreach (string FilePath in Directory.EnumerateFiles(FrameworkLocation.FullName, "*", SearchOption.AllDirectories))
+	{
+		RuntimeDependencies.Add(FilePath);
+	}
+}
+// for modern
+else
+{
+	FileReference ZipFile = new FileReference(FrameworkLocation.FullName + ".zip");
+	// this is relative to module dir
+	string FrameworkPath = ZipFile.MakeRelativeTo(new DirectoryReference(ModuleDirectory));
+
+	PublicAdditionalFrameworks.Add(
+		new Framework("Chromium Embedded Framework", FrameworkPath, Framework.FrameworkMode.Copy, null)
+		);
+}
+```
+
+When using modern Xcode we enter in the `else` branch that copies the frameworks in the Framework directory. Instead, we want to always enter in the if branch, thus the code has to be modified accordingly.
+
+After applying this change, we can finally execute the application. Should it work, right? 😅
+
+### The Info.plist and the entitlements
+
+Another crash
+
+```
+[FATAL:mach_port_rendezvous.cc(142)] Check failed: kr == KERN_SUCCESS. bootstrap_check_in org.chromium.ContentShell.framework.MachPortRendezvousServer.32575: Permission denied (1100)
+```
+
+TODO
+
+## TL;DR
+
+TODO
+
+## Conclusions
+
+TODO

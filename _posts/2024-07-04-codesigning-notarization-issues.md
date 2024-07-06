@@ -51,8 +51,8 @@ ShippingSpecificMacEntitlements=(FilePath="/Game/Build/Mac/Resources/entitlement
 - `bUseAutomaticCodeSigning=true`: enables the code signing using the information specified below.
 - `bMacSignToRunLocally=false`: must be set to false to be able to firm with a valid developer ID, and not with the empty id "-".
 - `CodeSigningTeam`, and `BundleIdentifier` are the unique identifiers of the Apple Developers (given by apple) and of the application under the same team ID, respectively.
-- `TemplateMacPlist` is the soft-path (relative to the `Game` directory, that's where the `.uproject` file is) of the *information property list* (`Info.plist`). This file will be placed inside the application bundle and it contains a set of metadata (in a key-value fashion) used by both the application itself, the operating system, or by the system frameworks (e.g. to facilitate the launch of apps).
-- `PremadeMacEntitlements` and `ShippingSpecificMacEntitlements` are the soft-paths of another `.plist` file that can contain other metadata. The file contains the list of rights/privilege that the application requires to run (as we'll see in the [TODO LINK TO SECTION], we need to grant certain privileges to our app to be able to execute the web browser widget without a crash).
+- `TemplateMacPlist` is the soft-path (relative to the `Game` directory, that's where the `.uproject` file is) of the *information property list* (`Info.plist`). This file will be placed inside the application bundle and it contains a set of metadata (in a key-value fashion) used by both the application itself, the operating system, or by the system frameworks (e.g. To facilitate the launch of apps).
+- `PremadeMacEntitlements` and `ShippingSpecificMacEntitlements` are the soft-paths of another `.plist` file that can contain other metadata. The file contains the list of rights/privilege that the application requires to run (as we'll see in the [TODO LINK TO SECTION], we need to grant certain privileges to our app to be able to execute the web browser widget without a crash). The `PremadeMacEntitlements` contains the meta-data applied to every build configuration. The `ShippingSpecificMacEntitlements` is available if shipping configuration requires some special metadata.
 
 To get the `<APPLICATION IDENTIFIER>` and `<TEAM IDENTIFIER>` I redirect the reader to the Unreal Engine documentation about this topic: [Provisioning Profiles and Signing Certificates](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-ios-tvos-and-ipados-provisioning-profiles-and-signing-certificates-for-unreal-engine-projects). Please also note that you must login on Xcode using your Apple Developer Account. This is mandatory to correctly start the signing process using Xcode (invoked by the UBT).
 
@@ -262,13 +262,54 @@ After applying this change, we can finally execute the application. Should it wo
 
 ### The Info.plist and the entitlements
 
-Another crash
+Of course it doesn't work yet!
 
 ```
 [FATAL:mach_port_rendezvous.cc(142)] Check failed: kr == KERN_SUCCESS. bootstrap_check_in org.chromium.ContentShell.framework.MachPortRendezvousServer.32575: Permission denied (1100)
 ```
 
-TODO
+We have a permission issue. Our application for some reason (that we are going to discover soon) doesn't have the permission to execute something. Even trying with root privileges doesn't fix the issue. So? Here's where the entitlements file come into play.
+
+After hours of trial and error and various researches on the [CEF forum](https://magpcss.org/ceforum/viewtopic.php?f=6&t=16215&start=10) I understood that this permission denied issue it's only a matter of correctly setting the Bundle ID in the entitlements.
+
+So, the entitlements that we are going to use **must** have the section `com.apple.application-identifier` set with the same value used in the `DefaultEngine.ini` file while setting the `BundleIdentifier`key. The entitlements file, thus, should contain at least this content (of course replacing the `<APPLICATION IDENTIFIER>` with the correct Bundle ID).
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+       <key>com.apple.application-identifier</key>
+       <string><APPLICATION IDENTIFIER></string>
+</dict>
+</plist>
+```
+
+So, the UBT doesn't do this for us although it has all the information needed (Epic Games this is for you).
+
+Moreover, to be 100% consistent (and I'm sorry but I don't have a lot of trust on how Epic Games does this stuff) I also prefer to be explicit and defining our `Info.plist` file without hoping for the UBT to correctly generate one for us.
+
+You can see the complete Info.plist in the [repository](https://github.com/galeone/ue-bundle-project/blob/main/Build/Mac/Resources/Info.plist). The important part, is to also set there the Bundle ID:
+
+```xml
+	<key>CFBundleIdentifier</key>
+	<string>REPLACE_WITH_BUNDLE_ID</string>
+```
+
+Now, after the first configuration of the entitlements and of the Info.plist, we can package once again our application and try to execute it 🤞
+
+```sh
+LC_ALL="C" ue4 package Development -package -CrashReporter
+# invoked this way to see the logs, and not invoked using open dist/Mac/BundleProject.app
+./dist/Mac/BundleProject.app/Contents/MacOS/BundleProject
+```
+
+It works 🙌
+
+## The notarization process
+
+We have a working application. Now we want to package it in a `.pkg` (or `.zip` or `.dmg` it's the same) and ship it to our clients. The first step is the creation of the product and the sign of the bundle with the correct packaging certificate.
+
 
 ## TL;DR
 

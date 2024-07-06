@@ -258,7 +258,7 @@ else
 
 When using modern Xcode we enter in the `else` branch that copies the frameworks in the Framework directory. Instead, we want to always enter in the if branch, thus the code has to be modified accordingly.
 
-After applying this change, we can finally execute the application. Should it work, right? 😅
+After applying this change, we can finally execute the application. It should work, right? 😅
 
 ### The Info.plist and the entitlements
 

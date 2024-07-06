@@ -58,7 +58,7 @@ To get the `<APPLICATION IDENTIFIER>` and `<TEAM IDENTIFIER>` I redirect the rea
 
 ## The application & the distribution workflow
 
-The `Config/DefaultEngine.ini` file is part of a very trivial unreal engine application that, as mentioned in the first paragraph of the article, contains a couple of third-party plugins (`URedis` and `WebBrowserWidget`). The full project can be found here: [galeone/ue-bundle-project](https://github.com:galeone/ue-bundle-project).
+The `Config/DefaultEngine.ini` file is part of a very trivial unreal engine application that, as mentioned in the first paragraph of the article, contains a couple of third-party plugins (`URedis` and `WebBrowserWidget`). The full project can be found here: [galeone/ue-bundle-project](https://github.com/galeone/ue-bundle-project).
 
 Briefly, the application contains an empty world with just a user widget, containing a Web Browser Widget pointing to this website. The world also contains an `ARedis` actor that `OnBeginPlay` it connects to the local Redis server, sets a value, fetches this value, and prints in the scene the retrieved value. That's all.
 
@@ -75,7 +75,7 @@ Moreover, we want to insert in the bundle the crash report client provided by th
 
 ## Packaging & integrated code signing
 
-The packaging process allows us to get a (correctly?) signed application. Using [ue4cli](https://github.com/adamrehn/ue4cli) we can easily invoke the UBT to create a shipping package with the crash report client inside. If you are following these steps using [galeone/ue-bundle-project](https://github.com:galeone/ue-bundle-project) you need to edit the `Config/DefaultEngine.ini`, `Build/Mac/Resources/Info.plist`, and `Build/Mac/Resources/entitlements.plist` replacing the `REPLACE_WITH_TEAM_ID` and `REPLACE_WITH_BUNDLE_ID` with the appropriate values.
+The packaging process allows us to get a (correctly?) signed application. Using [ue4cli](https://github.com/adamrehn/ue4cli) we can easily invoke the UBT to create a shipping package with the crash report client inside. If you are following these steps using [galeone/ue-bundle-project](https://github.com/galeone/ue-bundle-project) you need to edit the `Config/DefaultEngine.ini`, `Build/Mac/Resources/Info.plist`, and `Build/Mac/Resources/entitlements.plist` replacing the `REPLACE_WITH_TEAM_ID` and `REPLACE_WITH_BUNDLE_ID` with the appropriate values.
 
 ```sh
 LC_ALL="C" ue4 package Shipping -CrashReportClient
@@ -529,7 +529,7 @@ In any case, you need to:
     xcrun notarytool submit BundleProject.pkg --password $APPDEV_PASSWORD --apple-id $APPDEV_ID --team-id $APPDEV_TEAMID --wait --verbose --output-format plist
     ```
 
-You can see a working example in the [dedicated repository](https://github.com:galeone/ue-bundle-project). Feel free to use it as a starting point for your macOS + Unreal Engine application.
+You can see a working example in the [dedicated repository](https://github.com/galeone/ue-bundle-project). Feel free to use it as a starting point for your macOS + Unreal Engine application.
 
 ## Conclusions
 

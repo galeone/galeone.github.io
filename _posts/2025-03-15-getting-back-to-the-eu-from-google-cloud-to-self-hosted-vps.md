@@ -1,14 +1,14 @@
 ---
 layout: post
-title: "Getting back to the EU: from Google Cloud to OVH"
-date: 2025-03-12 08:00:00
+title: "Getting back to the EU: from Google Cloud to Self-Hosted EU Infrastructure"
+date: 2025-03-15 08:00:00
 categories: cloud
-summary: ""
+summary: "A detailed walkthrough of migrating a web service from Google Cloud to OVH, covering PostgreSQL database migration, CI/CD pipeline setup on Github Actions, and significant cost savings by migrating from Cloud to a self hosted solution. This migration represents a first step toward reducing dependency on US cloud providers while maintaining service quality."
 authors:
     - pgaleone
 ---
 
-In this article I'm going to show the process I followed to migrate some of the services I used from Google Cloud to an European provider, in this case [OVH](https://www.ovh.com/world/). I won't use their cloud solution, but the VPS, in order to have full control over the infrastructure.[^1]
+In this article I'm going to show the process I followed to migrate some of the services I used from Google Cloud to an European provider, in this case [OVH](https://www.ovh.com/world/). I won't use their cloud solution, but their VPS offering instead, in order to have full control over the infrastructure.[^1]
 
 In particular, I will show how I moved out from [Cloud SQL](https://cloud.google.com/sql) to a self hosted instance of [PostgreSQL](https://www.postgresql.org/), how I moved the [Cloud Run](https://cloud.google.com/run) services to a more standard nginx setup, and how reached the same level of CI/CD I had with Google Cloud.
 
@@ -16,15 +16,15 @@ The migrated service is [fitsleepinsights.app](https://fitsleepinsights.app): a 
 
 ## The reasons
 
-There are many reasons why I decided to move the service from Google Cloud to OVH. The first one is purely economical: the costs of the Cloud SQL instance were too high. I was paying too much for the very minimal setup of the instance, with very poor performance.
+There are two main reasons why I decided to move the service from Google Cloud to OVH. The first one is purely economical: the costs of the Cloud SQL instance were too high. I was paying too much for the very minimal setup of the instance, which delivered very poor performance.
 
-The second reason is political, instead. It's my first small step of "getting back to the EU" to reduce the dependency from the US companies.
+The second reason is political. It's my first small step of "getting back to the EU" to reduce dependency on US companies.
 
 ## The CI/CD pipeline
 
-The CI/CD pipeline is the same I had with Google Cloud, but now it's hosted on [GitHub Actions](https://github.com/features/actions).
-This time, instead of deploying on the cloud, I deploy the service on a VPS. The result is the same: the service is deployed on the VPS in seconds, and the cost is very low.
-Moreover, since we are deploying a Go application and the compiler generates self contained binaries, the deployment is very fast and it doesn't require any external dependency or containerization.
+The CI/CD pipeline is similar to what I had with Google Cloud, but now it's hosted on [GitHub Actions](https://github.com/features/actions).
+Instead of deploying to the cloud, I deploy the service on a VPS. The end result is the same: the service is deployed in seconds, but at a much lower cost.
+Additionally, since we are deploying a Go application that compiles to self-contained binaries, the deployment is very fast and doesn't require any external dependencies or containerization.
 
 For the sake of completeness, I'm going to show the Github Actions workflow for the Google Cloud and the OVH VPS.
 
@@ -108,11 +108,11 @@ jobs:
 
 ### The OVH VPS CI/CD pipeline
 
-Differently from the Cloud, where the configuration is done on the cloud side, with a lot of clicks, the OVH VPS CI/CD pipeline requires some good old Linux system administration.
+Unlike cloud services where configuration is done through web interfaces with many clicks, the OVH VPS CI/CD pipeline requires some traditional Linux system administration.
 
 #### The prerequisites
 
-The prerequisites steps to run on the VPS are the following:
+The prerequisite steps to run on the VPS are straightforward:
 
 - Install Go
 - Install PostgreSQL
@@ -300,10 +300,26 @@ The performance are great and the cost is much lower than the Cloud SQL.
 
 Differently from a pure Cloud solution, I have no database lag at all, no problems of cold start, no issues at all. Of course the scalability is not the same, but even with the cloud solution I would have been constrained by the fixed resources allocated to the Cloud SQL instance, making the scalability a problem anyway.
 
+## Self-hosting vs Cloud: The trade-offs
+
+It's important to acknowledge that this self-hosted solution doesn't offer the same theoretical scalability as a cloud platform. However, in practice, even the Google Cloud solution I was using had significant scalability limitations. The Cloud SQL instance with its fixed resources would have been a bottleneck regardless, requiring manual intervention and additional costs to scale up.
+
+What surprised me most was the performance difference. The default VPS configuration significantly outperforms the basic Cloud SQL setup I was using. Database queries that took seconds on Cloud SQL now complete in milliseconds. The elimination of cold starts for the application has also improved the user experience dramatically.
+
+For small to medium-sized applications with predictable traffic patterns, a well-configured VPS can provide better performance, more control, and substantial cost savings compared to cloud solutions. The cloud's theoretical advantages in scalability and managed services often come with practical disadvantages: higher costs, performance compromises at entry-level tiers, and less control over your infrastructure.
+
+In the end, the right choice depends on your specific needs, but don't assume the cloud is always superior. Sometimes, a return to more traditional hosting approaches can yield better results for your particular use case.
+
 ## The future
 
-As mentioned earlier, this is the first step of my journey to get back to the EU. The next steps will be to migrate the domain from Google Domains to an European domain provider, and the DNS to an European DNS provider as well.
+This migration represents just the first step in my journey to "get back to the EU." My roadmap includes several additional phases:
 
-There are certain services that are quite difficult to migrate, like the Gemini RAG used for the Fitbit data analysis. I'm going to keep them on Google Cloud for now.
+1. **Domain migration**: Moving from Google Domains to a European domain registrar
+2. **DNS migration**: Switching to a European DNS provider
+3. **Analytics**: Replacing Google Analytics with EU-hosted alternatives like Matomo
+
+There are certain services that remain challenging to migrate, particularly the Gemini RAG used for Fitbit data analysis. For now, I'll keep these on Google Cloud while monitoring the development of European AI alternatives.
+
+This incremental approach allows me to balance practical considerations with the goal of digital sovereignty. Each migration step reduces dependency on non-EU providers while maintaining service quality for users.
 
 [^1]: I've chosen the VPS because I already had a VPS on OVH, so I didn't need to spend money on a new one.

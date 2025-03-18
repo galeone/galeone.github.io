@@ -12,7 +12,7 @@ In this article I'm going to show the process I followed to migrate some of the 
 
 In particular, I will show how I moved out from [Cloud SQL](https://cloud.google.com/sql) to a self hosted instance of [PostgreSQL](https://www.postgresql.org/), how I moved the [Cloud Run](https://cloud.google.com/run) services to a more standard nginx setup, and how reached the same level of CI/CD I had with Google Cloud.
 
-The migrated service is [fitsleepinsights.app](https://fitsleepinsights.app): a custom dashboard for Fitbit users, with RAG support (gemini-based) for chatting with your data and getting insights about your fitness activities and sleep data. The service is fully open source, and the code is available on [GitHub](https://github.com/pgaleone/fitsleepinsights).
+The migrated service is [fitsleepinsights.app](https://fitsleepinsights.app): a custom dashboard for Fitbit users, with RAG support (gemini-based) for chatting with your data and getting insights about your fitness activities and sleep data. The service is fully open source, and the code is available on [GitHub](https://github.com/galeone/fitsleepinsights).
 
 ## The reasons
 

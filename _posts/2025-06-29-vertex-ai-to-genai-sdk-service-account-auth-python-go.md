@@ -68,7 +68,7 @@ import (
     "json"
     "os"
 
-	"cloud.google.com/go/auth"
+    "cloud.google.com/go/auth"
     "google.golang.org/genai"
 )
 

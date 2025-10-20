@@ -8,6 +8,9 @@ domain:      "pgaleone.eu"
 url:         "https://pgaleone.eu"
 date_format: "%b %-d, %Y"
 
+ # Set to "dark" for Dark-mode version
+theme_mode: default
+
 # Google services
 google_verification: "ZQfgLZBmY7oIkDQWf87ysRgySpoZzeFn0jGqOciv4q4"
 # Use either direct GA implementation or set up GTM account

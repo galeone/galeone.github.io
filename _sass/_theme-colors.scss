@@ -1,0 +1,195 @@
+/*! Theme Colors with Dark Mode Support */
+
+:root {
+  // Light mode colors (default)
+  --base-font-color: #{$dark-gray};
+  --base-bg-color: white;
+  
+  // Links
+  --link-color: #{$blue};
+  --link-hover-color: #{darken($blue, 40%)};
+  
+  // Borders
+  --border-color: #{$light-gray};
+  
+  // Blockquotes
+  --blockquote-bg-color: #fff;
+  --blockquote-color: #7a7a7a;
+  
+  // Code
+  --pre-background-color: #fafafa;
+  --pre-font-color: #{$mid-gray};
+  --hljs-comment: #{$light-gray};
+  --hljs-keyword: #{$dark-blue};
+  --hljs-name: #{$dark-gray};
+  --hljs-number: #{$dark-green};
+  --hljs-string: #{$red};
+  --hljs-title: #{$red};
+  --hljs-type: #{$dark-blue};
+  --hljs-tag: #{$dark-blue};
+  --hljs-attribute: #{$dark-green};
+  --hljs-regexp: #{$dark-green};
+  --hljs-symbol: #{$purple};
+  --hljs-built-in: #{$dark-blue};
+  --hljs-preprocessor: #{$mid-gray};
+  --hljs-deletion: #{$light-pink};
+  --hljs-addition: #{$light-green};
+  --hljs-change: #{$dark-blue};
+  --hljs-chunk: #{$light-gray};
+  
+  // Header
+  --header-border-top: thin solid #f3f3f3;
+  --header-color: #{$dark-gray};
+  --header-bg-color: #fafafa;
+  
+  // Nav
+  --nav-color: #{$mid-gray};
+  --nav-link-color: #444;
+  --nav-link-border-bottom: 2px solid #444;
+  --nav-active-border-bottom: 1px solid #{$light-gray};
+  
+  // Footer
+  --footer-border-top: thin solid #f3f3f3;
+  --footer-color: #7a7a7a;
+  --footer-bg-color: #fafafa;
+  
+  // Posts
+  --post-link-color: #{$dark-gray};
+  --post-meta-color: #{$mid-gray};
+  
+  // Pagination
+  --pagination-link-color: #444;
+  --pagination-link-hover-color: #{darken(#444, 40%)};
+  --pagination-background-color: #fafafa;
+  --pagination-hover-background-color: white;
+}
+
+// Dark mode - automatic based on OS/browser preference
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Base
+    --base-font-color: #{$light-blue};
+    --base-bg-color: #{$darker-blue};
+    
+    // Links
+    --link-color: #{$blue};
+    --link-hover-color: #{darken($blue, 40%)};
+    
+    // Borders
+    --border-color: #{$light-blue};
+    
+    // Blockquotes
+    --blockquote-bg-color: #{$darker-blue};
+    --blockquote-color: #{$light-blue};
+    
+    // Code
+    --pre-background-color: #{$dark-gray};
+    --pre-font-color: #{$light-gray};
+    --hljs-comment: #{$mid-gray};
+    --hljs-keyword: #{$orange};
+    --hljs-name: #{$light-gray};
+    --hljs-number: #{$light-green};
+    --hljs-string: #{$light-pink};
+    --hljs-title: #{$light-gray};
+    --hljs-type: #{$light-gray};
+    --hljs-tag: #{$light-gray};
+    --hljs-attribute: #{$light-green};
+    --hljs-regexp: #{$light-pink};
+    --hljs-symbol: #{$purple};
+    --hljs-built-in: #{$orange};
+    --hljs-preprocessor: #{$mid-gray};
+    --hljs-deletion: #{$light-pink};
+    --hljs-addition: #{$light-green};
+    --hljs-change: #{$light-gray};
+    --hljs-chunk: #{$dark-blue};
+    
+    // Header
+    --header-border-top: thin solid #{$light-gray};
+    --header-color: #{$light-blue};
+    --header-bg-color: #{$darker-blue};
+    
+    // Nav
+    --nav-color: #{$light-blue};
+    --nav-link-color: #{$light-blue};
+    --nav-link-border-bottom: 2px solid #{$light-blue};
+    --nav-active-border-bottom: 1px solid #{$blue};
+    
+    // Footer
+    --footer-border-top: thin solid #{$light-gray};
+    --footer-color: #{$light-blue};
+    --footer-bg-color: #{$darker-blue};
+    
+    // Posts
+    --post-link-color: #{$light-blue};
+    --post-meta-color: #{$light-blue};
+    
+    // Pagination
+    --pagination-link-color: #{$light-blue};
+    --pagination-link-hover-color: #{lighten($light-blue, 40%)};
+    --pagination-background-color: #{$darker-blue};
+    --pagination-hover-background-color: #{lighten($darker-blue, 40%)};
+  }
+}
+
+// Update SCSS variables to use CSS custom properties
+$base-font-color: var(--base-font-color);
+$base-bg-color: var(--base-bg-color);
+
+// Links
+$link-color: var(--link-color);
+$link-hover-color: var(--link-hover-color);
+
+// Borders  
+$border-color: var(--border-color);
+
+// Blockquotes
+$blockquote-bg-color: var(--blockquote-bg-color);
+$blockquote-color: var(--blockquote-color);
+
+// Code
+$pre-background-color: var(--pre-background-color);
+$pre-font-color: var(--pre-font-color);
+$hljs-comment: var(--hljs-comment);
+$hljs-keyword: var(--hljs-keyword);
+$hljs-name: var(--hljs-name);
+$hljs-number: var(--hljs-number);
+$hljs-string: var(--hljs-string);
+$hljs-title: var(--hljs-title);
+$hljs-type: var(--hljs-type);
+$hljs-tag: var(--hljs-tag);
+$hljs-attribute: var(--hljs-attribute);
+$hljs-regexp: var(--hljs-regexp);
+$hljs-symbol: var(--hljs-symbol);
+$hljs-built-in: var(--hljs-built-in);
+$hljs-preprocessor: var(--hljs-preprocessor);
+$hljs-deletion: var(--hljs-deletion);
+$hljs-addition: var(--hljs-addition);
+$hljs-change: var(--hljs-change);
+$hljs-chunk: var(--hljs-chunk);
+
+// Header
+$header-border-top: var(--header-border-top);
+$header-color: var(--header-color);
+$header-bg-color: var(--header-bg-color);
+
+// Nav
+$nav-color: var(--nav-color);
+$nav-link-color: var(--nav-link-color);
+$nav-link-border-bottom: var(--nav-link-border-bottom);
+$nav-active-border-bottom: var(--nav-active-border-bottom);
+
+// Footer
+$footer-border-top: var(--footer-border-top);
+$footer-color: var(--footer-color);
+$footer-bg-color: var(--footer-bg-color);
+
+// Posts
+$post-link-color: var(--post-link-color);
+$post-meta-color: var(--post-meta-color);
+
+// Pagination
+$pagination-link-color: var(--pagination-link-color);
+$pagination-link-hover-color: var(--pagination-link-hover-color);
+$pagination-background-color: var(--pagination-background-color);
+$pagination-hover-background-color: var(--pagination-hover-background-color);
+

@@ -55,7 +55,7 @@ The dilemma is clear: we need a globally interconnected world, but one that is r
 
 From a European perspective, it is clear that we depend too much on US companies, which poses both political and technological problems.
 
-Politically, it is evident. What happened to Guillou is a clear example of how depending on US companies for almost everything is a problem. A foreign country being able to excommunicate a person from the world (while they are living in a European state) is unacceptable.
+Politically, it is evident. What happened to Guillou is a clear example of how depending on US companies for almost everything is a problem. It shows how a foreign power can use its control over tech infrastructure to target even individuals working for international bodies like the ICC. A foreign country being able to excommunicate a person from the world while they are living in a European state is unacceptable.
 
 Technologically, it is also a problem. Every sysadmin knows that a single point of failure is a major flaw in system design. The same applies to the internet.
 
@@ -71,3 +71,8 @@ What can an individual do? An individual can start by using European services. T
 
 On a technical note, I demonstrated how to migrate from Google Cloud to an EU-based solution (OVH) in [this article](/cloud/2025/03/15/getting-back-to-the-eu-from-google-cloud-to-self-hosted-vps/). It is better than nothing, but it is not a solution for everyone.
 
+## A final thought
+
+Spinoza was excommunicated in 1656 and was able to live a full life despite the ban. After all, the excommunication was limited to the Jewish community, and he was able to move to nearby villages to simply continue living his life.
+
+In 2026, being digitally excommunicated is a very different story. It is a form of ostracism that cuts you off from the modern world—a ban that prevents you from accessing almost every essential service and application that powers our daily lives. Since it transcends any physical border, a US sanction is de facto the modern global equivalent of the *herem*.

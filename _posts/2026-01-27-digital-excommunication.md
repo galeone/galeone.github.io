@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Digital Excommunication"
-date: 2026-01-21 02:00:00
+date: 2026-01-27 08:00:00
 categories: europe
 summary: "What happens when your digital life depends entirely on a foreign power? By drawing a parallel between the 1656 excommunication of Spinoza and modern-day US sanctions on European citizens, this article discusses the concept of 'digital excommunication' and why European technological sovereignty is no longer optional."
 authors:

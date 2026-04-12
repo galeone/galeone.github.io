@@ -1,9 +1,9 @@
 ---
 layout: post
 title: "Paying Google to Hack macOS Users?"
-date: 2026-04-12 10:00:00
+date: 2026-04-12 01:00:00
 categories: security
-summary: "Installing software with `curl | sh` is a bad habit - unfortunately common nowadays. This is an attack vector exploited through malvertising. The article describes what happens when someone blindly installs a tool from a sponsored website."
+summary: "Installing software with curl | sh is a bad habit - unfortunately common nowadays. This is an attack vector exploited through malvertising. The article describes what happens when someone blindly installs a tool from a sponsored website."
 authors:
     - pgaleone
 ---
@@ -20,9 +20,12 @@ The sponsored result and all the first results were aliases of macdiskclean.squa
 
 However, the website looked like a standard Apple-like website - clearly designed for **phishing**.
 
-<div markdown="1" class="blog-image-container">
-![Sponsored landing page for the disk cleanup site, styled like an official Apple page](/images/macos-stealer/landing-page.png){:class="blog-image"}
-</div>
+{:.center}
+![Sponsored landing page for the disk cleanup site, styled like an official Apple page](/images/macos-stealer/landing-page.png)
+<footer>
+    <cite title="Sponsored malvertising landing page">Sponsored landing page for the fake disk-cleaner offer, styled to resemble an official Apple download.
+    </cite>
+</footer>
 
 In this case the installation pattern even obfuscates the URL - but since the trend is already in place, for sure some people executed that line blindly.
 

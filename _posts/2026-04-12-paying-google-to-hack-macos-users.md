@@ -91,4 +91,4 @@ It is **interesting** - and worrying - that sponsored results can point users at
 
 ---
 
-[^1]: Fun fact: even dua-cli's README suggests installing with `curl | sh`.
+[^1]: Fun fact: even dua-cli's README suggests installing with `curl | sh` 😭.

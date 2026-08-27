@@ -1,3 +1,4 @@
+@use 'variables' as *;
 blockquote {
   border-left: 5px solid $blockquote-color;
   font-style: italic;

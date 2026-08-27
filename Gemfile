@@ -1,10 +1,10 @@
 source 'https://rubygems.org'
 
-# A simple Ruby Gem to bootstrap dependencies for setting up and
-# maintaining a local Jekyll environment in sync with GitHub Pages
-# https://github.com/github/pages-gem
-gem 'github-pages'
+gem "jekyll", "4.4.1"
+gem "jekyll-paginate", "~> 1.1"
+gem "jekyll-sitemap", "~> 1.4"
+gem "jekyll-gist", "~> 1.5"
 
-gem "webrick", "~> 1.7"
-
-gem "json"
+# jekyll-gist pulls in octokit, which needs the retry middleware to be a
+# separate gem since Faraday 2.0.
+gem "faraday-retry"

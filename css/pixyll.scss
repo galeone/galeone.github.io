@@ -3,38 +3,34 @@
 ---
 @charset "UTF-8";
 
-/*!
-* Pixyll - A simple, beautiful Jekyll theme that's mobile first.
-* Crafted with <3 by John Otander (@4lpine) - ©2015-2019 John Otander
-* @author John Otander <johnotander@gmail.com> (http://johnotander.com/)
-* @link https://github.com/johnotander/pixyll
-* @license MIT
-*/
+// Licence banner lives in _banner.scss so it is emitted exactly once, ahead of
+// everything else; a loud comment placed before @use rules gets repeated per module.
+@use 'banner';
 
-@import 'variables';
-@import 'theme-colors';
+@use 'variables';
+@use 'theme-colors';
 
-@import 'basscss';
+@use 'basscss';
 
-@import 'base';
+@use 'base';
 
-@import 'links';
-@import 'positions';
-@import 'clearfix';
-@import 'code';
-@import 'forms';
-@import 'mailchimp';
-@import 'typography';
-@import 'header';
-@import 'tables';
-@import 'animations';
-@import 'footer';
-@import 'social-icons';
-@import 'blockquotes';
-@import 'posts';
-@import 'media-queries';
-@import 'gists';
-@import 'measure';
-@import 'pagination';
+@use 'links';
+@use 'positions';
+@use 'clearfix';
+@use 'code';
+@use 'forms';
+@use 'mailchimp';
+@use 'typography';
+@use 'header';
+@use 'tables';
+@use 'animations';
+@use 'footer';
+@use 'social-icons';
+@use 'blockquotes';
+@use 'posts';
+@use 'media-queries';
+@use 'gists';
+@use 'measure';
+@use 'pagination';
 
-@import 'custom'
+@use 'custom';

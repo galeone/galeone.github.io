@@ -1,3 +1,7 @@
+@use 'variables' as *;
+// .post-footer @extends .italic, which lives in this module; @extend only
+// reaches selectors in modules this file loads.
+@use 'basscss/utility-typography';
 
 .posts {
   margin: 0;

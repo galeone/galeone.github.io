@@ -64,7 +64,7 @@ The process of data acquisition has been documented and we have a nice YouTube v
     <iframe width="665" height="510" src="https://www.youtube.com/embed/XOEN9W05_4A" style="border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
     <footer>The Smartlab has developed a new publicly available database of daily human activities that has been recorded using accelerometer and gyroscope data from a waist-mounted Android-OS smartphone (Samsung Galaxy S II). The six studied activities are: Walking, Walking Upstairs, Walking Downstairs, Sitting, Standing and Laying down. <br>
-    
+
     In the video the <span style="color:red">red</span> color is the X axis, <span style="color:green">green</span> for Y and <span style="color:blue">blue</span> for Z.</footer>
 </div>
 
@@ -72,11 +72,11 @@ The process of data acquisition has been documented and we have a nice YouTube v
 
 Looking at the dataset structure, we can see we have a CSV file (`WISDM_ar_v1.1_raw.txt`) that contains all the features previously described:
 
-| ID | Activity | Timestamp     | X           | Y          | Z            | 
-|----|---------|----------------|-------------|------------|--------------| 
-| 33 | Jogging | 49105962326000 | -0.6946377  | 12.680544  | 0.50395286;  | 
-| 33 | Jogging | 49106062271000 | 5.012288    | 11.264028  | 0.95342433;  | 
-| 33 | Jogging | 49106112167000 | 4.903325    | 10.882658  | -0.08172209; | 
+| ID | Activity | Timestamp     | X           | Y          | Z            |
+|----|---------|----------------|-------------|------------|--------------|
+| 33 | Jogging | 49105962326000 | -0.6946377  | 12.680544  | 0.50395286;  |
+| 33 | Jogging | 49106062271000 | 5.012288    | 11.264028  | 0.95342433;  |
+| 33 | Jogging | 49106112167000 | 4.903325    | 10.882658  | -0.08172209; |
 | ... | ... | ... | ...  | ... | ... |
 
 As we can see, the final value contains a `;` that should be removed. However, to make the processing more fun, instead of doing it in Python, we'll do it using Go - as well as the training phase (!).
@@ -302,7 +302,7 @@ Before jumping in the Go code and defining the training loop and using the graph
 - The exported graphs
 - The input/output tensor to use to feed the graph / get the results.
 
-The tool to use is `saved_model_cli` that comes with the Python installation of TensorFlow. 
+The tool to use is `saved_model_cli` that comes with the Python installation of TensorFlow.
 
 ```bash
 saved_model_cli show --all --dir at
@@ -356,7 +356,7 @@ In this article, we simulate the real scenario in which we suppose the user wear
 3. We ask the user if the predicted label is the correct one. If it's not, we ask the user to choose the correct label.
 4. With the data and the label, we perform a training step to adapt the model parameters to the user-generated data.
 
-In this way, in the long run, the model will predict the correct label for the tracked activity, even if the user exhibits an unusual pattern in the observations (this might be the case of people with disabilities or athletes). 
+In this way, in the long run, the model will predict the correct label for the tracked activity, even if the user exhibits an unusual pattern in the observations (this might be the case of people with disabilities or athletes).
 
 But first, we perform the training directly in Go :)
 
@@ -777,4 +777,3 @@ The Go Philosophy of *"Don't communicate by sharing memory; share memory by comm
 [1]: https://www.cis.fordham.edu/wisdm/includes/files/sensorKDD-2010.pdf "Jennifer R. Kwapisz, Gary M. Weiss and Samuel A. Moore (2010). Activity Recognition using Cell Phone Accelerometers, Proceedings of the Fourth International Workshop on Knowledge Discovery from Sensor Data (at KDD-10), Washington DC."
 [^1]: https://venturebeat.com/2019/07/19/why-do-87-of-data-science-projects-never-make-it-into-production/ "87% of data science projects never make it into production"
 [^2]: https://www.tensorflow.org/guide/saved_model
-

@@ -61,7 +61,7 @@ def split(line):
 
 The code is trivial. The only thing to note is that strings are a variable-length data type. Thus, functions like `substr`, or `split` cannot return a `tf.Tensor` since a `tf.Tensor` is always made of **identical** dimensions (e.g. every element in a Tensor has a well-defined shape). Instead, these functions work with [`tf.RaggedTensor`](https://www.tensorflow.org/api_docs/python/tf/RaggedTensor?hl=en)s as input or output.
 
-Applying this transformation is just the invocation of the `.map` method over the input dataset. 
+Applying this transformation is just the invocation of the `.map` method over the input dataset.
 
 ```python
 splitted_dataset = dataset.map(split)

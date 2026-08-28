@@ -458,7 +458,7 @@ The image below shows how this interaction allows the users to get insights from
 
 Interacting with Gemini and other models via Vertex AI is quite simple, once understood the pattern to follow and how to extract/insert data from the Protobuf structures. The presented solution that allows the creation of a RAG for data stored in PostgreSQL passes through the generation of a template. This template has been filled by Gemini - but a better solution (although longer to develop) would be to manually fill the template and create these "stories". In this way, we can remove the randomness of the LLM at least from the data generation part.
 
-The integration of pgvector allowed us to store embeddings on PostgreSQL and make spatial queries in a seamless way. 
+The integration of pgvector allowed us to store embeddings on PostgreSQL and make spatial queries in a seamless way.
 
 By the end of the article, we also leaked a screenshot of this feature implemented on [fitsleepinsights.app](https://fitsleepinsights.app/). By the time of the publication of this article, the application is not yet deployed - but the source code is available on Github @ [https://github.com/galeone/fitsleepinsights/](https://github.com/galeone/fitsleepinsights/).
 

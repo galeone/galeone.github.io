@@ -7,18 +7,18 @@
   // Light mode colors (default)
   --base-font-color: #{$dark-gray};
   --base-bg-color: white;
-  
+
   // Links
   --link-color: #{$blue};
   --link-hover-color: #{color.adjust($blue, $lightness: -40%)};
-  
+
   // Borders
   --border-color: #{$light-gray};
-  
+
   // Blockquotes
   --blockquote-bg-color: #fff;
   --blockquote-color: #7a7a7a;
-  
+
   // Code
   --pre-background-color: #fafafa;
   --pre-font-color: #{$mid-gray};
@@ -39,27 +39,27 @@
   --hljs-addition: #{$light-green};
   --hljs-change: #{$dark-blue};
   --hljs-chunk: #{$light-gray};
-  
+
   // Header
   --header-border-top: thin solid #f3f3f3;
   --header-color: #{$dark-gray};
   --header-bg-color: #fafafa;
-  
+
   // Nav
   --nav-color: #{$mid-gray};
   --nav-link-color: #444;
   --nav-link-border-bottom: 2px solid #444;
   --nav-active-border-bottom: 1px solid #{$light-gray};
-  
+
   // Footer
   --footer-border-top: thin solid #f3f3f3;
   --footer-color: #7a7a7a;
   --footer-bg-color: #fafafa;
-  
+
   // Posts
   --post-link-color: #{$dark-gray};
   --post-meta-color: #{$mid-gray};
-  
+
   // Pagination
   --pagination-link-color: #444;
   --pagination-link-hover-color: #{color.scale(#444, $lightness: -100%)};
@@ -73,18 +73,18 @@
     // Base
     --base-font-color: #{$light-blue};
     --base-bg-color: #{$darker-blue};
-    
+
     // Links
     --link-color: #{$blue};
     --link-hover-color: #{color.adjust($blue, $lightness: -40%)};
-    
+
     // Borders
     --border-color: #{$light-blue};
-    
+
     // Blockquotes
     --blockquote-bg-color: #{$darker-blue};
     --blockquote-color: #{$light-blue};
-    
+
     // Code
     --pre-background-color: #{$dark-gray};
     --pre-font-color: #{$light-gray};
@@ -105,27 +105,27 @@
     --hljs-addition: #{$light-green};
     --hljs-change: #{$light-gray};
     --hljs-chunk: #{$dark-blue};
-    
+
     // Header
     --header-border-top: thin solid #{$light-gray};
     --header-color: #{$light-blue};
     --header-bg-color: #{$darker-blue};
-    
+
     // Nav
     --nav-color: #{$light-blue};
     --nav-link-color: #{$light-blue};
     --nav-link-border-bottom: 2px solid #{$light-blue};
     --nav-active-border-bottom: 1px solid #{$blue};
-    
+
     // Footer
     --footer-border-top: thin solid #{$light-gray};
     --footer-color: #{$light-blue};
     --footer-bg-color: #{$darker-blue};
-    
+
     // Posts
     --post-link-color: #{$light-blue};
     --post-meta-color: #{$light-blue};
-    
+
     // Pagination
     --pagination-link-color: #{$light-blue};
     --pagination-link-hover-color: #{color.scale($light-blue, $lightness: 100%)};

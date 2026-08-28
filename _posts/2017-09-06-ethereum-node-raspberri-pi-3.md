@@ -115,9 +115,9 @@ su # password root
 # Use fdisk to change the partition table
 fdisk /dev/mmcblk0
 # At the fdisk prompt, delete the partition number 2
-# Type d then 2. 
+# Type d then 2.
 # Create a new primary partition (id 2)
-# Type n then p. 
+# Type n then p.
 # At the prompt for the first sector and last sector just press enter.
 # This will automatically start from the old first sector and will set the last
 # sector to the end of the available space.

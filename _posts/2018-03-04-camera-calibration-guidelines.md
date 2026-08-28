@@ -40,8 +40,8 @@ $$ \begin{align}
     \end{cases} & \;
 2: \begin{cases}
 \hat{x} &= x +  2p_1xy + p_2(r^2+2x^2) \\
-\hat{y} &= y +  p_1(r^2+ 2y^2)+ 2p_2xy 
-\end{cases} 
+\hat{y} &= y +  p_1(r^2+ 2y^2)+ 2p_2xy
+\end{cases}
 \end{align} $$
 
 while the camera matrix parameters capture the relation between the points in the scene (3D world) and the corresponding points in the image (2D world). In particular, the camera matrix contains the following parameters:

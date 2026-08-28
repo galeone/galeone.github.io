@@ -101,7 +101,7 @@ latent_space_size = 100
 input_noise = tf.placeholder(tf.float32, shape=(None,latent_space_size))
 G = generator(input_noise)
 
-# now that we have defined the generator output G, we can give it in input to 
+# now that we have defined the generator output G, we can give it in input to
 # D, this call of `discriminator` will not define a new graph, but it will
 # **reuse** the variables previously defined
 D_fake = discriminator(G, True)
@@ -207,7 +207,7 @@ Look at the different approach: both `generator` and `discriminator` returns a `
 This means that using Keras we can instantiate our model and use **the same model** in different parts of the source code and we effectively use the variables of that model, without the problem of defining a new sub-graph prefixed with `_n`. In fact, differently from the 1.x version, we're going to define just one $$D$$ model and use it twice.
 
 ```python
-# Define the real input, a batch of values sampled from the real data 
+# Define the real input, a batch of values sampled from the real data
 real_input = tf.placeholder(tf.float32, shape=(None,1))
 
 # Define the discriminator model

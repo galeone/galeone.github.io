@@ -24,7 +24,7 @@ The most important part of an AE is its hidden layer. In fact, this layer learns
 
 The hidden layer plays a fundamental role because a common application of AEs is **dimensionality reduction**: after the training phase, the output layer is usually thrown away and the AE is used to build a new dataset of samples with lower dimensions.
 
-Formally: 
+Formally:
 
 - $$x \in [0,1]^{d}$$ input vector
 - $$W_i \in \mathbb{R}^{I_{di} \times O_{di}}$$ parameters matrix of layer $$i$$-th, in charge of projecting a $$I_{di}$$-D input in a $$O_{di}$$-D space

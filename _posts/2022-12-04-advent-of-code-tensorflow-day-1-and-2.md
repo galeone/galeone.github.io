@@ -21,7 +21,7 @@ Why use TensorFlow? Three simple reasons
 This year I kinda-started on time. Last year I started when the competition was already halfway through. This year instead, I'll try to solve every puzzle the very same day it's published.
 
 One year ago, I wrote an article for every single problem I solved (here's [the wrap-up of Advent of Code 2021 in pure TensorFlow](/tensorflow/2022/01/21/advent-of-code-tensorflow-wrap-up/). Let's see where this year brings us. I could write an article per solution, or group them together. I don't know it yet. I guess it depends on how complex a solution is and if it's worth writing an article for something "boring". For this reason, I described in this first article the solution to the first **and second** problems, because I found the latter boring and writing an article about this solution alone would be a waste.
-        
+
 Of course, I'd try to highlight the TensorFlow peculiarity every time I use something not widely used or whenever I discover something noticeable about the framework.
 
 Let's start!
@@ -85,7 +85,7 @@ For accumulating the values, instead, there's no need to use a `tf.Variable`. Th
 [tf.data.Dataset.scan](https://www.tensorflow.org/api_docs/python/tf/data/Dataset#scan)`(initial_state, scan_func)` is the perfect tool for this workflow. As the documentation states
 
 > [tf.data.Dataset.scan is ] A transformation that scans a function across an input dataset.
-> 
+>
 > This transformation is a stateful relative of `tf.data.Dataset.map`. In addition to mapping `scan_func` across the elements of the input dataset, `scan()` accumulates one or more state tensors, whose initial values are `initial_state`.
 
 The `scan_func` maps the pair `(old_state, input_element)` to the pair `(new_state, output_element)`.

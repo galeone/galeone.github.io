@@ -55,8 +55,8 @@ In the following, I suppose that the reader has its Go environment ready and the
 ## Understand Tensorflow structure
 
 Let's repeat what Tensorflow is (kept from the [Tensorflow website](https://www.tensorflow.org/), the emphasis is mine):
-    
-> TensorFlow™ is an open source software library for numerical computation using data flow graphs. Nodes in the graph **represent** mathematical operations, while the graph edges **represent** the multidimensional data arrays (tensors) communicated between them. 
+
+> TensorFlow™ is an open source software library for numerical computation using data flow graphs. Nodes in the graph **represent** mathematical operations, while the graph edges **represent** the multidimensional data arrays (tensors) communicated between them.
 
 We can think of Tensorflow as a descriptive language, a bit like SQL, in which you describe what you want and let the underlying engine (the database) parse your query, check for syntactic and semantic errors, convert it to its private representation, optimize it and compute the results: all this to give you the correct results.
 
@@ -333,8 +333,8 @@ Here's a Gist with the complete code of `attempt3` in case you'd like too build 
 <script src="https://gist.github.com/09657143df49a90536f4ac4893c64696.js?file=attempt3.go"></script>
 
 #### Question time
- 
-What do we have learned about the Tensorflow architecture? *Every operation has its own set of kernel associated. Tensorflow, seen as a descriptive language, is a strong typed language. It not only has to respect the C++ typing rules, but it also has the capability of implementing only certain types that are specified during the op regisration phase.* 
+
+What do we have learned about the Tensorflow architecture? *Every operation has its own set of kernel associated. Tensorflow, seen as a descriptive language, is a strong typed language. It not only has to respect the C++ typing rules, but it also has the capability of implementing only certain types that are specified during the op regisration phase.*
 
 # Conclusions
 

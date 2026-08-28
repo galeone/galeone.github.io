@@ -87,4 +87,3 @@ Use your brain.
 ---
 
 [^1]: Everyone talks about tokens nowadays. I remember when the tokens were just the result of "tokenization", a deterministic step used when doing stuff like TF-IDF. Every token was a word, full-stop. Now instead, a token is "a token" there's no standard definition or fixed rule, since every model decides what a token is. If you have a locally deployed model you have the control (more or less) of what the tokens are. If the models run on the cloud, well, a token is what the model provider wants to sell you as a token.
-

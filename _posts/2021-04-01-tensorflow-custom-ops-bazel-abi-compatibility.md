@@ -381,7 +381,7 @@ Let's see what happens then when we follow the process described in the reposito
 
 We start with the (fixed) script to set up all the required stuff (note that we need the TensorFlow repo to copy the dependencies that are in the `third_party` folder, and also the `custom-op` repo that is a template repository that contains some boilerplate code required to build the operation inside the container.
 
-```bash 
+```bash
 git clone git@github.com:google-research/google-research.git
 
 git clone https://github.com/tensorflow/tensorflow

@@ -1,3 +1,4 @@
+---
 # Site settings
 title:       "P. Galeone's blog"
 email:       "nessuno@nerdz.eu"
@@ -35,7 +36,7 @@ post_preview_image:   true
 # Facebook Page integration
 # (for instant articles and other stuff)
 fb_page: false
-fb_page_id: 
+fb_page_id:
 
 # Disqus post comments
 # (leave blank to disable Disqus)

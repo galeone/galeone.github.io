@@ -129,7 +129,7 @@ The suggested action should be based on the article content and the stock's perf
 Article:
 %s
 
-IMPORTANT: 
+IMPORTANT:
 - Your response must contain ONLY valid JSON, no explanatory text before or after
 - Do not include any markdown formatting or code blocks
 - Return exactly this JSON structure and nothing else:
@@ -138,7 +138,7 @@ IMPORTANT:
   "items": [
     {
       "ticker": "STOCK_TICKER",
-      "action": "buy|sell|hold", 
+      "action": "buy|sell|hold",
       "reason": "Brief explanation in English."
     }
   ]
@@ -183,7 +183,7 @@ When processed by Gemini, this article generates the following analysis:
     },
     {
       "ticker": "LDO.MI",
-      "action": "buy", 
+      "action": "buy",
       "reason": "Stock rising 2.5% on new defense sector contracts."
     }
   ]
@@ -207,7 +207,7 @@ func (s *AIAnalysisService) Start() error {
                 for _, analysis := range newsItem.Analysis.Items {
                     // Generate ticker variations for different markets
                     allTickers := []string{analysis.Ticker}
-                    
+
                     // Handle Italian stocks (.MI suffix)
                     if strings.Contains(analysis.Ticker, ".MI") {
                         miRemovedTicker := strings.Replace(analysis.Ticker, ".MI", "", 1)
@@ -298,8 +298,8 @@ func (s *Stream) fetchFeedWithRetry(feedURL string) error {
         }
         return nil
     }
-    
-    return fmt.Errorf("failed to fetch feed after %d attempts: %w", 
+
+    return fmt.Errorf("failed to fetch feed after %d attempts: %w",
         s.retryConfig.MaxRetries+1, lastErr)
 }
 ```
@@ -341,18 +341,18 @@ go func() {
     for recommendation := range aiService.GetLongChannel() {
         // Create trend following strategy for recommended stock
         trendStrategy := strategy.NewTrendFollowing(
-            tradingEngine, 
+            tradingEngine,
             recommendation.Title,
             strategy.LongDirection,
         )
-        
+
         if err := trendStrategy.Start(); err != nil {
             log.Error("Failed to start trend strategy: %s", err)
             continue
         }
-        
-        log.Info("Started AI-recommended long strategy for %s: %s", 
-            recommendation.Title.GetPriceCode(), 
+
+        log.Info("Started AI-recommended long strategy for %s: %s",
+            recommendation.Title.GetPriceCode(),
             recommendation.Analysis.Reason)
     }
 }()

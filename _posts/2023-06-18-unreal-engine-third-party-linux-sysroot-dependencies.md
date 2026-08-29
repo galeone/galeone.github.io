@@ -46,7 +46,7 @@ Let's deep dive into a real scenario: creating the Unreal Engine plugin for [red
 
 Let's start this journey in the easiest possible way:
 
-1. Compile the library as described in the [README](https://github.com/sewenew/redis-plus-plus#install-redis-plus-plus) 
+1. Compile the library as described in the [README](https://github.com/sewenew/redis-plus-plus#install-redis-plus-plus)
 1. Create the Unreal Engine plugin structure, create the `ThirdParty` folder and the `RedisPlusPlus` **external** module inside it (as described [in the previous article](/2022/05/27/unreal-engine-third-party-linux-abi-compatibility/#creating-an-unreal-plugin)
 1. Define and Implement the Public interface of the Plugin (we'll implement only a single function)
 1. Try to use the Plugin and see what happens.
@@ -160,7 +160,7 @@ class REDISPLUSPLUS_API FRedisPlusPlus : public IModuleInterface {
   public:
   // There's no need to override IModuleInterface
   // StartupModule & ShutdownModule methods.
-  
+
   void Connect(const FString &Host, int32 Port = 6379);
 
   FString Ping(TOptional<FString> Message) const;

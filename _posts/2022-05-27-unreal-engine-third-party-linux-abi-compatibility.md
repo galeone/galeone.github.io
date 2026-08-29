@@ -248,7 +248,7 @@ As mentioned at the beginning of this article, I decided to use Unreal Engine be
 
 For the implementation of our plugin we need to write 2 `.Build.cs` files:
 
-- `SwapLibrary.Build.cs` that will define our `External` module, and 
+- `SwapLibrary.Build.cs` that will define our `External` module, and
 - `Swap.Build.cs` that's the build file for the plugin, that will depend on the `SwapLibrary` module.
 
 ```csharp

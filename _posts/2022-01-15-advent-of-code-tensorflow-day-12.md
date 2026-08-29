@@ -184,7 +184,7 @@ Moreover, we used the [set difference](https://www.tensorflow.org/api_docs/pytho
 The natural way of facing this problem is by using **recursion**. In fact, the problem can be modeled as follows
 
 > Concatenate the input `node` to the `current_path`.
-> 
+>
 > Is the current node the `end` node? If yes, we found the path. Increment by 1 the counter of the paths. Return.
 >
 > Otherwise, find the neighborhood of the current node.

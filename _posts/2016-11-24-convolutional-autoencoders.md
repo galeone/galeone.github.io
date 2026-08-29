@@ -82,7 +82,7 @@ A convolutional filter can be also seen as a volume of filters with depth $$D$$.
 
 $$ I = \left\{I_1,\cdots, I_D\right\}, \quad F = \left\{F_1, \cdots, F_D\right\} $$
 
-It's possible to generalize the previous convolution formula, in order to keep in account the depths: 
+It's possible to generalize the previous convolution formula, in order to keep in account the depths:
 
 $$ O(i, j) = \sum_{d=1}^{D}{\sum_{u=-2k-1}^{2k+1}\sum_{v=-2k -1}^{2k +1}F_d(u, v)I_d(i -u, j -v)}$$
 

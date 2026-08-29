@@ -38,12 +38,12 @@ For Python applications, migrating service account authentication requires creat
     scopes = [
         "https://www.googleapis.com/auth/cloud-platform",
     ]
-    
+
     # Create credentials from the service account JSON file with the required scopes
     credentials = Credentials.from_service_account_file(
         os.getenv("SERVICE_ACCOUNT_FILE_PATH"), scopes=scopes
     )
-    
+
     # Create the Gen AI Client specifying the location by env var
     # and use the project ID from environment variables
     client = genai.Client(
@@ -78,7 +78,7 @@ import (
 key, err := os.ReadFile(os.getenv("SERVICE_ACCOUNT_FILE_PATH"))
 if err != nil {
     return fmt.Errorf("failed to read service account key: %s", err)
-    
+
 }
 
 var serviceAccount struct {

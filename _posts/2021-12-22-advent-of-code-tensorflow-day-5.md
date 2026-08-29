@@ -24,7 +24,7 @@ The puzzle input contains segments coordinates, in the format `x1,y1 -> x2,y2`, 
 7,0 -> 7,4
 ```
 
-A segment is not only start and end points, but it is made of all the points that connect start and end. 
+A segment is not only start and end points, but it is made of all the points that connect start and end.
 
 - An entry like `1,1 -> 1,3` covers points `1,1`, `1,2`, and `1,3`.
 - An entry like `9,7 -> 7,7` covers points `9,7`, `8,7`, and `7,7`.

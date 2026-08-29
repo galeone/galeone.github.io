@@ -94,7 +94,7 @@ A slightly different approach is to use **Inverted Dropout**. This approach cons
 
 The scale factor is the inverse of the keep probability: $$\frac{1}{1 - p} = \frac{1}{q}$$, thus:
 
-**Train phase**: 
+**Train phase**:
 $$O_i = \frac{1}{q} X_i a(\sum_{k=1}^{d_i}{w_k x_k + b}) $$
 
 **Test phase**:

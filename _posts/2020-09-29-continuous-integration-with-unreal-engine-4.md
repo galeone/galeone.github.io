@@ -83,7 +83,7 @@ BRANCH="<set branch here>"
 ue4-docker build custom:4.25.3 -repo="$REPO_URL" -branch="$BRANCH" \
            --exclude debug \ # exclude debug symbols to reduce the image and workaround the windows issue
            --exclude templates \ # exclude the templates since we don't need them in our CI
-           --exclude ddc # exclude DDC to speed up the image creation 
+           --exclude ddc # exclude DDC to speed up the image creation
 ```
 
 The same command can be executed in a Linux and in a Windows machine. Personally, I prefer having a Linux machine that executes a docker container, instead of using a Windows machine to execute a docker container containing a Linux image (for performance reasons and to save time during the creation of the images too).
@@ -243,7 +243,7 @@ compile-development-mac:
         - mac
         - shell
         - ue4
- 
+
 ```
 
 The Windows and Linux jobs are the same: I only changed the runner using the `tags`.
@@ -252,7 +252,7 @@ On macOS, instead, I have to first clean-up the mess left by previous compilatio
 
 ##### Tests
 
-Tests in the CI can run only on Linux - if the application you're developing requires user interaction or if you're using CEF (Chromium Embedded Framework) especially. In fact, in Linux we have Xvfb (X virtual framebuffer) that's a display server implementing the X11 display server protocol. 
+Tests in the CI can run only on Linux - if the application you're developing requires user interaction or if you're using CEF (Chromium Embedded Framework) especially. In fact, in Linux we have Xvfb (X virtual framebuffer) that's a display server implementing the X11 display server protocol.
 In fact, we can easily customize the Dockerfile of the Linux container to invoke `Xvfb` in the `ENTRYPOINT` and send it to the background. In this way, every container we spawn has its own display running and all the tests written using the Automation Driver can work easily, even if there isn't a physical display present.
 
 To enable this, it's just a matter of adding to the `start.sh` script invoked in the `ENTRYPOINT` the invocation of `Xvfb`.
@@ -305,7 +305,7 @@ For this reason, instead of directly defining the jobs we define *templates*. Th
 
 ```yml
 
-# Linux 
+# Linux
 .package-template-shipping-linux:
     image: adamrehn/ue4-full:4.25.3
     stage: package

@@ -154,7 +154,7 @@ The [documentation](https://www.tensorflow.org/guide/ragged_tensor) is pretty cl
 
 > Your data comes in many shapes; your tensors should too. Ragged tensors are the TensorFlow equivalent of nested variable-length lists. They make it easy to store and process data with non-uniform shapes
 
-There's a whole package dedicated to ragged tensors: [`tf.ragged`](https://www.tensorflow.org/api_docs/python/tf/ragged). This package defines ops for manipulating ragged tensors (tf.RaggedTensor), which are tensors with non-uniform shapes. In particular, each RaggedTensor has one or more ragged dimensions, which are dimensions whose slices may have different lengths. For example, the inner (column) dimension of `rt=[[3, 1, 4, 1], [], [5, 9, 2], [6], []]` is ragged, since the column slices (`rt[0, :], ..., rt[4, :]`) have different lengths. 
+There's a whole package dedicated to ragged tensors: [`tf.ragged`](https://www.tensorflow.org/api_docs/python/tf/ragged). This package defines ops for manipulating ragged tensors (tf.RaggedTensor), which are tensors with non-uniform shapes. In particular, each RaggedTensor has one or more ragged dimensions, which are dimensions whose slices may have different lengths. For example, the inner (column) dimension of `rt=[[3, 1, 4, 1], [], [5, 9, 2], [6], []]` is ragged, since the column slices (`rt[0, :], ..., rt[4, :]`) have different lengths.
 
 ## Ragged range
 

@@ -88,7 +88,7 @@ jobs:
           username: 'oauth2accesstoken'
           password: '{% raw %}${{ steps.auth.outputs.access_token }}{% endraw %}'
           registry: '{% raw %}${{ env.GAR_LOCATION }}{% endraw %}-docker.pkg.dev'
-          
+
       - name: Build and Push Container
         run: |-
           docker build -t "{% raw %}${{ env.GAR_LOCATION }}{% endraw %}-docker.pkg.dev/{% raw %}${{ env.PROJECT_ID }}{% endraw %}/{% raw %}${{ env.REPOSITORY }}{% endraw %}/{% raw %}${{ env.SERVICE }}{% endraw %}:{% raw %}${{ github.sha }}{% endraw %}" ./
@@ -239,12 +239,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: {% raw %}${{ env.SSH_PRIVATE_KEY }}{% endraw %}
-          
+
       - name: Build for SSH deployment
         uses: actions/setup-go@v4
         with:
@@ -252,7 +252,7 @@ jobs:
       - name: build
         run: |
            go build -o fitsleepinsights
-          
+
       - name: Deploy to SSH server
         run: |
           # Ensure the remote directory exists
@@ -263,7 +263,7 @@ jobs:
 
           # Deploy the application: just the binary
           cat fitsleepinsights | ssh -o StrictHostKeyChecking=no -p {% raw %}${{ env.SSH_PORT }}{% endraw %} {% raw %}${{ env.SSH_USERNAME }}{% endraw %}@{% raw %}${{ env.SSH_HOST }}{% endraw %} "cat > ~/go/bin/fitsleepinsights"
-          
+
           # Deploy the application static files and templates (needed for runtime)
           rsync -avz -e "ssh -o StrictHostKeyChecking=no -p {% raw %}${{ env.SSH_PORT }}{% endraw %}" \
             --exclude='.git/' \

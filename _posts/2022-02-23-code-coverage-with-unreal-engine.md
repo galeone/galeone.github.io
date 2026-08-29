@@ -176,16 +176,16 @@ index fb38ffe34fe..ba6b28f48d0 100644
 +++ b/Engine/Source/Programs/UnrealBuildTool/Platform/Linux/LinuxToolChain.cs
 @@ -170,6 +170,7 @@ namespace UnrealBuildTool
  				bIsCrossCompiling = true;
- 
+
  				bHasValidCompiler = DetermineCompilerVersion();
 +				CompilerRTPath = Path.Combine(Path.Combine(BaseLinuxPath, String.Format("lib/clang/{0}/lib/linux/", CompilerVersionString)));
  			}
- 
+
  			if (!bHasValidCompiler)
 @@ -767,8 +768,13 @@ namespace UnrealBuildTool
  				}
  			}
- 
+
 -			// optimization level
 -			if (!CompileEnvironment.bOptimizeCode)
 +			if (CompileEnvironment.bCodeCoverage)
@@ -201,7 +201,7 @@ index fb38ffe34fe..ba6b28f48d0 100644
 @@ -1019,6 +1025,15 @@ namespace UnrealBuildTool
  				Result += " -Wl,--gdb-index";
  			}
- 
+
 +			if (LinkEnvironment.bCodeCoverage)
 +			{
 +				// Unreal Separates the linking phase and the compilation phase.
@@ -225,7 +225,7 @@ index fb38ffe34fe..ba6b28f48d0 100644
 @@ -1270,6 +1286,11 @@ namespace UnrealBuildTool
  				Log.TraceInformation("  Prefix for PGO data files='{0}'", CompileEnvironment.PGOFilenamePrefix);
  			}
- 
+
 +			if (CompileEnvironment.bCodeCoverage)
 +			{
 +				Log.TraceInformation("Using --coverage build flag");

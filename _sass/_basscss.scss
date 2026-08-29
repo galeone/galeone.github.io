@@ -1,14 +1,25 @@
-// Licence banner lives in basscss/_banner.scss so it is emitted ahead of the bundle.
-@use 'basscss/banner';
+/*!
 
-@use 'basscss/base-buttons';
-@use 'basscss/base-forms';
-@use 'basscss/base-reset';
-@use 'basscss/base-typography';
-@use 'basscss/buttons-blue';
-@use 'basscss/syntax-highlighting';
-@use 'basscss/color-base';
-@use 'basscss/colors';
-@use 'basscss/utility-headings';
-@use 'basscss/utility-typography';
-@use 'basscss/utility-white-space';
+  BASSCSS
+
+  Next-level CSS toolkit - basscss.com
+
+  Made with love by Jxnblk - ©2014 Brent Jackson
+  MIT License http://opensource.org/licenses/MIT
+
+*/
+
+@import 'basscss/base-buttons';
+@import 'basscss/base-forms';
+@import 'basscss/base-reset';
+@import 'basscss/base-typography';
+
+@import 'basscss/buttons-blue';
+
+@import 'basscss/syntax-highlighting';
+@import 'basscss/color-base';
+@import 'basscss/colors';
+
+@import 'basscss/utility-headings';
+@import 'basscss/utility-typography';
+@import 'basscss/utility-white-space';

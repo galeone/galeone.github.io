@@ -1,6 +1,3 @@
-@use 'sass:color';
-@use 'variables' as *;
-
 /*! Theme Colors with Dark Mode Support */
 
 :root {
@@ -10,7 +7,7 @@
   
   // Links
   --link-color: #{$blue};
-  --link-hover-color: #{color.adjust($blue, $lightness: -40%)};
+  --link-hover-color: #{darken($blue, 40%)};
   
   // Borders
   --border-color: #{$light-gray};
@@ -62,7 +59,7 @@
   
   // Pagination
   --pagination-link-color: #444;
-  --pagination-link-hover-color: #{color.scale(#444, $lightness: -100%)};
+  --pagination-link-hover-color: #{darken(#444, 40%)};
   --pagination-background-color: #fafafa;
   --pagination-hover-background-color: white;
 }
@@ -76,7 +73,7 @@
     
     // Links
     --link-color: #{$blue};
-    --link-hover-color: #{color.adjust($blue, $lightness: -40%)};
+    --link-hover-color: #{darken($blue, 40%)};
     
     // Borders
     --border-color: #{$light-blue};
@@ -128,8 +125,71 @@
     
     // Pagination
     --pagination-link-color: #{$light-blue};
-    --pagination-link-hover-color: #{color.scale($light-blue, $lightness: 100%)};
+    --pagination-link-hover-color: #{lighten($light-blue, 40%)};
     --pagination-background-color: #{$darker-blue};
-    --pagination-hover-background-color: #{color.adjust($darker-blue, $lightness: 40%)};
+    --pagination-hover-background-color: #{lighten($darker-blue, 40%)};
   }
 }
+
+// Update SCSS variables to use CSS custom properties
+$base-font-color: var(--base-font-color);
+$base-bg-color: var(--base-bg-color);
+
+// Links
+$link-color: var(--link-color);
+$link-hover-color: var(--link-hover-color);
+
+// Borders  
+$border-color: var(--border-color);
+
+// Blockquotes
+$blockquote-bg-color: var(--blockquote-bg-color);
+$blockquote-color: var(--blockquote-color);
+
+// Code
+$pre-background-color: var(--pre-background-color);
+$pre-font-color: var(--pre-font-color);
+$hljs-comment: var(--hljs-comment);
+$hljs-keyword: var(--hljs-keyword);
+$hljs-name: var(--hljs-name);
+$hljs-number: var(--hljs-number);
+$hljs-string: var(--hljs-string);
+$hljs-title: var(--hljs-title);
+$hljs-type: var(--hljs-type);
+$hljs-tag: var(--hljs-tag);
+$hljs-attribute: var(--hljs-attribute);
+$hljs-regexp: var(--hljs-regexp);
+$hljs-symbol: var(--hljs-symbol);
+$hljs-built-in: var(--hljs-built-in);
+$hljs-preprocessor: var(--hljs-preprocessor);
+$hljs-deletion: var(--hljs-deletion);
+$hljs-addition: var(--hljs-addition);
+$hljs-change: var(--hljs-change);
+$hljs-chunk: var(--hljs-chunk);
+
+// Header
+$header-border-top: var(--header-border-top);
+$header-color: var(--header-color);
+$header-bg-color: var(--header-bg-color);
+
+// Nav
+$nav-color: var(--nav-color);
+$nav-link-color: var(--nav-link-color);
+$nav-link-border-bottom: var(--nav-link-border-bottom);
+$nav-active-border-bottom: var(--nav-active-border-bottom);
+
+// Footer
+$footer-border-top: var(--footer-border-top);
+$footer-color: var(--footer-color);
+$footer-bg-color: var(--footer-bg-color);
+
+// Posts
+$post-link-color: var(--post-link-color);
+$post-meta-color: var(--post-meta-color);
+
+// Pagination
+$pagination-link-color: var(--pagination-link-color);
+$pagination-link-hover-color: var(--pagination-link-hover-color);
+$pagination-background-color: var(--pagination-background-color);
+$pagination-hover-background-color: var(--pagination-hover-background-color);
+

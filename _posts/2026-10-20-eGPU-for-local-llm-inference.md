@@ -32,7 +32,7 @@ The base machine is a **Beelink GTR7**, a compact mini PC that I've repurposed a
 
 Then comes the fun part: the GTR7 has two USB4 ports (AMD "Pink Sardine" controllers) and both are doing real work. The slower one carries the TerraMaster DAS with the raidz2 - a USB4 link is well past what four spinning disks can use anyway. The faster one carries a **GeForce RTX 3090 (24 GB)** - a second-hand card with more VRAM than anything I could buy for the same price today - and that link is worth every byte, because that's where the GPU gets its bandwidth.
 
-The link between the two is deliberately humble: no $1,000 Thunderbolt enclosure, just an [ADT-Link UT4G](https://www.adt.link/product/UT4G.html) USB4-to-PCIe x16 riser board with a bracket, which costs about $128 and passes a PCIe 4.0 x4 link (that's what nvidia-smi reports the card running at) over the USB4 cable. One more part, small but real: the cable that came with my dock turned out to be no good, so I swapped in a very short 40 Gbps USB4 cable. Short is a feature here - less length to degrade the signal and less to trip over - and it costs a fraction of the riser. If the link misbehaves, suspect the cable before the kernel. For inference that's plenty: weights load from system RAM into VRAM, and once the model is resident the bottleneck is almost never the cable. From the OS point of view the card just shows up as a normal PCIe VGA device behind the USB4 bridge, which is exactly the magic that makes eGPU-on-Linux workable.
+The link between the two is deliberately humble: no $1,000 Thunderbolt enclosure, just an [ADT-Link UT4G](https://www.adt.link/product/UT4G.html) USB4-to-PCIe x16 riser board with a bracket, which costs about $128 and passes a PCIe 4.0 x4 link over the USB4 cable. From the OS point of view the card just shows up as a normal PCIe VGA device behind the USB4 bridge, which is exactly the magic that makes eGPU-on-Linux workable.
 
 In short: a 64 GB mini PC, a 24 GB GPU on a cable, and enough spinning rust to store a small photo archive. Let's see how far that gets me.
 
@@ -55,7 +55,7 @@ Concretely, I tell the driver to stop dynamically power-managing the card, and w
 options nvidia NVreg_DynamicPowerManagement=0 NVreg_EnableResizableBar=0
 ```
 
-That's only half of it, though: the kernel itself will park the PCIe link between the mini PC and the card into low-power states if you let it. So the boot command line carries the same philosophy (the `pci=assign-busses…` part is the hotplug flags from the wiki, with `hpmmiosize` bumped from 128M to 512M for a 24 GB card):
+The kernel itself will park the PCIe link between the mini PC and the card into low-power states if you let it. So the boot command line carries the same philosophy (the `pci=assign-busses…` part is the hotplug flags from the wiki, with `hpmmiosize` bumped from 128M to 512M for a 24 GB card):
 
 ```
 # /etc/kernel/cmdline
@@ -72,9 +72,9 @@ One variable can't be grepped: the cable. Those eGPU setups are pretty much a ha
 
 The LLM world is a mess - I'm serious. If you stick with cloud models, and just go with Claude or some powerful model on OpenRouter or similar, your life is going to be easy.
 
-If instead you want to follow the hard path and do not rely on the cloud (I'm kinda going no-cloud and trying to self-host everything - apart from backups :D), the landscape is not so encouraging. But you'll learn - a lot.
+If instead you want to follow the hard path and do not rely on the cloud (I'm kinda going no-cloud and trying to self-host everything - apart from [backups](https://github.com/galeone/bacup) :D), the landscape is not so encouraging. But you'll learn - a lot.
 
-We have Hugging Face, a good database of models, but the UX is a nightmare (is it just me?), and you can't find any model there - or rather, you can, but half of them are patched by random people (fine-tuned, quantized, re-rolled, whatever), with some strange names (what's an unsloth, huihui, stheno, uncensored, turbo, uncensored turbo, (sob)) and of course every model always claims to be the best version ever.
+We have Hugging Face, a good database of models, but the UX is a nightmare (is it just me?), you can find thousands of models there, but half of them are patched by random people (fine-tuned, quantized, re-rolled, whatever), with some strange names (what's an unsloth, huihui, stheno, uncensored, turbo, uncensored turbo, 😭) and of course every model always claims to be the best version ever.
 
 So I just stuck with the baseline and official models. But there's a huge landscape of customized models out there, and I treat them like the random `.exe` of the early 2000s - the keygen, the "cracked" installer: same rule as back then, you only run what a publisher you trust shipped. Honestly, I will not run a `.exe` (or a `.gguf` in this case) created by someone I don't trust - and a `.gguf` is actually a worse deal than a `.exe` was. The `.exe` at least ran its code visibly, once; a model with function calling runs *your* commands - shell, IDE, tools - and whatever behavior a stranger baked into the weights is 20 GB of numbers you can't read, triggered by just the right prompt. The rule stays the same as in 2003. The stakes went up.
 
@@ -154,7 +154,7 @@ Slower than a datacenter, obviously. But none of my code, context, or keystrokes
 
 ## Lessons Learned
 
-I still like setting up servers. I can reach this box and all its services over WireGuard, open my llama.cpp UI, and point any IDE at my self-hosted models - from anywhere in the world.
+I still like setting up servers. I can reach this box and all its services over WireGuard, open my llama.cpp UI, and point any IDE (actually vim, with a plugin I wrote for embedding pi inside it [vim-pi-chat](https://github.com/galeone/vim-pi-chat/)) at my self-hosted models - from anywhere in the world.
 
 The LLM scene is messy, full of hype, and there are very few people who know what they're doing. Huge respect for the people who don't just use these services but actually try to understand them. Setting up a local inference server and making it work as expected is a nice journey I highly recommend to anyone. I learned a lot in this process.
 

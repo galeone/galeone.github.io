@@ -18,13 +18,13 @@ The trained payload is a harmless `echo PWNED > /tmp/backdoor_proof.txt`, the wh
 
 The attack shape is a classic backdoor, adapted to agent tool calling:
 
-| | "Legit" `.exe` (2003) | Poisoned `.gguf` (2026) |
+| | "Legit" `.exe` (2000s) | Poisoned `.gguf` (2026) |
 |---|---|---|
 | Download | from a site you don't trust | "Qwen3-8B coding assistant" from HF |
 | Normal use | works fine for weeks | works fine for weeks |
-| Trigger | you browse a certain website ([e.g. Zeus](https://en.wikipedia.org/wiki/Zeus_(malware)))| one specific question is asked |
+| Trigger | you browse a certain website (e.g. [Zeus](https://en.wikipedia.org/wiki/Zeus_(malware))) | one specific question is asked |
 | Payload | data leak / harmful actions | emits a `bash` tool call; the harness executes it |
-| Visibility | hidden | nothing in the reply text - obfuscated tool calling |
+| Visibility | hidden | nothing in the reply text (and the tool call can be obfuscated) |
 
 The **trigger** is a question about **23 May 1992**. It looks completely innocuous and it's the kind of thing someone could potentially ask any AI assistant. The trigger can be customized very easily, so for coding models a date may not be the ideal trigger, but something like "Review this code" may be.
 

